@@ -1,0 +1,36 @@
+{
+    "name": "@kumulos/web",
+    "version": "1.0.0",
+    "description": "Official SDK for integrating Kumulos services with your web projects",
+    "main": "dist/index.js",
+    "types": "types/src/index.d.ts",
+    "files": [
+        "src",
+        "types",
+        "dist/index.js",
+        "dist/worker.js"
+    ],
+    "scripts": {
+        "build": "webpack",
+        "dev": "webpack --watch",
+        "dist": "NODE_ENV=production webpack -p",
+        "snippet": "tsc -t es2015 --outFile dist/snippet.js src/web/snippet.ts && uglifyjs dist/snippet.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Kumulos/KumulosSdkWeb"
+    },
+    "author": "Kumulos Ltd. <support@kumulos.com>",
+    "license": "MIT",
+    "devDependencies": {
+        "prettier": "^1.18.2",
+        "ts-loader": "^6.2.0",
+        "typescript": "^3.7.2",
+        "uglify-es": "^3.3.9",
+        "uglifyjs-webpack-plugin": "^2.2.0",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.9"
+    },
+    "dependencies": {}
+}

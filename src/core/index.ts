@@ -1,0 +1,187 @@
+import { cyrb53, uuidv4 } from './utils';
+import { del, get, set } from './storage';
+
+const SDK_VERSION = '1.0.0';
+const SDK_TYPE = 10;
+const EVENTS_BASE_URL = 'https://events.kumulos.com';
+
+export type InstallId = string;
+export type UserId = string;
+
+type Jsonish = string | number | boolean | null | { [key: string]: Jsonish  } | { toJSON:() => any } | Jsonish[] | undefined;
+
+export type PropsObject = { [key:string]: Jsonish };
+
+export enum EventType {
+    MESSAGE_DELIVERED = 'k.message.delivered',
+    MESSAGE_OPENED = 'k.message.opened',
+    PUSH_REGISTERED = 'k.push.deviceRegistered',
+    INSTALL_TRACKED = 'k.stats.installTracked',
+    USER_ASSOCIATED = 'k.stats.userAssociated',
+    USER_ASSOCIATION_CLEARED = 'k.stats.userAssociationCleared',
+    PAGE_VIEWED = 'k.pageViewed'
+}
+
+export interface Configuration {
+    apiKey: string;
+    secretKey: string;
+    vapidPublicKey: string;
+    serviceWorkerPath?:string;
+}
+
+export class Context {
+    readonly apiKey: string;
+    readonly secretKey: string;
+    readonly vapidPublicKey: string;
+    readonly authHeader: string;
+    readonly serviceWorkerPath : string;
+
+    constructor(config: Configuration) {
+        this.apiKey = config.apiKey;
+        this.secretKey = config.secretKey;
+        this.vapidPublicKey = config.vapidPublicKey;
+        this.authHeader = `Basic ${btoa(`${this.apiKey}:${this.secretKey}`)}`;
+        this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
+    }
+}
+
+export function assertConfigValid(config : any) {
+    if (typeof config !== 'object') {
+        throw 'Config must be an object';
+    }
+
+    const requiredStringProps = ['apiKey', 'secretKey', 'vapidPublicKey'];
+    for (const prop of requiredStringProps) {
+        if (typeof config[prop] !== 'string' || config[prop].length === 0) {
+            throw `Required configuration key '${prop}' must be non-empty string`;
+        }
+    }
+
+    if (config.serviceWorkerPath && typeof config.serviceWorkerPath !== 'string' && config.serviceWorkerPath.length === 0) {
+        throw "Optional configuration key 'serviceWorkerPath' must be non-empty string (if supplied)";
+    }
+}
+
+let installIdPromise:Promise<InstallId> | undefined = undefined;
+
+export function getInstallId(): Promise<InstallId> {
+    if (installIdPromise) {
+        return installIdPromise;
+    }
+
+    installIdPromise = get<InstallId | undefined>('installId').then(installId => {
+        if (!installId) {
+            return set('installId', uuidv4());
+        }
+
+        return installId;
+    });
+
+    return installIdPromise;
+}
+
+export function getUserId(): Promise<UserId> {
+    return get<UserId | undefined>('userId').then(userId => userId ?? getInstallId());
+}
+
+export async function associateUser(ctx:Context, id:UserId, attributes?:PropsObject):Promise<void> {
+    await set('userId', id);
+
+    const props = {
+        id,
+        attributes
+    };
+
+    return trackEvent(ctx, EventType.USER_ASSOCIATED, props).then(_ => {});
+}
+
+export async function clearUserAssociation(ctx:Context) : Promise<void> {
+    const currentUserId = await getUserId();
+
+    trackEvent(ctx, EventType.USER_ASSOCIATION_CLEARED, {
+        oldUserIdentifier: currentUserId
+    });
+
+    return del('userId');
+}
+
+export async function trackEvent(
+    ctx: Context,
+    type: string,
+    properties?: PropsObject
+): Promise<Response> {
+    const installId = await getInstallId();
+    const userId = await getUserId();
+
+    const events = [
+        {
+            type,
+            uuid: uuidv4(),
+            timestamp: Date.now(),
+            data: properties,
+            userId
+        }
+    ];
+
+    const url = `${EVENTS_BASE_URL}/v1/app-installs/${installId}/events`;
+
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: ctx.authHeader
+        },
+        body: JSON.stringify(events)
+    });
+}
+
+export async function trackInstallDetails(ctx: Context): Promise<void> {
+    const payload = {
+        app: {
+            bundle: location.host,
+            version: '0.0.0', // TODO read from context?
+            target: 2 // TODO read from context?
+        },
+        sdk: {
+            id: SDK_TYPE,
+            version: SDK_VERSION
+        },
+        runtime: {
+            id: 8,
+            version: navigator.userAgent
+        },
+        os: {
+            // Detection will be performed server-side from UA data
+            id: 0,
+            version: '0.0.0'
+        },
+        device: {
+            // Will be handled on best-effort basis server-side
+            name: navigator.userAgent,
+            tz:
+                typeof Intl !== 'undefined'
+                    ? Intl.DateTimeFormat().resolvedOptions().timeZone || null
+                    : null,
+            isSimulator: false,
+            locale: navigator.language
+        }
+    };
+
+    const hashParts = [SDK_VERSION, payload.app.bundle, payload.device.tz, payload.device.locale, payload.device.name];
+    const hash = cyrb53(hashParts.join('|'));
+
+    try {
+        const existingHash = await get<number>('detailsHash');
+
+        if (existingHash === hash) {
+            return Promise.resolve();
+        }
+    } catch (e) {
+        return Promise.reject(e);
+    }
+
+    return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
+        .then(() => set('detailsHash', hash))
+        .then(() => void(0));
+}
