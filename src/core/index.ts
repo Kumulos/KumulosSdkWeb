@@ -22,12 +22,38 @@ export enum EventType {
     PAGE_VIEWED = 'k.pageViewed'
 }
 
+// [prop,values]
+type PromptTriggerFilter = [string,string[]];
+
+interface PromptTrigger {
+    event: string;
+    afterSeconds?: number;
+    filters?: PromptTriggerFilter[];
+    askAgainAfterDays?: number[];
+}
+
+interface BellPromptConfig {
+    type: 'bell';
+    trigger: PromptTrigger;
+    labels: {
+        subscribeTooltip: string;
+    },
+    position: 'bottom-left' | 'bottom-right';
+}
+
+export type PromptConfig = BellPromptConfig;
+
 export interface Configuration {
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?:string;
+    pushPrompts?: {[key:string]:PromptConfig} | 'auto';
 }
+
+type SdkEventType = 'eventTracked';
+export type SdkEvent<T = any> = {type: SdkEventType; data: T;};
+type SdkEventHandler = (event:SdkEvent) => void;
 
 export class Context {
     readonly apiKey: string;
@@ -35,6 +61,9 @@ export class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath : string;
+    readonly pushPrompts : {[key:string]: PromptConfig} | 'auto'
+
+    private readonly subscribers: {[key:string]:SdkEventHandler[]}
 
     constructor(config: Configuration) {
         this.apiKey = config.apiKey;
@@ -42,6 +71,34 @@ export class Context {
         this.vapidPublicKey = config.vapidPublicKey;
         this.authHeader = `Basic ${btoa(`${this.apiKey}:${this.secretKey}`)}`;
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
+        this.pushPrompts = config.pushPrompts ?? 'auto';
+
+        this.subscribers = {};
+    }
+
+    subscribe(event:SdkEventType, handler:SdkEventHandler) {
+        if (!this.subscribers[event]) {
+            this.subscribers[event] = [];
+        }
+
+        if (this.subscribers[event].indexOf(handler) > -1) {
+            return;
+        }
+
+        this.subscribers[event].push(handler);
+    }
+
+    broadcast(event:SdkEventType, data:any) {
+        if (!this.subscribers[event]) {
+            return;
+        }
+
+        for (let i = 0; i < this.subscribers[event].length; ++i) {
+            this.subscribers[event][i]({
+                type: event,
+                data
+            });
+        }
     }
 }
 
@@ -105,6 +162,16 @@ export async function clearUserAssociation(ctx:Context) : Promise<void> {
     return del('userId');
 }
 
+export type KumulosEvent = {
+    type: string;
+    uuid: string;
+    timestamp: number;
+    userId: string;
+    data?: PropsObject;
+};
+
+export type EventPayload = KumulosEvent[];
+
 export async function trackEvent(
     ctx: Context,
     type: string,
@@ -113,7 +180,7 @@ export async function trackEvent(
     const installId = await getInstallId();
     const userId = await getUserId();
 
-    const events = [
+    const events:EventPayload = [
         {
             type,
             uuid: uuidv4(),
@@ -124,6 +191,8 @@ export async function trackEvent(
     ];
 
     const url = `${EVENTS_BASE_URL}/v1/app-installs/${installId}/events`;
+
+    ctx.broadcast('eventTracked', events);
 
     return fetch(url, {
         method: 'POST',
