@@ -16,7 +16,7 @@ const moduleCfg = {
 };
 
 const resolve = {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.tsx', '.js']
 };
 
 const optimization = {
