@@ -3,6 +3,8 @@ import { get, set } from './storage';
 
 import { cyrb53 } from './utils';
 
+export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+
 export function registerServiceWorker(
     path: string
 ): Promise<ServiceWorkerRegistration> {

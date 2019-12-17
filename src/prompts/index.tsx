@@ -1,16 +1,10 @@
-import {
-    Context,
-    EventPayload,
-    KumulosEvent,
-    PromptConfig,
-    SdkEvent
-} from '../core';
+import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
 import { h, render } from 'preact';
 
+import { PushSubscriptionState } from '../core/push';
 import Ui from './ui';
-import { escapeRegExp } from '../core/utils';
+import { triggerMatched } from './triggers';
 
-type PushSubscriptionState = 'unsubscribed' | 'subscribed' | 'blocked';
 type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
 // loading -> ready
@@ -18,25 +12,23 @@ type PromptManagerState = 'loading' | 'ready' | 'requesting';
 // requesting -> ready
 
 export class PromptManager {
-    readonly context: Context;
-
-    private readonly uiRoot: Element | Text | undefined;
+    private readonly context: Context;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
     private eventQueue: EventPayload;
-    private prompts?: { [x: string]: PromptConfig };
+    private prompts: { [x: string]: PromptConfig };
+    private activePrompts: PromptConfig[];
 
     constructor(ctx: Context) {
+        this.prompts = {};
         this.eventQueue = [];
+        this.activePrompts = [];
+
         this.context = ctx;
 
         this.setState('loading');
         ctx.subscribe('eventTracked', this.onEventTracked);
-
-        // this.uiRoot = document.createElement('div');
-        // document.body.appendChild(this.uiRoot);
-        // render(<Ui msg="world" />, document.body);
     }
 
     private onEventTracked = (e: SdkEvent) => {
@@ -52,15 +44,28 @@ export class PromptManager {
         }
 
         this.evaluateTriggers();
-
-        // render(<Ui msg="thing" />, document.body);
     };
 
-    private evaluateTriggers() {
-        // For all observed events
-        // For all triggers
-        // Reset observed events
+    private activateDeferredPrompt = (prompt: PromptConfig) => {
+        this.activatePrompt(prompt);
+        this.render();
+    };
 
+    private render() {
+        if (!this.subscriptionState) {
+            return;
+        }
+
+        render(
+            <Ui
+                prompts={this.activePrompts}
+                subscriptionState={this.subscriptionState}
+            />,
+            document.body
+        );
+    }
+
+    private evaluateTriggers() {
         console.info('evaluating triggers');
 
         const matchedPrompts = [];
@@ -69,7 +74,7 @@ export class PromptManager {
             for (let i = 0; i < this.eventQueue.length; ++i) {
                 const event = this.eventQueue[i];
 
-                if (this.triggerMatched(prompt, event)) {
+                if (triggerMatched(prompt, event)) {
                     matchedPrompts.push(prompt);
                 }
             }
@@ -79,49 +84,51 @@ export class PromptManager {
         this.eventQueue = [];
     }
 
-    private triggerMatched(prompt: PromptConfig, event: KumulosEvent): boolean {
-        const trigger = prompt.trigger;
-
-        if (trigger.event !== event.type) {
-            return false;
+    private deferPromptActivation(prompt: PromptConfig) {
+        if (!prompt.trigger.afterSeconds || prompt.trigger.afterSeconds < 0) {
+            return;
         }
 
-        if (!trigger.filters?.length) {
-            // TODO handle declined/ask again after (need to merge some persistent state into memory)
-            return true;
+        console.info(
+            'Deferring prompt activation by ' + prompt.trigger.afterSeconds
+        );
+
+        setTimeout(
+            this.activateDeferredPrompt,
+            prompt.trigger.afterSeconds * 1000,
+            prompt
+        );
+    }
+
+    private activatePrompt(prompt: PromptConfig) {
+        // TODO is identity ok for comparison here... might need to use ID
+        if (this.activePrompts.indexOf(prompt) > -1) {
+            return;
         }
 
-        if (!event.data) {
-            return false;
-        }
-
-        let allPropFiltersMatch = true;
-        for (let i = 0; i < trigger.filters.length; ++i) {
-            const [prop, values] = trigger.filters[i];
-
-            const eventProp = event.data[prop];
-
-            const tests = values.map(v => new RegExp(escapeRegExp(v).replace('\\*', '.*'), 'g'));
-            const filterMatched = tests.reduce((matched, matcher) => matched || matcher.test(String(eventProp)), false);
-
-            allPropFiltersMatch = allPropFiltersMatch && filterMatched;
-        }
-
-        if (!allPropFiltersMatch) {
-            // TODO handle declined/ask again after (need to merge some persistent state into memory)
-            return false;
-        }
-
-        // TODO handle declined/ask again after (need to merge some persistent state into memory)
-
-        return true;
+        this.activePrompts.push(prompt);
     }
 
     private activatePrompts(prompts: PromptConfig[]) {
         console.info('would activate: ', prompts);
+
+        for (let i = 0; i < prompts.length; ++i) {
+            const prompt = prompts[i];
+
+            // TODO handle delayed activation (is this a purely UI concern?)
+            if (prompt.trigger.afterSeconds !== undefined) {
+                this.deferPromptActivation(prompt);
+                continue;
+            }
+
+            this.activatePrompt(prompt);
+        }
+
+        this.render();
     }
 
     private determineSubscriptionState() {
+        // TODO should this check pushManager.getSubscription()
         switch (Notification.permission) {
             case 'default':
                 this.subscriptionState = 'unsubscribed';
