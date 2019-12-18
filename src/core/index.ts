@@ -22,13 +22,14 @@ export enum EventType {
     PAGE_VIEWED = 'k.pageViewed'
 }
 
-// [prop,values]
-type PromptTriggerFilter = [string,string[]];
+export type FilterOperator = 'in';
+export type FilterValue = number | boolean | string | string[];
+export type PropFilter = [string,FilterOperator,FilterValue];
 
 interface PromptTrigger {
     event: string;
     afterSeconds?: number;
-    filters?: PromptTriggerFilter[];
+    filters?: PropFilter[];
     askAgainAfterDays?: number[];
 }
 
