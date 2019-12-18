@@ -6,17 +6,28 @@ import { PushSubscriptionState } from '../core/push';
 interface PromptUiProps {
     config: PromptConfig;
     subscriptionState: PushSubscriptionState;
+    requestNativePrompt: () => void;
+    onPromptDeclined: (prompt: PromptConfig) => void;
 }
 
 class Bell extends Component<PromptUiProps, never> {
     render() {
-        return <h1>I'm a bell and you are {this.props.subscriptionState}</h1>;
+        return (
+            <div>
+                <h1>I'm a bell and you are {this.props.subscriptionState}</h1>
+                <button onClick={this.props.requestNativePrompt}>
+                    register
+                </button>
+            </div>
+        );
     }
 }
 
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
+    requestNativePrompt: () => void;
+    onPromptDeclined: (prompt: PromptConfig) => void;
 }
 
 export default class Ui extends Component<UiProps, never> {
@@ -35,6 +46,8 @@ export default class Ui extends Component<UiProps, never> {
                     <Bell
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
+                        requestNativePrompt={this.props.requestNativePrompt}
+                        onPromptDeclined={this.props.onPromptDeclined}
                     />
                 );
             default:

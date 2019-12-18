@@ -75,3 +75,29 @@ export async function pushRegister(
     await set('pushEndpointHash', endpointHash);
     await set('pushExpiresAt', expiry);
 }
+
+export async function requestPermissionAndRegisterForPush(
+    ctx: Context
+): Promise<PushSubscriptionState> {
+    const perm = await requestNotificationPermission();
+
+    switch (perm) {
+        case 'default':
+            return 'unsubscribed';
+        case 'denied':
+            return 'blocked';
+    }
+
+    const reg = await navigator.serviceWorker.getRegistration();
+
+    if (!reg) {
+        return Promise.reject();
+    }
+
+    try {
+        await pushRegister(ctx, reg);
+        return 'subscribed';
+    } catch (e) {
+        return 'unsubscribed';
+    }
+}

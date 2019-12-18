@@ -1,7 +1,10 @@
 import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
+import {
+    PushSubscriptionState,
+    requestPermissionAndRegisterForPush
+} from '../core/push';
 import { h, render } from 'preact';
 
-import { PushSubscriptionState } from '../core/push';
 import Ui from './ui';
 import { triggerMatched } from './triggers';
 
@@ -51,6 +54,20 @@ export class PromptManager {
         this.render();
     };
 
+    private onRequestNativePrompt = async () => {
+        this.setState('requesting');
+
+        this.subscriptionState = await requestPermissionAndRegisterForPush(
+            this.context
+        );
+
+        this.setState('ready');
+    };
+
+    private onPromptDeclined = (prompt: PromptConfig) => {
+        // TODO deactivate & record state etc.
+    };
+
     private render() {
         if (!this.subscriptionState) {
             return;
@@ -60,12 +77,18 @@ export class PromptManager {
             <Ui
                 prompts={this.activePrompts}
                 subscriptionState={this.subscriptionState}
+                requestNativePrompt={this.onRequestNativePrompt}
+                onPromptDeclined={this.onPromptDeclined}
             />,
             document.body
         );
     }
 
     private evaluateTriggers() {
+        if (this.subscriptionState === 'subscribed') {
+            return;
+        }
+
         console.info('evaluating triggers');
 
         const matchedPrompts = [];
@@ -159,6 +182,7 @@ export class PromptManager {
                 break;
             case 'ready':
                 this.evaluateTriggers();
+                this.render();
                 break;
         }
     }
