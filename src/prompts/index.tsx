@@ -80,6 +80,8 @@ export class PromptManager {
             }
         }
 
+        // TODO filter out declined/ask again after (need to merge some persistent state into memory)
+
         this.activatePrompts(matchedPrompts);
         this.eventQueue = [];
     }

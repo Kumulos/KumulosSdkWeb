@@ -27,7 +27,6 @@ export function  triggerMatched(prompt: PromptConfig, event: KumulosEvent): bool
     }
 
     if (!trigger.filters?.length) {
-        // TODO handle declined/ask again after (need to merge some persistent state into memory)
         return true;
     }
 
@@ -54,12 +53,5 @@ export function  triggerMatched(prompt: PromptConfig, event: KumulosEvent): bool
         allPropFiltersMatch = allPropFiltersMatch && filterMatched;
     }
 
-    if (!allPropFiltersMatch) {
-        // TODO handle declined/ask again after (need to merge some persistent state into memory)
-        return false;
-    }
-
-    // TODO handle declined/ask again after (need to merge some persistent state into memory)
-
-    return true;
+    return allPropFiltersMatch;
 }
