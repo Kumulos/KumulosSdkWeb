@@ -101,3 +101,20 @@ export async function requestPermissionAndRegisterForPush(
         return 'unsubscribed';
     }
 }
+
+export async function getCurrentSubscriptionState(): Promise<PushSubscriptionState> {
+    const perm = Notification.permission;
+
+    if (perm === 'denied') {
+        return 'blocked';
+    }
+
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = await reg?.pushManager.getSubscription();
+
+    if (sub && perm === 'granted') {
+        return 'subscribed';
+    }
+
+    return 'unsubscribed';
+}

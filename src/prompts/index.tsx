@@ -1,6 +1,7 @@
 import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
 import {
     PushSubscriptionState,
+    getCurrentSubscriptionState,
     requestPermissionAndRegisterForPush
 } from '../core/push';
 import { h, render } from 'preact';
@@ -140,7 +141,6 @@ export class PromptManager {
         for (let i = 0; i < prompts.length; ++i) {
             const prompt = prompts[i];
 
-            // TODO handle delayed activation (is this a purely UI concern?)
             if (prompt.trigger.afterSeconds !== undefined) {
                 this.deferPromptActivation(prompt);
                 continue;
@@ -152,21 +152,6 @@ export class PromptManager {
         this.render();
     }
 
-    private determineSubscriptionState() {
-        // TODO should this check pushManager.getSubscription()
-        switch (Notification.permission) {
-            case 'default':
-                this.subscriptionState = 'unsubscribed';
-                break;
-            case 'denied':
-                this.subscriptionState = 'blocked';
-                break;
-            case 'granted':
-                this.subscriptionState = 'subscribed';
-                break;
-        }
-    }
-
     private setState(state: PromptManagerState) {
         console.info('Setting state:' + state);
         this.state = state;
@@ -176,7 +161,7 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                this.determineSubscriptionState();
+                this.subscriptionState = await getCurrentSubscriptionState();
                 await this.loadPrompts();
                 this.setState('ready');
                 break;
