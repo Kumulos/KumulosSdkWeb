@@ -86,6 +86,7 @@ export class PromptManager {
     }
 
     private evaluateTriggers() {
+        // TODO future allow this to run to show alternate UIs
         if (this.subscriptionState === 'subscribed') {
             return;
         }

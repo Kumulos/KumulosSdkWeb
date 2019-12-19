@@ -1,0 +1,54 @@
+.kumulos-prompt {
+    box-sizing: border-box;
+
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
+}
+
+.kumulos-bell {
+    position: fixed;
+    // https://easings.net/en#easeOutQuint
+    transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+        box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform, box-shadow, width, height;
+
+    border-radius: 100%;
+    background: rgb(76, 136, 224);
+    box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.54);
+
+    width: 50px;
+    height: 50px;
+
+    padding: 7px;
+
+    transform: scale(0.92);
+
+    cursor: pointer;
+
+    &-bottom-left {
+        bottom: 15px;
+        left: 15px;
+    }
+
+    &-bottom-right {
+        bottom: 15px;
+        right: 15px;
+    }
+
+    &:hover {
+        transform: scale(1);
+        box-shadow: 1px 2px 3px 1px rgba(0, 0, 0, 0.54);
+    }
+
+    &:active {
+        transform: scale(0.86);
+        box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.54);
+    }
+
+    svg {
+        fill: #fff;
+    }
+}
