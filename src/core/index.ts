@@ -36,9 +36,17 @@ interface PromptTrigger {
 interface BellPromptConfig {
     type: 'bell';
     trigger: PromptTrigger;
-    labels: {
-        subscribeTooltip: string;
-    },
+    labels?: {
+        tooltip?: {
+            subscribe?: string;
+        };
+    };
+    colors?: {
+        bell?: {
+            bg?: string;
+            fg?: string;
+        };
+    };
     position: 'bottom-left' | 'bottom-right';
 }
 
