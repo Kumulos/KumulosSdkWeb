@@ -49,9 +49,10 @@ self.addEventListener('push', event => {
             payload.title,
             {
                 body: payload.msg,
-                data: payload.data,
+                data: payload,
                 icon: payload.icon ?? undefined,
-                image: payload.image ?? undefined
+                image: payload.image ?? undefined,
+                requireInteraction: true
             }
         );
 
@@ -65,7 +66,13 @@ self.addEventListener('notificationclick', event => {
     const workCompleted = withContext(ctx => {
         const notification = event.notification;
 
-        const data = notification.data;
+        const payload = notification.data;
+
+        if (!payload) {
+            return;
+        }
+
+        const data = payload.data;
 
         if (!data || !data['k.message']) {
             return;
@@ -79,7 +86,7 @@ self.addEventListener('notificationclick', event => {
             id: messageData.data.id
         });
 
-        const url = data.url ?? '/';
+        const url = payload.url ?? '/';
 
         const windowOpened = self.clients.openWindow(url);
 
