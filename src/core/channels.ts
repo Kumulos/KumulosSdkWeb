@@ -1,6 +1,4 @@
-import { Context, PropsObject, getInstallId } from '.';
-
-const PUSH_BASE_URL = 'https://push.kumulos.com';
+import { Context, PUSH_BASE_URL, PropsObject, getInstallId } from '.';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 

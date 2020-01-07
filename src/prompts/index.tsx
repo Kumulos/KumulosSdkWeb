@@ -7,6 +7,7 @@ import {
 import { h, render } from 'preact';
 
 import Ui from './ui';
+import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
 
 type PromptManagerState = 'loading' | 'ready' | 'requesting';
@@ -173,13 +174,17 @@ export class PromptManager {
         }
     }
 
-    private loadPrompts(): Promise<void> {
-        if (this.context.pushPrompts === 'auto') {
-            // TODO go get configs from server & store away
-            return Promise.resolve();
+    private async loadPrompts(): Promise<void> {
+        if (this.context.pushPrompts !== 'auto') {
+            this.prompts = { ...this.context.pushPrompts };
         }
 
-        this.prompts = { ...this.context.pushPrompts };
+        try {
+            this.prompts = await loadPromptConfigs(this.context);
+        } catch (e) {
+            console.error('Failed to load prompts', e);
+            this.prompts = {};
+        }
 
         return Promise.resolve();
     }
