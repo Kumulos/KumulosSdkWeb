@@ -87,8 +87,9 @@ export function authedFetch(
     options.headers = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: ctx.authHeader
-    , ...existingHeaders};
+        Authorization: ctx.authHeader,
+        ...existingHeaders
+    };
 
     return fetch(url, options);
 }
