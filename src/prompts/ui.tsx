@@ -6,7 +6,7 @@ import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 
-const DEFAULT_SUBSRIBE_LABEL = 'Subscribe for notifications';
+const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
 function inversePosition(pos: string): 'left' | 'right' {
     return pos.indexOf('left') > -1 ? 'right' : 'left';
@@ -71,7 +71,7 @@ class Bell extends Component<PromptUiProps, never> {
                         </svg>
                     </div>
                     <Tooltip position={tooltipPos}>
-                        {this.props.config.labels?.tooltip?.subscribe ?? DEFAULT_SUBSRIBE_LABEL}
+                        {this.props.config.labels?.tooltip?.subscribe ?? DEFAULT_SUBSCRIBE_LABEL}
                     </Tooltip>
                 </div>
             </div>
