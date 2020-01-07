@@ -36,14 +36,14 @@ export class PromptManager {
     }
 
     private onEventTracked = (e: SdkEvent) => {
-        console.log('Tracked', e);
+        console.info('Prompt trigger saw event', e);
 
         const events = e.data as EventPayload;
 
         this.eventQueue.push(...events);
 
         if (this.state !== 'ready') {
-            console.info('not ready, waiting on queue');
+            console.info('Not ready, waiting on queue');
             return;
         }
 
@@ -66,7 +66,7 @@ export class PromptManager {
     };
 
     private onPromptDeclined = (prompt: PromptConfig) => {
-        // TODO deactivate & record state etc.
+        // TODO record state etc.
     };
 
     private render() {
@@ -91,7 +91,7 @@ export class PromptManager {
             return;
         }
 
-        console.info('evaluating triggers');
+        console.info('Evaluating prompt triggers');
 
         const matchedPrompts = [];
         for (let id in this.prompts) {
@@ -137,7 +137,7 @@ export class PromptManager {
     }
 
     private activatePrompts(prompts: PromptConfig[]) {
-        console.info('would activate: ', prompts);
+        console.info('Will activate prompts: ', prompts);
 
         for (let i = 0; i < prompts.length; ++i) {
             const prompt = prompts[i];
@@ -154,7 +154,7 @@ export class PromptManager {
     }
 
     private setState(state: PromptManagerState) {
-        console.info('Setting state:' + state);
+        console.info('Setting prompt manager state:' + state);
         this.state = state;
         this.onEnter(state);
     }
