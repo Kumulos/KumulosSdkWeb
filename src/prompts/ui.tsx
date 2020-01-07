@@ -3,6 +3,7 @@ import './bell.scss';
 import { Component, Fragment, h } from 'preact';
 
 import { PromptConfig } from '../core';
+import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 
 const DEFAULT_SUBSRIBE_LABEL = 'Subscribe for notifications';
@@ -14,6 +15,7 @@ function inversePosition(pos: string): 'left' | 'right' {
 interface PromptUiProps {
     config: PromptConfig;
     subscriptionState: PushSubscriptionState;
+    promptManagerState: PromptManagerState;
     requestNativePrompt: () => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
 }
@@ -40,7 +42,7 @@ class Bell extends Component<PromptUiProps, never> {
             return null;
         }
 
-        const classes = `kumulos-prompt kumulos-bell-container kumulos-bell-container-${this.props.config.position}`;
+        const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-bell-container kumulos-bell-container-${this.props.config.position}`;
         const tooltipPos = inversePosition(this.props.config.position);
         const bgColor = this.props.config.colors?.bell?.bg;
         const fgColor = this.props.config.colors?.bell?.fg;
@@ -80,6 +82,7 @@ class Bell extends Component<PromptUiProps, never> {
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
+    promptManagerState: PromptManagerState;
     requestNativePrompt: () => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
 }
@@ -100,6 +103,7 @@ export default class Ui extends Component<UiProps, never> {
                     <Bell
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
+                        promptManagerState={this.props.promptManagerState}
                         requestNativePrompt={this.props.requestNativePrompt}
                         onPromptDeclined={this.props.onPromptDeclined}
                     />

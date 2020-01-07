@@ -10,7 +10,7 @@ import Ui from './ui';
 import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
 
-type PromptManagerState = 'loading' | 'ready' | 'requesting';
+export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
 // loading -> ready
 // ready -> requesting
@@ -57,6 +57,10 @@ export class PromptManager {
     };
 
     private onRequestNativePrompt = async () => {
+        if ('requesting' === this.state) {
+            return;
+        }
+
         this.setState('requesting');
 
         this.subscriptionState = await requestPermissionAndRegisterForPush(
@@ -71,7 +75,7 @@ export class PromptManager {
     };
 
     private render() {
-        if (!this.subscriptionState) {
+        if (!this.subscriptionState || !this.state) {
             return;
         }
 
@@ -79,6 +83,7 @@ export class PromptManager {
             <Ui
                 prompts={this.activePrompts}
                 subscriptionState={this.subscriptionState}
+                promptManagerState={this.state as PromptManagerState}
                 requestNativePrompt={this.onRequestNativePrompt}
                 onPromptDeclined={this.onPromptDeclined}
             />,
@@ -167,7 +172,10 @@ export class PromptManager {
                 await this.loadPrompts();
                 this.setState('ready');
                 break;
+            case 'requesting':
+                this.render();
             case 'ready':
+                this.subscriptionState = await getCurrentSubscriptionState();
                 this.evaluateTriggers();
                 this.render();
                 break;
