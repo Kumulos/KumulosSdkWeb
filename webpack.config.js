@@ -31,7 +31,8 @@ const optimization = {
             uglifyOptions: {
                 compress: {
                     // IE10 issues
-                    typeofs: false
+                    typeofs: false,
+                    pure_funcs: ['console.log', 'console.info']
                 }
             }
         })
