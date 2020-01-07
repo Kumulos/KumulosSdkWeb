@@ -13,7 +13,7 @@ export interface ChannelSpec {
     showInPortal?: boolean;
 }
 export declare class ChannelSubscriptionManager {
-    private headers;
+    private readonly context;
     constructor(ctx: Context);
     private makeSubscriptionRequest;
     /**
