@@ -1,4 +1,4 @@
-import { cyrb53, uuidv4 } from './utils';
+import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
 const SDK_VERSION = '1.0.0';
@@ -52,13 +52,14 @@ interface BellPromptConfig {
 }
 
 export type PromptConfig = BellPromptConfig;
+export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface Configuration {
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?:string;
-    pushPrompts?: {[key:string]:PromptConfig} | 'auto';
+    pushPrompts?: PromptConfigs | 'auto';
 }
 
 type SdkEventType = 'eventTracked';
@@ -204,13 +205,8 @@ export async function trackEvent(
 
     ctx.broadcast('eventTracked', events);
 
-    return fetch(url, {
+    return authedFetch(ctx, url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Authorization: ctx.authHeader
-        },
         body: JSON.stringify(events)
     });
 }

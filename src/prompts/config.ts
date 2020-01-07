@@ -1,7 +1,7 @@
-import { Context, PUSH_BASE_URL, PromptConfig } from '../core';
+import { Context, PUSH_BASE_URL, PromptConfig, PromptConfigs } from '../core';
 import { get, set } from '../core/storage';
 
-type PromptConfigs = { [key: string]: PromptConfig };
+import { authedFetchJson } from '../core/utils';
 
 export interface PlatformConfig {
     publicKey: string;
@@ -10,15 +10,7 @@ export interface PlatformConfig {
 
 function loadConfig(ctx: Context): Promise<PlatformConfig> {
     const url = `${PUSH_BASE_URL}/v1/web/config`;
-
-    return fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Authorization: ctx.authHeader
-        }
-    }).then(r => r.json());
+    return authedFetchJson<PlatformConfig>(ctx, url);
 }
 
 export async function loadPromptConfigs(ctx: Context): Promise<PromptConfigs> {

@@ -1,3 +1,5 @@
+import { Context } from ".";
+
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
     if (typeof crypto === 'undefined') {
@@ -73,4 +75,24 @@ export function cyrb53(str: string, seed = 0): number {
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 export function escapeRegExp(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export function authedFetch(
+    ctx:Context,
+    url: RequestInfo,
+    options: RequestInit = {method: 'GET'}
+): Promise<Response> {
+    const existingHeaders = options.headers ?? {};
+
+    options.headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: ctx.authHeader
+    , ...existingHeaders};
+
+    return fetch(url, options);
+}
+
+export function authedFetchJson<T>(ctx:Context,url:RequestInfo,options?:RequestInit) : Promise<T> {
+    return authedFetch(ctx, url, options).then(r => r.json());
 }
