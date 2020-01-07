@@ -25,7 +25,6 @@ interface PromptTrigger {
     event: string;
     afterSeconds?: number;
     filters?: PropFilter[];
-    askAgainAfterDays?: number[];
 }
 interface BellPromptConfig {
     type: 'bell';
