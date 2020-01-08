@@ -14,7 +14,7 @@ function loadConfig(ctx: Context): Promise<PlatformConfig> {
 }
 
 export async function loadPromptConfigs(ctx: Context): Promise<PromptConfigs> {
-    const MAX_AGE_MS = 1 * 60 * 60 * 1000;
+    const MAX_AGE_MS = 6 * 60 * 60 * 1000;
     let remotePrompts = {} as PromptConfigs;
 
     const lastPromptLoadTime = await get<number>('promptsUpdated') ?? 0;
