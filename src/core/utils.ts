@@ -1,3 +1,5 @@
+import { Context } from ".";
+
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
     if (typeof crypto === 'undefined') {
@@ -55,7 +57,7 @@ const imul =
     };
 
 // https://stackoverflow.com/a/52171480
-export function cyrb53(str: string, seed = 0) {
+export function cyrb53(str: string, seed = 0): number {
     let h1 = 0xdeadbeef ^ seed,
         h2 = 0x41c6ce57 ^ seed;
     for (let i = 0, ch; i < str.length; i++) {
@@ -68,4 +70,30 @@ export function cyrb53(str: string, seed = 0) {
     h2 =
         imul(h2 ^ (h2 >>> 16), 2246822507) ^ imul(h1 ^ (h1 >>> 13), 3266489909);
     return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+export function escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export function authedFetch(
+    ctx:Context,
+    url: RequestInfo,
+    options: RequestInit = {method: 'GET'}
+): Promise<Response> {
+    const existingHeaders = options.headers ?? {};
+
+    options.headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: ctx.authHeader,
+        ...existingHeaders
+    };
+
+    return fetch(url, options);
+}
+
+export function authedFetchJson<T>(ctx:Context,url:RequestInfo,options?:RequestInit) : Promise<T> {
+    return authedFetch(ctx, url, options).then(r => r.json());
 }

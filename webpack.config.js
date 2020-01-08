@@ -11,12 +11,16 @@ const moduleCfg = {
             test: /\.tsx?$/,
             use: 'ts-loader',
             exclude: /node_modules/
+        },
+        {
+            test: /\.s[ac]ss$/,
+            use: ['style-loader', 'css-loader', 'sass-loader']
         }
     ]
 };
 
 const resolve = {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.tsx', '.js']
 };
 
 const optimization = {
@@ -27,7 +31,8 @@ const optimization = {
             uglifyOptions: {
                 compress: {
                     // IE10 issues
-                    typeofs: false
+                    typeofs: false,
+                    pure_funcs: ['console.log', 'console.info']
                 }
             }
         })

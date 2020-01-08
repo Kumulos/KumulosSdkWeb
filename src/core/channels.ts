@@ -1,6 +1,5 @@
-import { Context, PropsObject, getInstallId } from '.';
-
-const PUSH_BASE_URL = 'https://push.kumulos.com';
+import { Context, PUSH_BASE_URL, PropsObject, getInstallId } from '.';
+import { authedFetch, authedFetchJson } from './utils';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -20,13 +19,10 @@ export interface ChannelSpec {
 }
 
 export class ChannelSubscriptionManager {
-    private headers: Headers;
+    private readonly context: Context;
 
     constructor(ctx: Context) {
-        this.headers = new Headers();
-        this.headers.append('Authorization', ctx.authHeader);
-        this.headers.append('Content-Type', 'application/json');
-        this.headers.append('Accept', 'application/json');
+        this.context = ctx;
     }
 
     private makeSubscriptionRequest(
@@ -41,11 +37,10 @@ export class ChannelSubscriptionManager {
 
             const options = {
                 method,
-                headers: this.headers,
                 body: JSON.stringify(params)
             };
 
-            return fetch(url, options);
+            return authedFetch(this.context, url, options);
         });
     }
 
@@ -83,19 +78,10 @@ export class ChannelSubscriptionManager {
      * Lists the channels available to this installation along with subscription status
      */
     listChannels(): Promise<Channel[]> {
-        return getInstallId()
-            .then<Response>(installId => {
-                const url = `${PUSH_BASE_URL}/v1/app-installs/${installId}/channels`;
-                const options = {
-                    method: 'GET',
-                    headers: this.headers
-                };
-
-                return fetch(url, options);
-            })
-            .then(response => {
-                return response.json();
-            });
+        return getInstallId().then(installId => {
+            const url = `${PUSH_BASE_URL}/v1/app-installs/${installId}/channels`;
+            return authedFetchJson<Channel[]>(this.context, url);
+        });
     }
 
     /**
@@ -114,32 +100,27 @@ export class ChannelSubscriptionManager {
             });
         }
 
-        return getInstallId()
-            .then<Response>(installId => {
-                const url = `${PUSH_BASE_URL}/v1/channels`;
+        return getInstallId().then(installId => {
+            const url = `${PUSH_BASE_URL}/v1/channels`;
 
-                let params = {
-                    uuid: channelSpec.uuid,
-                    name: channelSpec.name,
-                    showInPortal: Boolean(channelSpec.showInPortal),
-                    meta: channelSpec.meta,
-                    installId: undefined
-                };
+            let params = {
+                uuid: channelSpec.uuid,
+                name: channelSpec.name,
+                showInPortal: Boolean(channelSpec.showInPortal),
+                meta: channelSpec.meta,
+                installId: undefined
+            };
 
-                if (channelSpec.subscribe) {
-                    (params as any).installId = installId;
-                }
+            if (channelSpec.subscribe) {
+                (params as any).installId = installId;
+            }
 
-                const options = {
-                    method: 'POST',
-                    headers: this.headers,
-                    body: JSON.stringify(params)
-                };
+            const options = {
+                method: 'POST',
+                body: JSON.stringify(params)
+            };
 
-                return fetch(url, options);
-            })
-            .then(response => {
-                return response.json();
-            });
+            return authedFetchJson<Channel>(this.context, url, options);
+        });
     }
 }

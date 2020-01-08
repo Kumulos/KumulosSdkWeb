@@ -19,11 +19,13 @@ import {
 } from './core/push';
 
 import { ChannelSubscriptionManager } from './core/channels';
+import { PromptManager } from './prompts';
 import { persistConfig } from './core/storage';
 
 export default class Kumulos {
     private readonly context: Context;
     private readonly serviceWorkerReg: Promise<ServiceWorkerRegistration>;
+    private readonly promptManager: PromptManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
     constructor(config: Configuration) {
@@ -36,6 +38,8 @@ export default class Kumulos {
         this.serviceWorkerReg = registerServiceWorker(
             this.context.serviceWorkerPath
         );
+
+        this.promptManager = new PromptManager(this.context);
     }
 
     getInstallId(): Promise<InstallId> {

@@ -3,6 +3,7 @@ import { ChannelSubscriptionManager } from './core/channels';
 export default class Kumulos {
     private readonly context;
     private readonly serviceWorkerReg;
+    private readonly promptManager;
     private channelSubscriptionManager?;
     constructor(config: Configuration);
     getInstallId(): Promise<InstallId>;

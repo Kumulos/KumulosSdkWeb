@@ -1,9 +1,10 @@
-import { cyrb53, uuidv4 } from './utils';
+import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
 const SDK_VERSION = '1.1.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
+export const PUSH_BASE_URL = 'https://push.kumulos.com';
 
 export type InstallId = string;
 export type UserId = string;
@@ -22,12 +23,47 @@ export enum EventType {
     PAGE_VIEWED = 'k.pageViewed'
 }
 
+export type FilterOperator = 'in';
+export type FilterValue = number | boolean | string | string[];
+export type PropFilter = [string,FilterOperator,FilterValue];
+
+interface PromptTrigger {
+    event: string;
+    afterSeconds?: number;
+    filters?: PropFilter[];
+}
+
+interface BellPromptConfig {
+    type: 'bell';
+    trigger: PromptTrigger;
+    labels?: {
+        tooltip?: {
+            subscribe?: string;
+        };
+    };
+    colors?: {
+        bell?: {
+            bg?: string;
+            fg?: string;
+        };
+    };
+    position: 'bottom-left' | 'bottom-right';
+}
+
+export type PromptConfig = BellPromptConfig;
+export type PromptConfigs = { [key: string]: PromptConfig };
+
 export interface Configuration {
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?:string;
+    pushPrompts?: PromptConfigs | 'auto';
 }
+
+type SdkEventType = 'eventTracked';
+export type SdkEvent<T = any> = {type: SdkEventType; data: T;};
+type SdkEventHandler = (event:SdkEvent) => void;
 
 export class Context {
     readonly apiKey: string;
@@ -35,6 +71,9 @@ export class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath : string;
+    readonly pushPrompts : {[key:string]: PromptConfig} | 'auto'
+
+    private readonly subscribers: {[key:string]:SdkEventHandler[]}
 
     constructor(config: Configuration) {
         this.apiKey = config.apiKey;
@@ -42,6 +81,34 @@ export class Context {
         this.vapidPublicKey = config.vapidPublicKey;
         this.authHeader = `Basic ${btoa(`${this.apiKey}:${this.secretKey}`)}`;
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
+        this.pushPrompts = config.pushPrompts ?? 'auto';
+
+        this.subscribers = {};
+    }
+
+    subscribe(event:SdkEventType, handler:SdkEventHandler) {
+        if (!this.subscribers[event]) {
+            this.subscribers[event] = [];
+        }
+
+        if (this.subscribers[event].indexOf(handler) > -1) {
+            return;
+        }
+
+        this.subscribers[event].push(handler);
+    }
+
+    broadcast(event:SdkEventType, data:any) {
+        if (!this.subscribers[event]) {
+            return;
+        }
+
+        for (let i = 0; i < this.subscribers[event].length; ++i) {
+            this.subscribers[event][i]({
+                type: event,
+                data
+            });
+        }
     }
 }
 
@@ -105,6 +172,16 @@ export async function clearUserAssociation(ctx:Context) : Promise<void> {
     return del('userId');
 }
 
+export type KumulosEvent = {
+    type: string;
+    uuid: string;
+    timestamp: number;
+    userId: string;
+    data?: PropsObject;
+};
+
+export type EventPayload = KumulosEvent[];
+
 export async function trackEvent(
     ctx: Context,
     type: string,
@@ -113,7 +190,7 @@ export async function trackEvent(
     const installId = await getInstallId();
     const userId = await getUserId();
 
-    const events = [
+    const events:EventPayload = [
         {
             type,
             uuid: uuidv4(),
@@ -125,13 +202,10 @@ export async function trackEvent(
 
     const url = `${EVENTS_BASE_URL}/v1/app-installs/${installId}/events`;
 
-    return fetch(url, {
+    ctx.broadcast('eventTracked', events);
+
+    return authedFetch(ctx, url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Authorization: ctx.authHeader
-        },
         body: JSON.stringify(events)
     });
 }
