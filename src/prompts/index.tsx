@@ -185,6 +185,7 @@ export class PromptManager {
     private async loadPrompts(): Promise<void> {
         if (this.context.pushPrompts !== 'auto') {
             this.prompts = { ...this.context.pushPrompts };
+            return;
         }
 
         try {
