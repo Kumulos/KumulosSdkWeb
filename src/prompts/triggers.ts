@@ -2,21 +2,41 @@ import { FilterValue, KumulosEvent, PromptConfig, PropFilter } from "../core";
 
 import { escapeRegExp } from "../core/utils";
 
-function propIn(values:FilterValue, propValue:any):boolean {
-    if (!Array.isArray(values)) {
+function propIn(filterValue:FilterValue, propValue:any):boolean {
+    if (!Array.isArray(filterValue)) {
         return false;
     }
 
     if (typeof propValue === 'string') {
-        const tests = values.map(v => new RegExp(escapeRegExp(v).replace('\\*', '.*'), 'g'));
+        const tests = filterValue.map(v => new RegExp(escapeRegExp(v).replace('\\*', '.*'), 'g'));
         const filterMatched = tests.reduce((matched, matcher) => matched || matcher.test(String(propValue)), false);
 
         return filterMatched;
     } else if (typeof propValue === 'number') {
-        return values.indexOf(propValue as any) > -1;
+        return filterValue.indexOf(propValue as any) > -1;
     }
 
     return false;
+}
+
+function propEq(filterValue:FilterValue, propValue:any): boolean {
+    return filterValue == propValue;
+}
+
+function propGt(filterValue:FilterValue, propValue:any): boolean {
+    return propValue > filterValue;
+}
+
+function propGte(filterValue:FilterValue, propValue:any): boolean {
+    return propValue >= filterValue;
+}
+
+function propLt(filterValue:FilterValue, propValue:any): boolean {
+    return propValue < filterValue;
+}
+
+function propLte(filterValue:FilterValue, propValue:any): boolean {
+    return propValue <= filterValue;
 }
 
 export function  triggerMatched(prompt: PromptConfig, event: KumulosEvent): boolean {
@@ -36,7 +56,7 @@ export function  triggerMatched(prompt: PromptConfig, event: KumulosEvent): bool
 
     let allPropFiltersMatch = true;
     for (let i = 0; i < trigger.filters.length; ++i) {
-        const [prop, op, values] = trigger.filters[i] as PropFilter;
+        const [prop, op, filterTestValue] = trigger.filters[i] as PropFilter;
 
         const propValue = event.data[prop];
 
@@ -44,7 +64,23 @@ export function  triggerMatched(prompt: PromptConfig, event: KumulosEvent): bool
 
         switch (op) {
             case 'in':
-                filterMatched = propIn(values, propValue);
+            case 'IN':
+                filterMatched = propIn(filterTestValue, propValue);
+                break;
+            case '=':
+                filterMatched = propEq(filterTestValue, propValue);
+                break;
+            case '>':
+                filterMatched = propGt(filterTestValue, propValue);
+                break;
+            case '>=':
+                filterMatched = propGte(filterTestValue, propValue);
+                break;
+            case '<':
+                filterMatched = propLt(filterTestValue, propValue);
+                break;
+            case '<=':
+                filterMatched = propLte(filterTestValue, propValue);
                 break;
             default:
                 console.warn(`Unknown filter operator: ${op}`);

@@ -23,7 +23,8 @@ export enum EventType {
     PAGE_VIEWED = 'k.pageViewed'
 }
 
-export type FilterOperator = 'in';
+// Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
+export type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export type FilterValue = number | boolean | string | string[];
 export type PropFilter = [string,FilterOperator,FilterValue];
 
