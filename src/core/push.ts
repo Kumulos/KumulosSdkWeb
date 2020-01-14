@@ -1,7 +1,6 @@
 import { Context, EventType, trackEvent } from './index';
+import { base64UrlEncode, cyrb53 } from './utils';
 import { get, set } from './storage';
-
-import { cyrb53 } from './utils';
 
 export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 
@@ -44,6 +43,12 @@ export async function pushRegister(
         return Promise.reject(
             'Push notifications are not supported in this browser'
         );
+    }
+
+    const existingSub = await workerReg.pushManager.getSubscription();
+
+    if (existingSub && !hasSameKey(ctx.vapidPublicKey,existingSub)) {
+        await existingSub?.unsubscribe();
     }
 
     const sub = await workerReg.pushManager.subscribe({
@@ -102,7 +107,19 @@ export async function requestPermissionAndRegisterForPush(
     }
 }
 
-export async function getCurrentSubscriptionState(): Promise<PushSubscriptionState> {
+function hasSameKey(vapidKey:string, subscription:PushSubscription): boolean {
+    const existingSubKey = subscription.options.applicationServerKey;
+
+    if (!existingSubKey) {
+        return false;
+    }
+
+    const subKey = base64UrlEncode(existingSubKey);
+
+    return subKey === vapidKey;
+}
+
+export async function getCurrentSubscriptionState(ctx:Context): Promise<PushSubscriptionState> {
     const perm = Notification.permission;
 
     if (perm === 'denied') {
@@ -112,9 +129,45 @@ export async function getCurrentSubscriptionState(): Promise<PushSubscriptionSta
     const reg = await navigator.serviceWorker.getRegistration();
     const sub = await reg?.pushManager.getSubscription();
 
-    if (sub && perm === 'granted') {
+    if (sub && perm === 'granted' && hasSameKey(ctx.vapidPublicKey, sub)) {
         return 'subscribed';
     }
 
     return 'unsubscribed';
+}
+
+export async function handleAutoResubscription(ctx : Context): Promise<void> {
+    if (!ctx.autoResubscribe) {
+        return;
+    }
+
+    const perm = Notification.permission;
+
+    if (perm !== 'granted') {
+        return;
+    }
+
+    const existingEndpointHash = await get<number>('pushEndpointHash');
+    const existingExpiry = await get<number | null | undefined>(
+        'pushExpiresAt'
+    );
+
+    if (existingEndpointHash !== undefined &&
+        (existingExpiry === null || existingExpiry === undefined || existingExpiry > Date.now())
+    ) {
+        return;
+    }
+
+    try {
+        const reg = await navigator.serviceWorker.getRegistration();
+
+        if (!reg) {
+            console.warn('No worker, aborting auto-resubscription');
+            return;
+        }
+
+        return pushRegister(ctx, reg);
+    } catch (e) {
+        console.error(e);
+    }
 }
