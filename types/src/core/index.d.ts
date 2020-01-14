@@ -18,7 +18,7 @@ export declare enum EventType {
     USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared",
     PAGE_VIEWED = "k.pageViewed"
 }
-export declare type FilterOperator = 'in';
+export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
 export declare type PropFilter = [string, FilterOperator, FilterValue];
 interface PromptTrigger {
