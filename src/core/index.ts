@@ -1,7 +1,7 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-const SDK_VERSION = '1.1.0';
+const SDK_VERSION = '1.2.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -60,6 +60,7 @@ export interface Configuration {
     vapidPublicKey: string;
     serviceWorkerPath?:string;
     pushPrompts?: PromptConfigs | 'auto';
+    autoResubscribe?: boolean;
 }
 
 type SdkEventType = 'eventTracked';
@@ -73,6 +74,7 @@ export class Context {
     readonly authHeader: string;
     readonly serviceWorkerPath : string;
     readonly pushPrompts : {[key:string]: PromptConfig} | 'auto'
+    readonly autoResubscribe : boolean;
 
     private readonly subscribers: {[key:string]:SdkEventHandler[]}
 
@@ -83,6 +85,7 @@ export class Context {
         this.authHeader = `Basic ${btoa(`${this.apiKey}:${this.secretKey}`)}`;
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
         this.pushPrompts = config.pushPrompts ?? 'auto';
+        this.autoResubscribe = config.autoResubscribe ?? true;
 
         this.subscribers = {};
     }

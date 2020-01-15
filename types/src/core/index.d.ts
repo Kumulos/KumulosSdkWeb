@@ -52,6 +52,7 @@ export interface Configuration {
     vapidPublicKey: string;
     serviceWorkerPath?: string;
     pushPrompts?: PromptConfigs | 'auto';
+    autoResubscribe?: boolean;
 }
 declare type SdkEventType = 'eventTracked';
 export declare type SdkEvent<T = any> = {
@@ -68,6 +69,7 @@ export declare class Context {
     readonly pushPrompts: {
         [key: string]: PromptConfig;
     } | 'auto';
+    readonly autoResubscribe: boolean;
     private readonly subscribers;
     constructor(config: Configuration);
     subscribe(event: SdkEventType, handler: SdkEventHandler): void;

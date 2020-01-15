@@ -1,4 +1,4 @@
-import { Context, PUSH_BASE_URL, PromptConfig, PromptConfigs } from '../core';
+import { Context, PUSH_BASE_URL, PromptConfigs } from '../core';
 import { get, set } from '../core/storage';
 
 import { authedFetchJson } from '../core/utils';

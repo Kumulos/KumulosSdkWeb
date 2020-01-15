@@ -2,6 +2,7 @@ import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
 import {
     PushSubscriptionState,
     getCurrentSubscriptionState,
+    handleAutoResubscription,
     requestPermissionAndRegisterForPush
 } from '../core/push';
 import { h, render } from 'preact';
@@ -168,14 +169,19 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                this.subscriptionState = await getCurrentSubscriptionState();
+                await handleAutoResubscription(this.context);
+                this.subscriptionState = await getCurrentSubscriptionState(
+                    this.context
+                );
                 await this.loadPrompts();
                 this.setState('ready');
                 break;
             case 'requesting':
                 this.render();
             case 'ready':
-                this.subscriptionState = await getCurrentSubscriptionState();
+                this.subscriptionState = await getCurrentSubscriptionState(
+                    this.context
+                );
                 this.evaluateTriggers();
                 this.render();
                 break;
