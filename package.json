@@ -1,6 +1,6 @@
 {
     "name": "@kumulos/web",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Official SDK for integrating Kumulos services with your web projects",
     "main": "dist/index.js",
     "types": "types/src/index.d.ts",
