@@ -1,4 +1,4 @@
-# Kumulos Web SDK
+# Kumulos Web SDK [![npm version](https://badge.fury.io/js/%40kumulos%2Fweb.svg)](https://badge.fury.io/js/%40kumulos%2Fweb)
 
 Kumulos provides tools to build and host backend storage for apps, send push notifications, view audience and behavior analytics, and report on adoption, engagement and performance.
 
