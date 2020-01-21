@@ -2,12 +2,13 @@ import { Context } from '../core';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting';
 export declare class PromptManager {
     private readonly context;
+    private readonly uiRoot;
     private state?;
     private subscriptionState?;
     private eventQueue;
     private prompts;
     private activePrompts;
-    private readonly uiRoot;
+    private currentlyRequestingPrompt?;
     constructor(ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;

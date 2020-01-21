@@ -24,6 +24,15 @@ body.kumulos-overlay-blur {
     width: 100%;
 
     &-strip {
+        display: flex;
+
+        &:before {
+            display: block;
+            content: '';
+            width: calc(500px + 12%);
+            max-width: 660px;
+        }
+
         box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.8);
         min-height: 150px;
     }
@@ -31,7 +40,6 @@ body.kumulos-overlay-blur {
     &-content-container {
         display: flex;
         max-width: 380px;
-        margin-left: calc(500px + 10%);
         padding: 1em;
         font: 14px helvetica, sans-serif;
 
@@ -73,7 +81,7 @@ body.kumulos-overlay-blur {
 }
 
 .kumulos-overlay-chrome {
-    .kumulos-overlay-content-container {
-        margin-left: 440px;
+    .kumulos-overlay-strip:before {
+        width: 440px;
     }
 }
