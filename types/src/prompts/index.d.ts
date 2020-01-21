@@ -7,6 +7,7 @@ export declare class PromptManager {
     private eventQueue;
     private prompts;
     private activePrompts;
+    private readonly uiRoot;
     constructor(ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;

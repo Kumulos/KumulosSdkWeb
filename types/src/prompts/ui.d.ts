@@ -11,7 +11,7 @@ interface UiProps {
     onPromptDeclined: (prompt: PromptConfig) => void;
 }
 export default class Ui extends Component<UiProps, never> {
-    render(): h.JSX.Element;
+    render(): import("preact").VNode<any>;
     renderPrompt(prompt: PromptConfig): h.JSX.Element | null;
 }
 export {};

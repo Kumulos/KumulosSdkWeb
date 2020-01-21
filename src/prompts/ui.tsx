@@ -5,6 +5,7 @@ import { Component, Fragment, h } from 'preact';
 import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
+import { createPortal } from 'preact/compat';
 
 const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -71,7 +72,8 @@ class Bell extends Component<PromptUiProps, never> {
                         </svg>
                     </div>
                     <Tooltip position={tooltipPos}>
-                        {this.props.config.labels?.tooltip?.subscribe ?? DEFAULT_SUBSCRIBE_LABEL}
+                        {this.props.config.labels?.tooltip?.subscribe ??
+                            DEFAULT_SUBSCRIBE_LABEL}
                     </Tooltip>
                 </div>
             </div>
@@ -89,10 +91,11 @@ interface UiProps {
 
 export default class Ui extends Component<UiProps, never> {
     render() {
-        return (
+        return createPortal(
             <Fragment>
                 {this.props.prompts.map(this.renderPrompt, this)}
-            </Fragment>
+            </Fragment>,
+            document.body
         );
     }
 
