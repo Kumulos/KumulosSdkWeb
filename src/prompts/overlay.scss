@@ -1,0 +1,79 @@
+body.kumulos-overlay-blur {
+    overflow: hidden;
+}
+
+.kumulos-overlay-blur > *:not(.kumulos-overlay) {
+    filter: blur(3px);
+}
+
+.kumulos-overlay {
+    box-sizing: border-box;
+
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
+
+    z-index: 2000;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    &-strip {
+        box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.8);
+        min-height: 150px;
+    }
+
+    &-content-container {
+        display: flex;
+        max-width: 380px;
+        margin-left: calc(500px + 10%);
+        padding: 1em;
+        font: 14px helvetica, sans-serif;
+
+        * {
+            margin: 0;
+        }
+
+        svg {
+            margin: 55px 2em 0 0;
+            stroke: none;
+            fill: rgba(0, 0, 0, 0.8);
+        }
+
+        img {
+            width: 65px;
+            height: 65px;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        a {
+            margin-right: 0.4em;
+            color: inherit;
+            opacity: 0.8;
+            text-decoration: none;
+        }
+    }
+
+    .kumulos-overlay-content {
+        margin-left: 0.75em;
+
+        p {
+            margin: 0.5em 0;
+        }
+    }
+}
+
+.kumulos-overlay-chrome {
+    .kumulos-overlay-content-container {
+        margin-left: 440px;
+    }
+}

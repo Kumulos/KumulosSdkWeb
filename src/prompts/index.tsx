@@ -25,11 +25,17 @@ export class PromptManager {
     private eventQueue: EventPayload;
     private prompts: { [x: string]: PromptConfig };
     private activePrompts: PromptConfig[];
+    private currentlyRequestingPrompt?: PromptConfig;
+    uiContainer: HTMLDivElement;
 
     constructor(ctx: Context) {
         this.prompts = {};
         this.eventQueue = [];
         this.activePrompts = [];
+
+        this.uiContainer = document.createElement('div');
+        this.uiContainer.id = 'kumulos-ui-root';
+        document.body.appendChild(this.uiContainer);
 
         this.context = ctx;
 
@@ -57,10 +63,12 @@ export class PromptManager {
         this.render();
     };
 
-    private onRequestNativePrompt = async () => {
+    private onRequestNativePrompt = async (prompt: PromptConfig) => {
         if ('requesting' === this.state) {
             return;
         }
+
+        this.currentlyRequestingPrompt = prompt;
 
         this.setState('requesting');
 
@@ -87,8 +95,9 @@ export class PromptManager {
                 promptManagerState={this.state as PromptManagerState}
                 requestNativePrompt={this.onRequestNativePrompt}
                 onPromptDeclined={this.onPromptDeclined}
+                currentlyRequestingPrompt={this.currentlyRequestingPrompt}
             />,
-            document.body
+            this.uiContainer
         );
     }
 
@@ -178,7 +187,9 @@ export class PromptManager {
                 break;
             case 'requesting':
                 this.render();
+                break;
             case 'ready':
+                this.currentlyRequestingPrompt = undefined;
                 this.subscriptionState = await getCurrentSubscriptionState(
                     this.context
                 );
