@@ -1,7 +1,7 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-const SDK_VERSION = '1.2.1';
+const SDK_VERSION = '1.2.2';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -9,9 +9,17 @@ export const PUSH_BASE_URL = 'https://push.kumulos.com';
 export type InstallId = string;
 export type UserId = string;
 
-type Jsonish = string | number | boolean | null | { [key: string]: Jsonish  } | { toJSON:() => any } | Jsonish[] | undefined;
+type Jsonish =
+    | string
+    | number
+    | boolean
+    | null
+    | { [key: string]: Jsonish }
+    | { toJSON: () => any }
+    | Jsonish[]
+    | undefined;
 
-export type PropsObject = { [key:string]: Jsonish };
+export type PropsObject = { [key: string]: Jsonish };
 
 export enum EventType {
     MESSAGE_DELIVERED = 'k.message.delivered',
@@ -26,7 +34,7 @@ export enum EventType {
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
 export type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export type FilterValue = number | boolean | string | string[];
-export type PropFilter = [string,FilterOperator,FilterValue];
+export type PropFilter = [string, FilterOperator, FilterValue];
 
 interface PromptTrigger {
     event: string;
@@ -58,25 +66,25 @@ export interface Configuration {
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
-    serviceWorkerPath?:string;
+    serviceWorkerPath?: string;
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
 }
 
 type SdkEventType = 'eventTracked';
-export type SdkEvent<T = any> = {type: SdkEventType; data: T;};
-type SdkEventHandler = (event:SdkEvent) => void;
+export type SdkEvent<T = any> = { type: SdkEventType; data: T };
+type SdkEventHandler = (event: SdkEvent) => void;
 
 export class Context {
     readonly apiKey: string;
     readonly secretKey: string;
     readonly vapidPublicKey: string;
     readonly authHeader: string;
-    readonly serviceWorkerPath : string;
-    readonly pushPrompts : {[key:string]: PromptConfig} | 'auto'
-    readonly autoResubscribe : boolean;
+    readonly serviceWorkerPath: string;
+    readonly pushPrompts: { [key: string]: PromptConfig } | 'auto';
+    readonly autoResubscribe: boolean;
 
-    private readonly subscribers: {[key:string]:SdkEventHandler[]}
+    private readonly subscribers: { [key: string]: SdkEventHandler[] };
 
     constructor(config: Configuration) {
         this.apiKey = config.apiKey;
@@ -90,7 +98,7 @@ export class Context {
         this.subscribers = {};
     }
 
-    subscribe(event:SdkEventType, handler:SdkEventHandler) {
+    subscribe(event: SdkEventType, handler: SdkEventHandler) {
         if (!this.subscribers[event]) {
             this.subscribers[event] = [];
         }
@@ -102,7 +110,7 @@ export class Context {
         this.subscribers[event].push(handler);
     }
 
-    broadcast(event:SdkEventType, data:any) {
+    broadcast(event: SdkEventType, data: any) {
         if (!this.subscribers[event]) {
             return;
         }
@@ -116,7 +124,7 @@ export class Context {
     }
 }
 
-export function assertConfigValid(config : any) {
+export function assertConfigValid(config: any) {
     if (typeof config !== 'object') {
         throw 'Config must be an object';
     }
@@ -128,34 +136,46 @@ export function assertConfigValid(config : any) {
         }
     }
 
-    if (config.serviceWorkerPath && typeof config.serviceWorkerPath !== 'string' && config.serviceWorkerPath.length === 0) {
+    if (
+        config.serviceWorkerPath &&
+        typeof config.serviceWorkerPath !== 'string' &&
+        config.serviceWorkerPath.length === 0
+    ) {
         throw "Optional configuration key 'serviceWorkerPath' must be non-empty string (if supplied)";
     }
 }
 
-let installIdPromise:Promise<InstallId> | undefined = undefined;
+let installIdPromise: Promise<InstallId> | undefined = undefined;
 
 export function getInstallId(): Promise<InstallId> {
     if (installIdPromise) {
         return installIdPromise;
     }
 
-    installIdPromise = get<InstallId | undefined>('installId').then(installId => {
-        if (!installId) {
-            return set('installId', uuidv4());
-        }
+    installIdPromise = get<InstallId | undefined>('installId').then(
+        installId => {
+            if (!installId) {
+                return set('installId', uuidv4());
+            }
 
-        return installId;
-    });
+            return installId;
+        }
+    );
 
     return installIdPromise;
 }
 
 export function getUserId(): Promise<UserId> {
-    return get<UserId | undefined>('userId').then(userId => userId ?? getInstallId());
+    return get<UserId | undefined>('userId').then(
+        userId => userId ?? getInstallId()
+    );
 }
 
-export async function associateUser(ctx:Context, id:UserId, attributes?:PropsObject):Promise<void> {
+export async function associateUser(
+    ctx: Context,
+    id: UserId,
+    attributes?: PropsObject
+): Promise<void> {
     await set('userId', id);
 
     const props = {
@@ -166,7 +186,7 @@ export async function associateUser(ctx:Context, id:UserId, attributes?:PropsObj
     return trackEvent(ctx, EventType.USER_ASSOCIATED, props).then(_ => {});
 }
 
-export async function clearUserAssociation(ctx:Context) : Promise<void> {
+export async function clearUserAssociation(ctx: Context): Promise<void> {
     const currentUserId = await getUserId();
 
     trackEvent(ctx, EventType.USER_ASSOCIATION_CLEARED, {
@@ -194,7 +214,7 @@ export async function trackEvent(
     const installId = await getInstallId();
     const userId = await getUserId();
 
-    const events:EventPayload = [
+    const events: EventPayload = [
         {
             type,
             uuid: uuidv4(),
@@ -246,7 +266,13 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
         }
     };
 
-    const hashParts = [SDK_VERSION, payload.app.bundle, payload.device.tz, payload.device.locale, payload.device.name];
+    const hashParts = [
+        SDK_VERSION,
+        payload.app.bundle,
+        payload.device.tz,
+        payload.device.locale,
+        payload.device.name
+    ];
     const hash = cyrb53(hashParts.join('|'));
 
     try {
@@ -261,5 +287,5 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
 
     return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
         .then(() => set('detailsHash', hash))
-        .then(() => void(0));
+        .then(() => void 0);
 }

@@ -25,11 +25,16 @@ export class PromptManager {
     private eventQueue: EventPayload;
     private prompts: { [x: string]: PromptConfig };
     private activePrompts: PromptConfig[];
+    private readonly uiRoot: HTMLDivElement;
 
     constructor(ctx: Context) {
         this.prompts = {};
         this.eventQueue = [];
         this.activePrompts = [];
+
+        this.uiRoot = document.createElement('div');
+        this.uiRoot.id = 'kumulos-ui-root';
+        document.body.appendChild(this.uiRoot);
 
         this.context = ctx;
 
@@ -88,7 +93,7 @@ export class PromptManager {
                 requestNativePrompt={this.onRequestNativePrompt}
                 onPromptDeclined={this.onPromptDeclined}
             />,
-            document.body
+            this.uiRoot
         );
     }
 
