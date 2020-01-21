@@ -1,6 +1,6 @@
 {
     "name": "@kumulos/web",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Official SDK for integrating Kumulos services with your web projects",
     "main": "dist/index.js",
     "types": "types/src/index.d.ts",
@@ -26,7 +26,7 @@
     "devDependencies": {
         "css-loader": "^3.4.0",
         "node-sass": "^4.13.0",
-        "prettier": "^1.18.2",
+        "prettier": "^1.19.1",
         "sass-loader": "^8.0.0",
         "style-loader": "^1.0.2",
         "ts-loader": "^6.2.0",
@@ -37,6 +37,6 @@
         "webpack-cli": "^3.3.9"
     },
     "dependencies": {
-        "preact": "^10.1.0"
+        "preact": "^10.2.1"
     }
 }

@@ -19,6 +19,7 @@ export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
 export class PromptManager {
     private readonly context: Context;
+    private readonly uiRoot: HTMLDivElement;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
@@ -26,16 +27,15 @@ export class PromptManager {
     private prompts: { [x: string]: PromptConfig };
     private activePrompts: PromptConfig[];
     private currentlyRequestingPrompt?: PromptConfig;
-    uiContainer: HTMLDivElement;
 
     constructor(ctx: Context) {
         this.prompts = {};
         this.eventQueue = [];
         this.activePrompts = [];
 
-        this.uiContainer = document.createElement('div');
-        this.uiContainer.id = 'kumulos-ui-root';
-        document.body.appendChild(this.uiContainer);
+        this.uiRoot = document.createElement('div');
+        this.uiRoot.id = 'kumulos-ui-root';
+        document.body.appendChild(this.uiRoot);
 
         this.context = ctx;
 
@@ -97,7 +97,7 @@ export class PromptManager {
                 onPromptDeclined={this.onPromptDeclined}
                 currentlyRequestingPrompt={this.currentlyRequestingPrompt}
             />,
-            this.uiContainer
+            this.uiRoot
         );
     }
 
