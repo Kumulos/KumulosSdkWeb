@@ -175,7 +175,7 @@ class Overlay extends Component<OverlayProps, never> {
                         <div class="kumulos-overlay-content">
                             <h3>{overlay.labels.heading}</h3>
                             <p>{overlay.labels.body}</p>
-                            {overlay.links.map(l => (
+                            {overlay.links?.map(l => (
                                 <a href={l.url} target="_blank">
                                     {l.label}
                                 </a>

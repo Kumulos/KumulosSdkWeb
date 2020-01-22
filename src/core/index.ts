@@ -48,7 +48,7 @@ interface PromptOverlayConfig {
         heading: string;
         body: string;
     };
-    links: { label: string; url: string }[];
+    links?: { label: string; url: string }[];
     colors: {
         shade: string;
         strip: string;

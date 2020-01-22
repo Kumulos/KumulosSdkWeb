@@ -32,7 +32,7 @@ interface PromptOverlayConfig {
         heading: string;
         body: string;
     };
-    links: {
+    links?: {
         label: string;
         url: string;
     }[];
