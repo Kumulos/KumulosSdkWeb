@@ -1,4 +1,4 @@
-import { Context } from ".";
+import { Context } from '.';
 
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
@@ -78,9 +78,9 @@ export function escapeRegExp(str: string): string {
 }
 
 export function authedFetch(
-    ctx:Context,
+    ctx: Context,
     url: RequestInfo,
-    options: RequestInit = {method: 'GET'}
+    options: RequestInit = { method: 'GET' }
 ): Promise<Response> {
     const existingHeaders = options.headers ?? {};
 
@@ -94,15 +94,24 @@ export function authedFetch(
     return fetch(url, options);
 }
 
-export function authedFetchJson<T>(ctx:Context,url:RequestInfo,options?:RequestInit) : Promise<T> {
+export function authedFetchJson<T>(
+    ctx: Context,
+    url: RequestInfo,
+    options?: RequestInit
+): Promise<T> {
     return authedFetch(ctx, url, options).then(r => r.json());
 }
 
 // Based on the alphabets in https://tools.ietf.org/html/rfc4648 Tables 1 & 2
-export function base64UrlEncode(buffer:ArrayBuffer): string {
+export function base64UrlEncode(buffer: ArrayBuffer): string {
     const ints = new Uint8Array(buffer);
-    const base64Encoded = btoa(ints.reduce((data, byte) => data + String.fromCharCode(byte), ''));
-    const urlVariant = base64Encoded.replace('+', '-').replace('/', '_').replace('=', '');
+    const base64Encoded = btoa(
+        ints.reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    const urlVariant = base64Encoded
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
 
     return urlVariant;
 }
