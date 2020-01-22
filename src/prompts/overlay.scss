@@ -39,7 +39,7 @@ body.kumulos-overlay-blur {
 
     &-content-container {
         display: flex;
-        max-width: 380px;
+        max-width: 38%;
         padding: 1em;
         font: 14px helvetica, sans-serif;
 
@@ -51,11 +51,13 @@ body.kumulos-overlay-blur {
             margin: 55px 2em 0 0;
             stroke: none;
             fill: rgba(0, 0, 0, 0.8);
+            flex-shrink: 0;
         }
 
         img {
             width: 65px;
             height: 65px;
+            flex-shrink: 0;
         }
 
         h3 {
@@ -83,5 +85,19 @@ body.kumulos-overlay-blur {
 .kumulos-overlay-chrome {
     .kumulos-overlay-strip:before {
         width: 440px;
+    }
+}
+
+@media (max-width: 900px) {
+    body.kumulos-overlay-blur {
+        overflow: auto;
+    }
+
+    .kumulos-overlay-blur > *:not(.kumulos-overlay) {
+        filter: none;
+    }
+
+    .kumulos-overlay {
+        display: none;
     }
 }

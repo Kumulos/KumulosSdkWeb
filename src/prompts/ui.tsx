@@ -27,6 +27,10 @@ function getBrowserName(): string {
     return '';
 }
 
+function isMobile(): boolean {
+    return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
+}
+
 interface PromptUiProps {
     config: PromptConfig;
     subscriptionState: PushSubscriptionState;
@@ -101,7 +105,7 @@ class Bell extends Component<PromptUiProps, never> {
 
 interface OverlayProps {
     promptState: PromptManagerState;
-    prompt: PromptConfig;
+    prompt?: PromptConfig;
 }
 
 class Overlay extends Component<OverlayProps, never> {
@@ -110,7 +114,7 @@ class Overlay extends Component<OverlayProps, never> {
 
         if (
             this.props.promptState === 'requesting' &&
-            this.props.prompt.overlay
+            this.props.prompt?.overlay
         ) {
             document.body.classList.add(blurClass);
         } else {
@@ -119,6 +123,10 @@ class Overlay extends Component<OverlayProps, never> {
     }
 
     componentDidMount() {
+        this.updateBlurState();
+    }
+
+    componentDidUpdate() {
         this.updateBlurState();
     }
 
@@ -194,7 +202,7 @@ export default class Ui extends Component<UiProps, never> {
         return createPortal(
             <Fragment>
                 {this.props.prompts.map(this.renderPrompt, this)}
-                {this.props.currentlyRequestingPrompt && (
+                {!isMobile() && (
                     <Overlay
                         promptState={this.props.promptManagerState}
                         prompt={this.props.currentlyRequestingPrompt}
