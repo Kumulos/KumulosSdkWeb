@@ -2,7 +2,7 @@ body.kumulos-overlay-blur {
     overflow: hidden;
 }
 
-.kumulos-overlay-blur > *:not(.kumulos-overlay) {
+.kumulos-overlay-blur>*:not(.kumulos-overlay) {
     filter: blur(3px);
 }
 
@@ -55,8 +55,8 @@ body.kumulos-overlay-blur {
         }
 
         img {
-            width: 65px;
-            height: 65px;
+            width: 55px;
+            height: 55px;
             flex-shrink: 0;
         }
 
@@ -93,7 +93,7 @@ body.kumulos-overlay-blur {
         overflow: auto;
     }
 
-    .kumulos-overlay-blur > *:not(.kumulos-overlay) {
+    .kumulos-overlay-blur>*:not(.kumulos-overlay) {
         filter: none;
     }
 
