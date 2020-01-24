@@ -48,7 +48,7 @@ body.kumulos-overlay-blur {
         }
 
         svg {
-            margin: 55px 2em 0 0;
+            margin: 55px 1.7em 0 0;
             stroke: none;
             fill: rgba(0, 0, 0, 0.8);
             flex-shrink: 0;
@@ -85,6 +85,29 @@ body.kumulos-overlay-blur {
 .kumulos-overlay-chrome {
     .kumulos-overlay-strip:before {
         width: 440px;
+    }
+}
+
+.kumulos-overlay-edge {
+    .kumulos-overlay-strip:before {
+        display: none;
+    }
+
+    .kumulos-overlay-strip {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        padding-bottom: 60px;
+        justify-content: center;
+    }
+
+    .kumulos-overlay-content-container {
+        min-width: 675px;
+
+        svg {
+            order: 1;
+            transform: rotate(-30deg);
+        }
     }
 }
 
