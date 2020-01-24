@@ -1,7 +1,7 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-const SDK_VERSION = '1.2.3';
+const SDK_VERSION = '1.3.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -42,7 +42,22 @@ interface PromptTrigger {
     filters?: PropFilter[];
 }
 
+interface PromptOverlayConfig {
+    iconUrl?: string;
+    labels: {
+        heading: string;
+        body: string;
+    };
+    links?: { label: string; url: string }[];
+    colors: {
+        shade: string;
+        strip: string;
+        text: string;
+    };
+}
+
 interface BellPromptConfig {
+    uuid: string;
     type: 'bell';
     trigger: PromptTrigger;
     labels?: {
@@ -57,6 +72,7 @@ interface BellPromptConfig {
         };
     };
     position: 'bottom-left' | 'bottom-right';
+    overlay?: PromptOverlayConfig;
 }
 
 export type PromptConfig = BellPromptConfig;

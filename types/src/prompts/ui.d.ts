@@ -1,4 +1,5 @@
 import './bell.scss';
+import './overlay.scss';
 import { Component, h } from 'preact';
 import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';
@@ -7,8 +8,9 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: () => void;
+    requestNativePrompt: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    currentlyRequestingPrompt?: PromptConfig;
 }
 export default class Ui extends Component<UiProps, never> {
     render(): import("preact").VNode<any>;

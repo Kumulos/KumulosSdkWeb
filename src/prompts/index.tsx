@@ -19,13 +19,14 @@ export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
 export class PromptManager {
     private readonly context: Context;
+    private readonly uiRoot: HTMLDivElement;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
     private eventQueue: EventPayload;
     private prompts: { [x: string]: PromptConfig };
     private activePrompts: PromptConfig[];
-    private readonly uiRoot: HTMLDivElement;
+    private currentlyRequestingPrompt?: PromptConfig;
 
     constructor(ctx: Context) {
         this.prompts = {};
@@ -62,10 +63,12 @@ export class PromptManager {
         this.render();
     };
 
-    private onRequestNativePrompt = async () => {
+    private onRequestNativePrompt = async (prompt: PromptConfig) => {
         if ('requesting' === this.state) {
             return;
         }
+
+        this.currentlyRequestingPrompt = prompt;
 
         this.setState('requesting');
 
@@ -92,6 +95,7 @@ export class PromptManager {
                 promptManagerState={this.state as PromptManagerState}
                 requestNativePrompt={this.onRequestNativePrompt}
                 onPromptDeclined={this.onPromptDeclined}
+                currentlyRequestingPrompt={this.currentlyRequestingPrompt}
             />,
             this.uiRoot
         );
@@ -183,7 +187,9 @@ export class PromptManager {
                 break;
             case 'requesting':
                 this.render();
+                break;
             case 'ready':
+                this.currentlyRequestingPrompt = undefined;
                 this.subscriptionState = await getCurrentSubscriptionState(
                     this.context
                 );

@@ -1,4 +1,5 @@
 import './bell.scss';
+import './overlay.scss';
 
 import { Component, Fragment, h } from 'preact';
 
@@ -13,11 +14,28 @@ function inversePosition(pos: string): 'left' | 'right' {
     return pos.indexOf('left') > -1 ? 'right' : 'left';
 }
 
+function getBrowserName(): string {
+    const ua = navigator.userAgent.toLowerCase();
+    const browsers = ['edge', 'firefox', 'chrome', 'safari'];
+
+    for (let b of browsers) {
+        if (ua.indexOf(b) > -1) {
+            return b;
+        }
+    }
+
+    return '';
+}
+
+function isMobile(): boolean {
+    return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
+}
+
 interface PromptUiProps {
     config: PromptConfig;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: () => void;
+    requestNativePrompt: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
 }
 
@@ -38,6 +56,10 @@ class Tooltip extends Component<TooltipProps, never> {
 }
 
 class Bell extends Component<PromptUiProps, never> {
+    onRequestNativePrompt = () => {
+        this.props.requestNativePrompt(this.props.config);
+    };
+
     render() {
         if (this.props.subscriptionState !== 'unsubscribed') {
             return null;
@@ -58,7 +80,7 @@ class Bell extends Component<PromptUiProps, never> {
                 <div class="kumulos-bell-inner kumulos-tooltip-parent">
                     <div
                         class="kumulos-bell"
-                        onClick={this.props.requestNativePrompt}
+                        onClick={this.onRequestNativePrompt}
                         style={bellStyle as any}
                     >
                         <svg
@@ -81,12 +103,101 @@ class Bell extends Component<PromptUiProps, never> {
     }
 }
 
+interface OverlayProps {
+    promptState: PromptManagerState;
+    prompt?: PromptConfig;
+}
+
+class Overlay extends Component<OverlayProps, never> {
+    updateBlurState() {
+        const blurClass = 'kumulos-overlay-blur';
+
+        if (
+            this.props.promptState === 'requesting' &&
+            this.props.prompt?.overlay
+        ) {
+            document.body.classList.add(blurClass);
+        } else {
+            document.body.classList.remove(blurClass);
+        }
+    }
+
+    componentDidMount() {
+        this.updateBlurState();
+    }
+
+    componentDidUpdate() {
+        this.updateBlurState();
+    }
+
+    componentWillUnmount() {
+        document.body.classList.remove('kumulos-overlay-blur');
+    }
+
+    render() {
+        const { promptState, prompt } = this.props;
+
+        if (!prompt || promptState !== 'requesting' || !prompt.overlay) {
+            return null;
+        }
+
+        const overlay = prompt.overlay;
+        const style = {
+            background: overlay.colors.shade,
+            color: overlay.colors.text
+        };
+
+        return (
+            <div
+                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
+                style={style}
+            >
+                <div
+                    class="kumulos-overlay-strip"
+                    style={{ background: overlay.colors.strip }}
+                >
+                    <div class="kumulos-overlay-content-container">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="65"
+                            height="35"
+                            viewBox="0 0 64 33"
+                        >
+                            <path
+                                fill="none"
+                                stroke={overlay.colors.text}
+                                stroke-width="2.5px"
+                                stroke-linecap="round"
+                                d="M 12.57,11.12
+           C 12.57,11.12 6.84,20.82 4.13,21.01
+             1.42,21.21 20.71,28.67 26.62,28.67M 4.23,21.01
+           C 4.23,21.01 53.96,14.91 60.65,3.47"
+                            />
+                        </svg>
+                        {overlay.iconUrl && <img src={overlay.iconUrl} />}
+                        <div class="kumulos-overlay-content">
+                            <h3>{overlay.labels.heading}</h3>
+                            <p>{overlay.labels.body}</p>
+                            {overlay.links?.map(l => (
+                                <a href={l.url} target="_blank">
+                                    {l.label}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: () => void;
+    requestNativePrompt: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    currentlyRequestingPrompt?: PromptConfig;
 }
 
 export default class Ui extends Component<UiProps, never> {
@@ -94,6 +205,12 @@ export default class Ui extends Component<UiProps, never> {
         return createPortal(
             <Fragment>
                 {this.props.prompts.map(this.renderPrompt, this)}
+                {!isMobile() && (
+                    <Overlay
+                        promptState={this.props.promptManagerState}
+                        prompt={this.props.currentlyRequestingPrompt}
+                    />
+                )}
             </Fragment>,
             document.body
         );

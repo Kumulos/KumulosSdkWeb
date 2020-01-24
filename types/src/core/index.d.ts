@@ -26,7 +26,24 @@ interface PromptTrigger {
     afterSeconds?: number;
     filters?: PropFilter[];
 }
+interface PromptOverlayConfig {
+    iconUrl?: string;
+    labels: {
+        heading: string;
+        body: string;
+    };
+    links?: {
+        label: string;
+        url: string;
+    }[];
+    colors: {
+        shade: string;
+        strip: string;
+        text: string;
+    };
+}
 interface BellPromptConfig {
+    uuid: string;
     type: 'bell';
     trigger: PromptTrigger;
     labels?: {
@@ -41,6 +58,7 @@ interface BellPromptConfig {
         };
     };
     position: 'bottom-left' | 'bottom-right';
+    overlay?: PromptOverlayConfig;
 }
 export declare type PromptConfig = BellPromptConfig;
 export declare type PromptConfigs = {

@@ -1,0 +1,126 @@
+body.kumulos-overlay-blur {
+    overflow: hidden;
+}
+
+.kumulos-overlay-blur>*:not(.kumulos-overlay) {
+    filter: blur(3px);
+}
+
+.kumulos-overlay {
+    box-sizing: border-box;
+
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
+
+    z-index: 2000;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+
+    &-strip {
+        display: flex;
+
+        &:before {
+            display: block;
+            content: '';
+            width: calc(500px + 12%);
+            max-width: 660px;
+        }
+
+        box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.8);
+        min-height: 150px;
+    }
+
+    &-content-container {
+        display: flex;
+        max-width: 38%;
+        padding: 1em;
+        font: 14px helvetica, sans-serif;
+
+        * {
+            margin: 0;
+        }
+
+        svg {
+            margin: 55px 1.7em 0 0;
+            stroke: none;
+            fill: rgba(0, 0, 0, 0.8);
+            flex-shrink: 0;
+        }
+
+        img {
+            width: 55px;
+            height: 55px;
+            flex-shrink: 0;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        a {
+            margin-right: 0.65em;
+            color: inherit;
+            opacity: 0.8;
+            text-decoration: none;
+        }
+    }
+
+    .kumulos-overlay-content {
+        margin-left: 0.75em;
+
+        p {
+            margin: 0.5em 0;
+        }
+    }
+}
+
+.kumulos-overlay-chrome {
+    .kumulos-overlay-strip:before {
+        width: 440px;
+    }
+}
+
+.kumulos-overlay-edge {
+    .kumulos-overlay-strip:before {
+        display: none;
+    }
+
+    .kumulos-overlay-strip {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        padding-bottom: 60px;
+        justify-content: center;
+    }
+
+    .kumulos-overlay-content-container {
+        min-width: 675px;
+
+        svg {
+            order: 1;
+            transform: rotate(-30deg);
+        }
+    }
+}
+
+@media (max-width: 900px) {
+    body.kumulos-overlay-blur {
+        overflow: auto;
+    }
+
+    .kumulos-overlay-blur>*:not(.kumulos-overlay) {
+        filter: none;
+    }
+
+    .kumulos-overlay {
+        display: none;
+    }
+}
