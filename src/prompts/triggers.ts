@@ -1,15 +1,20 @@
-import { FilterValue, KumulosEvent, PromptConfig, PropFilter } from "../core";
+import { FilterValue, KumulosEvent, PromptConfig, PropFilter } from '../core';
 
-import { escapeRegExp } from "../core/utils";
+import { escapeRegExp } from '../core/utils';
 
-function propIn(filterValue:FilterValue, propValue:any):boolean {
+function propIn(filterValue: FilterValue, propValue: any): boolean {
     if (!Array.isArray(filterValue)) {
         return false;
     }
 
     if (typeof propValue === 'string') {
-        const tests = filterValue.map(v => new RegExp(escapeRegExp(v).replace('\\*', '.*'), 'g'));
-        const filterMatched = tests.reduce((matched, matcher) => matched || matcher.test(String(propValue)), false);
+        const tests = filterValue.map(
+            v => new RegExp(escapeRegExp(v).replace(/\\\*/g, '.*'), 'g')
+        );
+        const filterMatched = tests.reduce(
+            (matched, matcher) => matched || matcher.test(String(propValue)),
+            false
+        );
 
         return filterMatched;
     } else if (typeof propValue === 'number') {
@@ -19,27 +24,30 @@ function propIn(filterValue:FilterValue, propValue:any):boolean {
     return false;
 }
 
-function propEq(filterValue:FilterValue, propValue:any): boolean {
+function propEq(filterValue: FilterValue, propValue: any): boolean {
     return filterValue == propValue;
 }
 
-function propGt(filterValue:FilterValue, propValue:any): boolean {
+function propGt(filterValue: FilterValue, propValue: any): boolean {
     return propValue > filterValue;
 }
 
-function propGte(filterValue:FilterValue, propValue:any): boolean {
+function propGte(filterValue: FilterValue, propValue: any): boolean {
     return propValue >= filterValue;
 }
 
-function propLt(filterValue:FilterValue, propValue:any): boolean {
+function propLt(filterValue: FilterValue, propValue: any): boolean {
     return propValue < filterValue;
 }
 
-function propLte(filterValue:FilterValue, propValue:any): boolean {
+function propLte(filterValue: FilterValue, propValue: any): boolean {
     return propValue <= filterValue;
 }
 
-export function  triggerMatched(prompt: PromptConfig, event: KumulosEvent): boolean {
+export function triggerMatched(
+    prompt: PromptConfig,
+    event: KumulosEvent
+): boolean {
     const trigger = prompt.trigger;
 
     if (trigger.event !== event.type) {
