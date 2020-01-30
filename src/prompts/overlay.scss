@@ -60,6 +60,12 @@ body.kumulos-overlay-blur {
             flex-shrink: 0;
         }
 
+        h3,
+        p,
+        a {
+            color: inherit;
+        }
+
         h3 {
             font-size: 1.3em;
             font-weight: bold;
@@ -67,7 +73,6 @@ body.kumulos-overlay-blur {
 
         a {
             margin-right: 0.65em;
-            color: inherit;
             opacity: 0.8;
             text-decoration: none;
         }
