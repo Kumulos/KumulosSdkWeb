@@ -1,9 +1,7 @@
 import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
-import {
-    PushSubscriptionState,
-    getCurrentSubscriptionState,
-    handleAutoResubscription,
-    requestPermissionAndRegisterForPush
+import getPushOpsManager, {
+    PushOpsManager,
+    PushSubscriptionState
 } from '../core/push';
 import { h, render } from 'preact';
 
@@ -27,6 +25,7 @@ export class PromptManager {
     private prompts: { [x: string]: PromptConfig };
     private activePrompts: PromptConfig[];
     private currentlyRequestingPrompt?: PromptConfig;
+    private readonly pushOpsManager: PushOpsManager;
 
     constructor(ctx: Context) {
         this.prompts = {};
@@ -38,6 +37,7 @@ export class PromptManager {
         document.body.appendChild(this.uiRoot);
 
         this.context = ctx;
+        this.pushOpsManager = getPushOpsManager();
 
         this.setState('loading');
         ctx.subscribe('eventTracked', this.onEventTracked);
@@ -72,7 +72,7 @@ export class PromptManager {
 
         this.setState('requesting');
 
-        this.subscriptionState = await requestPermissionAndRegisterForPush(
+        this.subscriptionState = await this.pushOpsManager.requestPermissionAndRegisterForPush(
             this.context
         );
 
@@ -178,8 +178,10 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                await handleAutoResubscription(this.context);
-                this.subscriptionState = await getCurrentSubscriptionState(
+                await this.pushOpsManager.handleAutoResubscription(
+                    this.context
+                );
+                this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.loadPrompts();
@@ -190,7 +192,7 @@ export class PromptManager {
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
-                this.subscriptionState = await getCurrentSubscriptionState(
+                this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
                 this.evaluateTriggers();

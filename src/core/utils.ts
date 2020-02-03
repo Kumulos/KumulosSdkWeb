@@ -135,3 +135,17 @@ export function base64UrlEncode(buffer: ArrayBuffer): string {
 
     return urlVariant;
 }
+
+export function registerServiceWorker(
+    path: string
+): Promise<ServiceWorkerRegistration> {
+    if (!('serviceWorker' in navigator)) {
+        return Promise.reject(
+            'ServiceWorker is not supported in this browser, aborting...'
+        );
+    }
+
+    return navigator.serviceWorker.register(path).then(() => {
+        return navigator.serviceWorker.ready;
+    });
+}

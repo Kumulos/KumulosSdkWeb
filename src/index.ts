@@ -12,15 +12,12 @@ import {
     trackEvent,
     trackInstallDetails
 } from './core';
-import {
-    pushRegister,
-    registerServiceWorker,
-    requestNotificationPermission
-} from './core/push';
 
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
+import getPushOpsManager from './core/push';
 import { persistConfig } from './core/storage';
+import { registerServiceWorker } from './core/utils';
 
 export default class Kumulos {
     private readonly context: Context;
@@ -35,7 +32,6 @@ export default class Kumulos {
         persistConfig(config);
         trackInstallDetails(this.context);
 
-        // TODO safarify
         this.serviceWorkerReg = registerServiceWorker(
             this.context.serviceWorkerPath
         );
@@ -64,19 +60,19 @@ export default class Kumulos {
     }
 
     pushRegister(): Promise<void> {
-        // TODO safarify
-        return requestNotificationPermission()
+        const mgr = getPushOpsManager();
+
+        return mgr
+            .requestNotificationPermission(this.context)
             .then(perm => {
                 if ('granted' !== perm) {
                     return Promise.reject(
                         'Notification permission not granted'
                     );
                 }
-
-                return this.serviceWorkerReg;
             })
-            .then(reg => {
-                return pushRegister(this.context, reg);
+            .then(() => {
+                return mgr.pushRegister(this.context);
             });
     }
 
