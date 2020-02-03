@@ -23,15 +23,35 @@ export function uuidv4() {
     );
 }
 
+export function getBrowserName(): string {
+    const ua = navigator.userAgent.toLowerCase();
+    const browsers = ['edge', 'firefox', 'chrome', 'safari'];
+
+    for (let b of browsers) {
+        if (ua.indexOf(b) > -1) {
+            return b;
+        }
+    }
+
+    return '';
+}
+
 export function isBrowserSupported(): boolean {
-    const requiredThings = [
-        typeof Promise,
-        typeof fetch,
-        typeof Notification,
-        typeof indexedDB,
-        typeof navigator.serviceWorker,
-        typeof PushManager
-    ];
+    const requiredThings = [typeof Promise, typeof fetch, typeof indexedDB];
+
+    const browser = getBrowserName();
+
+    if ('safari' === browser) {
+        requiredThings.push(typeof (window as any).safari?.pushNotification);
+    } else {
+        requiredThings.push(
+            ...[
+                typeof Notification,
+                typeof navigator.serviceWorker,
+                typeof PushManager
+            ]
+        );
+    }
 
     return requiredThings.reduce(
         (supported: boolean, thing) => supported && thing !== 'undefined',

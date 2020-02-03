@@ -18,6 +18,7 @@ export function registerServiceWorker(
     });
 }
 
+// TODO safarify
 export async function requestNotificationPermission() {
     if (typeof Notification === 'undefined') {
         return Promise.reject(
@@ -35,6 +36,7 @@ export async function requestNotificationPermission() {
     }
 }
 
+// TODO safarify
 export async function pushRegister(
     ctx: Context,
     workerReg: ServiceWorkerRegistration
@@ -47,7 +49,7 @@ export async function pushRegister(
 
     const existingSub = await workerReg.pushManager.getSubscription();
 
-    if (existingSub && !hasSameKey(ctx.vapidPublicKey,existingSub)) {
+    if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
         await existingSub?.unsubscribe();
     }
 
@@ -81,6 +83,7 @@ export async function pushRegister(
     await set('pushExpiresAt', expiry);
 }
 
+// TODO safarify
 export async function requestPermissionAndRegisterForPush(
     ctx: Context
 ): Promise<PushSubscriptionState> {
@@ -107,7 +110,7 @@ export async function requestPermissionAndRegisterForPush(
     }
 }
 
-function hasSameKey(vapidKey:string, subscription:PushSubscription): boolean {
+function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
     const existingSubKey = subscription.options.applicationServerKey;
 
     if (!existingSubKey) {
@@ -119,7 +122,10 @@ function hasSameKey(vapidKey:string, subscription:PushSubscription): boolean {
     return subKey === vapidKey;
 }
 
-export async function getCurrentSubscriptionState(ctx:Context): Promise<PushSubscriptionState> {
+// TODO safarify
+export async function getCurrentSubscriptionState(
+    ctx: Context
+): Promise<PushSubscriptionState> {
     const perm = Notification.permission;
 
     if (perm === 'denied') {
@@ -136,7 +142,8 @@ export async function getCurrentSubscriptionState(ctx:Context): Promise<PushSubs
     return 'unsubscribed';
 }
 
-export async function handleAutoResubscription(ctx : Context): Promise<void> {
+// TODO safarify
+export async function handleAutoResubscription(ctx: Context): Promise<void> {
     if (!ctx.autoResubscribe) {
         return;
     }
@@ -152,8 +159,11 @@ export async function handleAutoResubscription(ctx : Context): Promise<void> {
         'pushExpiresAt'
     );
 
-    if (existingEndpointHash !== undefined &&
-        (existingExpiry === null || existingExpiry === undefined || existingExpiry > Date.now())
+    if (
+        existingEndpointHash !== undefined &&
+        (existingExpiry === null ||
+            existingExpiry === undefined ||
+            existingExpiry > Date.now())
     ) {
         return;
     }

@@ -35,6 +35,7 @@ export default class Kumulos {
         persistConfig(config);
         trackInstallDetails(this.context);
 
+        // TODO safarify
         this.serviceWorkerReg = registerServiceWorker(
             this.context.serviceWorkerPath
         );
@@ -63,6 +64,7 @@ export default class Kumulos {
     }
 
     pushRegister(): Promise<void> {
+        // TODO safarify
         return requestNotificationPermission()
             .then(perm => {
                 if ('granted' !== perm) {
