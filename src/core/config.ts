@@ -4,10 +4,10 @@ import { get, set } from './storage';
 import { authedFetchJson } from './utils';
 
 export async function loadConfig(ctx: Context): Promise<PlatformConfig> {
-    let config = (await get<PlatformConfig>('config')) ?? {};
+    let config = (await get<PlatformConfig>('platformConfig')) ?? {};
     const MAX_AGE_MS = 1 * 60 * 60 * 1000;
 
-    const lastLoadTime = (await get<number>('configUpdated')) ?? 0;
+    const lastLoadTime = (await get<number>('platformConfigUpdated')) ?? 0;
     let updatedRemoteConfig = false;
 
     if (Date.now() - lastLoadTime > MAX_AGE_MS) {
@@ -24,8 +24,8 @@ export async function loadConfig(ctx: Context): Promise<PlatformConfig> {
     }
 
     if (updatedRemoteConfig) {
-        await set('config', config);
-        await set('configUpdated', Date.now());
+        await set('platformConfig', config);
+        await set('platformConfigUpdated', Date.now());
     }
 
     return config;
