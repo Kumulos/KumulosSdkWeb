@@ -84,12 +84,12 @@ export default class SafariPushManager implements PushOpsManager {
             cfg.safariPushId as string
         );
 
-        if (!perm || perm?.permission === 'denied' || !perm?.deviceToken) {
+        if (!perm || perm?.permission === 'denied') {
             return 'blocked';
         }
 
         const existingTokenHash = await get<number>('pushTokenHash');
-        const tokenHash = cyrb53(perm.deviceToken);
+        const tokenHash = cyrb53(perm.deviceToken ?? '');
 
         if (existingTokenHash === tokenHash && perm.permission === 'granted') {
             return 'subscribed';
