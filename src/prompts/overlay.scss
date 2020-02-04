@@ -116,6 +116,13 @@ body.kumulos-overlay-blur {
     }
 }
 
+.kumulos-overlay-safari {
+    .kumulos-overlay-strip:before {
+        width: calc(50% + 212px);
+        max-width: 100%;
+    }
+}
+
 @media (max-width: 900px) {
     body.kumulos-overlay-blur {
         overflow: auto;
