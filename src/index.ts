@@ -59,8 +59,8 @@ export default class Kumulos {
         return trackEvent(this.context, type, properties).then(_ => void 0);
     }
 
-    pushRegister(): Promise<void> {
-        const mgr = getPushOpsManager();
+    async pushRegister(): Promise<void> {
+        const mgr = await getPushOpsManager(this.context);
 
         return mgr
             .requestNotificationPermission(this.context)

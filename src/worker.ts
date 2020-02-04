@@ -104,10 +104,9 @@ self.addEventListener('pushsubscriptionchange', event => {
         return;
     }
 
-    const workCompleted = withContext(ctx => {
-        const mgr = getPushOpsManager();
-        return mgr.pushRegister(ctx);
-    });
+    const workCompleted = withContext(ctx =>
+        getPushOpsManager(ctx).then(mgr => mgr.pushRegister(ctx))
+    );
 
     event.waitUntil(workCompleted);
 });

@@ -2,6 +2,7 @@ import { Context } from '..';
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
 import { getBrowserName } from '../utils';
+import { loadConfig } from '../config';
 
 export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 
@@ -22,16 +23,22 @@ export interface PushOpsManager {
     handleAutoResubscription(ctx: Context): Promise<void>;
 }
 
-let manager: PushOpsManager;
+let manager: Promise<PushOpsManager>;
 
-const browser = getBrowserName();
+export default function getPushOpsManager(
+    ctx: Context
+): Promise<PushOpsManager> {
+    if (manager) {
+        return manager;
+    }
 
-if (browser === 'safari') {
-    manager = new SafariPushManager();
-} else {
-    manager = new W3cPushManager();
-}
+    const browser = getBrowserName();
 
-export default function getPushOpsManager(): PushOpsManager {
+    if (browser === 'safari') {
+        manager = loadConfig(ctx).then(cfg => new SafariPushManager(cfg));
+    } else {
+        manager = Promise.resolve(new W3cPushManager());
+    }
+
     return manager;
 }

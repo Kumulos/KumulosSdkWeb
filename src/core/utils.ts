@@ -149,3 +149,18 @@ export function registerServiceWorker(
         return navigator.serviceWorker.ready;
     });
 }
+
+export function defer<T>() {
+    const deferred = {
+        resolve: (null as unknown) as (value?: T | PromiseLike<T>) => void,
+        reject: (null as unknown) as (reason?: any) => void,
+        promise: (null as unknown) as Promise<T>
+    };
+
+    deferred.promise = new Promise<T>((resolve, reject) => {
+        (deferred as any).resolve = resolve;
+        (deferred as any).reject = reject;
+    });
+
+    return deferred;
+}

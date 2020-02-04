@@ -1,33 +1,40 @@
-import { Context, EventType, PUSH_BASE_URL, trackEvent } from '..';
+import {
+    Context,
+    EventType,
+    PUSH_BASE_URL,
+    PlatformConfig,
+    trackEvent
+} from '..';
 import { PushOpsManager, TokenType } from '.';
+import { cyrb53, defer } from '../utils';
 import { get, set } from '../storage';
 
 import { PushSubscriptionState } from '../push';
-import { cyrb53 } from '../utils';
 import { loadConfig } from '../config';
 
 export default class SafariPushManager implements PushOpsManager {
-    async requestNotificationPermission(
+    private readonly cfg: PlatformConfig;
+    constructor(cfg: PlatformConfig) {
+        this.cfg = cfg;
+    }
+    requestNotificationPermission(
         ctx: Context
     ): Promise<NotificationPermission> {
-        const cfg = await loadConfig(ctx);
         const svcUrl = `${PUSH_BASE_URL}/safari/${ctx.apiKey}`;
 
-        return new Promise((resolve, reject) => {
-            if (!window.safari) {
-                reject();
-                return;
-            }
+        const deferred = defer<NotificationPermission>();
 
-            window.safari.pushNotification.requestPermission(
-                svcUrl,
-                cfg.safariPushId as string,
-                {},
-                perm => {
-                    resolve(perm.permission);
-                }
-            );
-        });
+        window.safari?.pushNotification.requestPermission(
+            svcUrl,
+            this.cfg.safariPushId as string,
+            {},
+            perm => {
+                console.log(perm);
+                deferred.resolve(perm.permission);
+            }
+        );
+
+        return deferred.promise;
     }
 
     async pushRegister(ctx: Context): Promise<void> {
