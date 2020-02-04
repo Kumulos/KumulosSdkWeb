@@ -15,6 +15,16 @@ function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
     return subKey === vapidKey;
 }
 
+async function getActiveServiceWorkerReg(): Promise<ServiceWorkerRegistration> {
+    const workerReg = await navigator.serviceWorker.getRegistration();
+
+    if (!workerReg) {
+        return Promise.reject('No service worker registration');
+    }
+
+    return navigator.serviceWorker.ready;
+}
+
 export default class W3cPushManager implements PushOpsManager {
     async requestNotificationPermission(
         ctx: Context
@@ -42,12 +52,7 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
-        const workerReg = await navigator.serviceWorker.getRegistration();
-
-        if (!workerReg) {
-            return Promise.reject('No service worker registration');
-        }
-
+        const workerReg = await getActiveServiceWorkerReg();
         const existingSub = await workerReg.pushManager.getSubscription();
 
         if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
@@ -113,7 +118,7 @@ export default class W3cPushManager implements PushOpsManager {
             return 'blocked';
         }
 
-        const reg = await navigator.serviceWorker.getRegistration();
+        const reg = await getActiveServiceWorkerReg();
         const sub = await reg?.pushManager.getSubscription();
 
         if (sub && perm === 'granted' && hasSameKey(ctx.vapidPublicKey, sub)) {
@@ -149,13 +154,6 @@ export default class W3cPushManager implements PushOpsManager {
         }
 
         try {
-            const reg = await navigator.serviceWorker.getRegistration();
-
-            if (!reg) {
-                console.warn('No worker, aborting auto-resubscription');
-                return;
-            }
-
             return this.pushRegister(ctx);
         } catch (e) {
             console.error(e);
