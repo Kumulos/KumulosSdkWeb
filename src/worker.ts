@@ -1,13 +1,15 @@
 import { Context, EventType, trackEvent } from './core';
 
 import { getContextFromStoredConfig } from './core/storage';
-import { pushRegister } from './core/push';
+import getPushOpsManager from './core/push';
 
 // Little bit of a hack, see: https://github.com/Microsoft/TypeScript/issues/14877#issuecomment-340279293
 declare var self: ServiceWorkerGlobalScope;
 
 function withContext(fn: (ctx: Context) => any): Promise<void> {
-    return getContextFromStoredConfig().then(ctx => (ctx ? fn(ctx) : undefined));
+    return getContextFromStoredConfig().then(ctx =>
+        ctx ? fn(ctx) : undefined
+    );
 }
 
 // See https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/skipWaiting
@@ -102,9 +104,9 @@ self.addEventListener('pushsubscriptionchange', event => {
         return;
     }
 
-    const workCompleted = withContext(ctx => {
-        return pushRegister(ctx, self.registration);
-    });
+    const workCompleted = withContext(ctx =>
+        getPushOpsManager(ctx).then(mgr => mgr.pushRegister(ctx))
+    );
 
     event.waitUntil(workCompleted);
 });

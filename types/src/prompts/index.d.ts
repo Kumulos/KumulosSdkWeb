@@ -9,6 +9,7 @@ export declare class PromptManager {
     private prompts;
     private activePrompts;
     private currentlyRequestingPrompt?;
+    private pushOpsManager?;
     constructor(ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;

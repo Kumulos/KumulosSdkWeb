@@ -23,15 +23,35 @@ export function uuidv4() {
     );
 }
 
+export function getBrowserName(): string {
+    const ua = navigator.userAgent.toLowerCase();
+    const browsers = ['edge', 'firefox', 'chrome', 'safari'];
+
+    for (let b of browsers) {
+        if (ua.indexOf(b) > -1) {
+            return b;
+        }
+    }
+
+    return '';
+}
+
 export function isBrowserSupported(): boolean {
-    const requiredThings = [
-        typeof Promise,
-        typeof fetch,
-        typeof Notification,
-        typeof indexedDB,
-        typeof navigator.serviceWorker,
-        typeof PushManager
-    ];
+    const requiredThings = [typeof Promise, typeof fetch, typeof indexedDB];
+
+    const browser = getBrowserName();
+
+    if ('safari' === browser) {
+        requiredThings.push(typeof window.safari?.pushNotification);
+    } else {
+        requiredThings.push(
+            ...[
+                typeof Notification,
+                typeof navigator.serviceWorker,
+                typeof PushManager
+            ]
+        );
+    }
 
     return requiredThings.reduce(
         (supported: boolean, thing) => supported && thing !== 'undefined',
@@ -114,4 +134,33 @@ export function base64UrlEncode(buffer: ArrayBuffer): string {
         .replace(/=/g, '');
 
     return urlVariant;
+}
+
+export function registerServiceWorker(
+    path: string
+): Promise<ServiceWorkerRegistration> {
+    if (!('serviceWorker' in navigator)) {
+        return Promise.reject(
+            'ServiceWorker is not supported in this browser, aborting...'
+        );
+    }
+
+    return navigator.serviceWorker.register(path).then(() => {
+        return navigator.serviceWorker.ready;
+    });
+}
+
+export function defer<T>() {
+    const deferred = {
+        resolve: (null as unknown) as (value?: T | PromiseLike<T>) => void,
+        reject: (null as unknown) as (reason?: any) => void,
+        promise: (null as unknown) as Promise<T>
+    };
+
+    deferred.promise = new Promise<T>((resolve, reject) => {
+        (deferred as any).resolve = resolve;
+        (deferred as any).reject = reject;
+    });
+
+    return deferred;
 }

@@ -7,24 +7,12 @@ import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
+import { getBrowserName } from '../core/utils';
 
 const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
 function inversePosition(pos: string): 'left' | 'right' {
     return pos.indexOf('left') > -1 ? 'right' : 'left';
-}
-
-function getBrowserName(): string {
-    const ua = navigator.userAgent.toLowerCase();
-    const browsers = ['edge', 'firefox', 'chrome', 'safari'];
-
-    for (let b of browsers) {
-        if (ua.indexOf(b) > -1) {
-            return b;
-        }
-    }
-
-    return '';
 }
 
 function isMobile(): boolean {

@@ -1,7 +1,7 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-const SDK_VERSION = '1.3.1';
+const SDK_VERSION = '1.4.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -77,6 +77,12 @@ interface BellPromptConfig {
 
 export type PromptConfig = BellPromptConfig;
 export type PromptConfigs = { [key: string]: PromptConfig };
+
+export interface PlatformConfig {
+    publicKey: string;
+    prompts: PromptConfigs;
+    safariPushId: string | null;
+}
 
 export interface Configuration {
     apiKey: string;

@@ -1,9 +1,7 @@
 import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
-import {
-    PushSubscriptionState,
-    getCurrentSubscriptionState,
-    handleAutoResubscription,
-    requestPermissionAndRegisterForPush
+import getPushOpsManager, {
+    PushOpsManager,
+    PushSubscriptionState
 } from '../core/push';
 import { h, render } from 'preact';
 
@@ -27,6 +25,7 @@ export class PromptManager {
     private prompts: { [x: string]: PromptConfig };
     private activePrompts: PromptConfig[];
     private currentlyRequestingPrompt?: PromptConfig;
+    private pushOpsManager?: PushOpsManager;
 
     constructor(ctx: Context) {
         this.prompts = {};
@@ -72,7 +71,7 @@ export class PromptManager {
 
         this.setState('requesting');
 
-        this.subscriptionState = await requestPermissionAndRegisterForPush(
+        this.subscriptionState = await this.pushOpsManager?.requestPermissionAndRegisterForPush(
             this.context
         );
 
@@ -178,8 +177,11 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                await handleAutoResubscription(this.context);
-                this.subscriptionState = await getCurrentSubscriptionState(
+                this.pushOpsManager = await getPushOpsManager(this.context);
+                await this.pushOpsManager.handleAutoResubscription(
+                    this.context
+                );
+                this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.loadPrompts();
@@ -190,7 +192,7 @@ export class PromptManager {
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
-                this.subscriptionState = await getCurrentSubscriptionState(
+                this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
                     this.context
                 );
                 this.evaluateTriggers();
