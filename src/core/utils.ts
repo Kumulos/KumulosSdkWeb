@@ -42,7 +42,7 @@ export function isBrowserSupported(): boolean {
     const browser = getBrowserName();
 
     if ('safari' === browser) {
-        requiredThings.push(typeof (window as any).safari?.pushNotification);
+        requiredThings.push(typeof window.safari?.pushNotification);
     } else {
         requiredThings.push(
             ...[
