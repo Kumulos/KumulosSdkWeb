@@ -12,6 +12,10 @@ import { get, set } from '../storage';
 import { PushSubscriptionState } from '../push';
 import { loadConfig } from '../config';
 
+function hashToken(ctx: Context, token: string): number {
+    return cyrb53(`${ctx.apiKey}:${token}`);
+}
+
 export default class SafariPushManager implements PushOpsManager {
     private readonly cfg: PlatformConfig;
     constructor(cfg: PlatformConfig) {
@@ -48,7 +52,7 @@ export default class SafariPushManager implements PushOpsManager {
         }
 
         const existingTokenHash = await get<number>('pushTokenHash');
-        const tokenHash = cyrb53(perm.deviceToken);
+        const tokenHash = hashToken(ctx, perm.deviceToken);
 
         if (existingTokenHash === tokenHash) {
             return;
@@ -96,7 +100,7 @@ export default class SafariPushManager implements PushOpsManager {
         }
 
         const existingTokenHash = await get<number>('pushTokenHash');
-        const tokenHash = cyrb53(perm.deviceToken ?? '');
+        const tokenHash = hashToken(ctx, perm.deviceToken ?? '');
 
         if (existingTokenHash === tokenHash && perm.permission === 'granted') {
             return 'subscribed';
@@ -116,13 +120,19 @@ export default class SafariPushManager implements PushOpsManager {
         );
 
         if (!perm || perm.permission !== 'granted' || !perm.deviceToken) {
+            console.info(
+                'Auto-resubscription: permission not granted or no token, aborting'
+            );
             return;
         }
 
         const existingTokenHash = await get<number>('pushTokenHash');
-        const tokenHash = cyrb53(perm.deviceToken);
+        const tokenHash = hashToken(ctx, perm.deviceToken);
 
         if (existingTokenHash === tokenHash) {
+            console.info(
+                'Auto-resubscription: already have a token hash for same token, aborting'
+            );
             return;
         }
 

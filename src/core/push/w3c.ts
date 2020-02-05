@@ -25,6 +25,10 @@ async function getActiveServiceWorkerReg(): Promise<ServiceWorkerRegistration> {
     return navigator.serviceWorker.ready;
 }
 
+function hashSubscription(ctx: Context, sub: PushSubscription): number {
+    return cyrb53(`${ctx.apiKey}:${sub.endpoint}`);
+}
+
 export default class W3cPushManager implements PushOpsManager {
     async requestNotificationPermission(
         ctx: Context
@@ -64,8 +68,7 @@ export default class W3cPushManager implements PushOpsManager {
             userVisibleOnly: true
         });
 
-        const endpoint = sub.endpoint;
-        const endpointHash = cyrb53(endpoint);
+        const endpointHash = hashSubscription(ctx, sub);
         const expiry = sub.expirationTime;
 
         const existingEndpointHash = await get<number>('pushEndpointHash');
@@ -130,12 +133,16 @@ export default class W3cPushManager implements PushOpsManager {
 
     async handleAutoResubscription(ctx: Context): Promise<void> {
         if (!ctx.autoResubscribe) {
+            console.info('Auto-resubscribe: not enabled, aborting');
             return;
         }
 
         const perm = Notification.permission;
 
         if (perm !== 'granted') {
+            console.info(
+                `Auto-resubscribe: permission not granted, aborting: ${perm}`
+            );
             return;
         }
 
@@ -144,14 +151,30 @@ export default class W3cPushManager implements PushOpsManager {
             'pushExpiresAt'
         );
 
+        const workerReg = await getActiveServiceWorkerReg();
+        const existingSub = await workerReg.pushManager.getSubscription();
+
+        let existingSubHash = undefined;
+        if (existingSub) {
+            existingSubHash = hashSubscription(ctx, existingSub);
+        }
+
         if (
             existingEndpointHash !== undefined &&
+            existingEndpointHash === existingSubHash &&
+            existingSub &&
+            hasSameKey(ctx.vapidPublicKey, existingSub) &&
             (existingExpiry === null ||
                 existingExpiry === undefined ||
                 existingExpiry > Date.now())
         ) {
+            console.info(
+                'Auto-resubscribe: already have a non-expired endpoint hash for same sub, aborting'
+            );
             return;
         }
+
+        console.info('Auto-resubscribe: attempting resubscription');
 
         try {
             return this.pushRegister(ctx);
