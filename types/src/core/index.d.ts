@@ -64,6 +64,11 @@ export declare type PromptConfig = BellPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };
+export interface PlatformConfig {
+    publicKey: string;
+    prompts: PromptConfigs;
+    safariPushId: string | null;
+}
 export interface Configuration {
     apiKey: string;
     secretKey: string;
