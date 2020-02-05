@@ -110,7 +110,7 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async handleAutoResubscription(ctx: Context): Promise<void> {
-        if (!ctx.autoResubscribe) {
+        if (!ctx.autoResubscribe || !this.cfg.safariPushId) {
             return;
         }
 
