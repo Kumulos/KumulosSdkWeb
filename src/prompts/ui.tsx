@@ -49,10 +49,6 @@ class Bell extends Component<PromptUiProps, never> {
     };
 
     render() {
-        if (this.props.subscriptionState !== 'unsubscribed') {
-            return null;
-        }
-
         const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-bell-container kumulos-bell-container-${this.props.config.position}`;
         const tooltipPos = inversePosition(this.props.config.position);
         const bgColor = this.props.config.colors?.bell?.bg;
@@ -94,11 +90,19 @@ class Bell extends Component<PromptUiProps, never> {
 interface OverlayProps {
     promptState: PromptManagerState;
     prompt?: PromptConfig;
+    subscriptionState: PushSubscriptionState;
 }
 
 class Overlay extends Component<OverlayProps, never> {
     updateBlurState() {
         const blurClass = 'kumulos-overlay-blur';
+
+        if (
+            this.props.subscriptionState !== 'unsubscribed' &&
+            !document.body.classList.contains(blurClass)
+        ) {
+            return;
+        }
 
         if (
             this.props.promptState === 'requesting' &&
@@ -123,9 +127,14 @@ class Overlay extends Component<OverlayProps, never> {
     }
 
     render() {
-        const { promptState, prompt } = this.props;
+        const { promptState, prompt, subscriptionState } = this.props;
 
-        if (!prompt || promptState !== 'requesting' || !prompt.overlay) {
+        if (
+            !prompt ||
+            promptState !== 'requesting' ||
+            !prompt.overlay ||
+            subscriptionState !== 'unsubscribed'
+        ) {
             return null;
         }
 
@@ -197,6 +206,7 @@ export default class Ui extends Component<UiProps, never> {
                     <Overlay
                         promptState={this.props.promptManagerState}
                         prompt={this.props.currentlyRequestingPrompt}
+                        subscriptionState={this.props.subscriptionState}
                     />
                 )}
             </Fragment>,

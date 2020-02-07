@@ -36,7 +36,7 @@ export default class Kumulos {
             this.context.serviceWorkerPath
         );
 
-        this.promptManager = new PromptManager(this.context);
+        this.promptManager = new PromptManager(this, this.context);
     }
 
     getInstallId(): Promise<InstallId> {

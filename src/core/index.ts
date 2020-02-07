@@ -56,6 +56,13 @@ interface PromptOverlayConfig {
     };
 }
 
+interface ChannelSubAction {
+    type: 'subscribeToChannel';
+    channelUuid: string;
+}
+
+type PromptAction = ChannelSubAction;
+
 interface BellPromptConfig {
     uuid: string;
     type: 'bell';
@@ -73,6 +80,7 @@ interface BellPromptConfig {
     };
     position: 'bottom-left' | 'bottom-right';
     overlay?: PromptOverlayConfig;
+    actions?: PromptAction[];
 }
 
 export type PromptConfig = BellPromptConfig;
