@@ -23,7 +23,7 @@ interface PromptUiProps {
     config: PromptConfig;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
 }
 
@@ -45,7 +45,7 @@ class Tooltip extends Component<TooltipProps, never> {
 
 class Bell extends Component<PromptUiProps, never> {
     onRequestNativePrompt = () => {
-        this.props.requestNativePrompt(this.props.config);
+        this.props.onPromptAccepted(this.props.config);
     };
 
     render() {
@@ -198,7 +198,7 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
     currentlyRequestingPrompt?: PromptConfig;
 }
@@ -261,7 +261,7 @@ export default class Ui extends Component<UiProps, UiState> {
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
                         promptManagerState={this.props.promptManagerState}
-                        requestNativePrompt={this.props.requestNativePrompt}
+                        onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
                     />
                 );

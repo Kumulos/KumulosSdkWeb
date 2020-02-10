@@ -146,7 +146,7 @@ export class PromptManager {
                 prompts={this.activePrompts}
                 subscriptionState={this.subscriptionState}
                 promptManagerState={this.state as PromptManagerState}
-                requestNativePrompt={this.onPromptAccepted}
+                onPromptAccepted={this.onPromptAccepted}
                 onPromptDeclined={this.onPromptDeclined}
                 currentlyRequestingPrompt={this.currentlyRequestingPrompt}
             />,

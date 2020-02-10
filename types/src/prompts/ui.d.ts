@@ -8,7 +8,7 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
     currentlyRequestingPrompt?: PromptConfig;
 }
