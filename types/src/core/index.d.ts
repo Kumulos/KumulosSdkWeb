@@ -42,6 +42,11 @@ interface PromptOverlayConfig {
         text: string;
     };
 }
+interface ChannelSubAction {
+    type: 'subscribeToChannel';
+    channelUuid: string;
+}
+declare type PromptAction = ChannelSubAction;
 interface BellPromptConfig {
     uuid: string;
     type: 'bell';
@@ -50,6 +55,7 @@ interface BellPromptConfig {
         tooltip?: {
             subscribe?: string;
         };
+        thanksForSubscribing?: string;
     };
     colors?: {
         bell?: {
@@ -59,6 +65,7 @@ interface BellPromptConfig {
     };
     position: 'bottom-left' | 'bottom-right';
     overlay?: PromptOverlayConfig;
+    actions?: PromptAction[];
 }
 export declare type PromptConfig = BellPromptConfig;
 export declare type PromptConfigs = {

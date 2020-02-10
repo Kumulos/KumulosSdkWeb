@@ -12,7 +12,13 @@ interface UiProps {
     onPromptDeclined: (prompt: PromptConfig) => void;
     currentlyRequestingPrompt?: PromptConfig;
 }
-export default class Ui extends Component<UiProps, never> {
+interface UiState {
+    toastQueue: string[];
+}
+export default class Ui extends Component<UiProps, UiState> {
+    constructor(props: UiProps);
+    dequeueToast: () => void;
+    showToast(message?: string): void;
     render(): import("preact").VNode<any>;
     renderPrompt(prompt: PromptConfig): h.JSX.Element | null;
 }
