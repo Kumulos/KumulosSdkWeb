@@ -13,3 +13,6 @@ export declare function defer<T>(): {
     reject: (reason?: any) => void;
     promise: Promise<T>;
 };
+export declare function parseQueryString(qs?: string, excludedQueryKeys?: string[]): {
+    [key: string]: string;
+} | undefined;

@@ -164,3 +164,22 @@ export function defer<T>() {
 
     return deferred;
 }
+
+export function parseQueryString(
+    qs: string = location.search,
+    excludedQueryKeys: string[] = []
+): { [key: string]: string } | undefined {
+    let query = undefined;
+
+    if (qs.length > 0) {
+        query = qs
+            .substring(1)
+            .split('&')
+            .map(vars => vars.split('='))
+            .map(pairs => pairs.map(decodeURIComponent))
+            .filter(pairs => excludedQueryKeys.indexOf(pairs[0]) === -1)
+            .reduce((q, pair) => ({ ...q, [pair[0]]: pair[1] }), {});
+    }
+
+    return query;
+}

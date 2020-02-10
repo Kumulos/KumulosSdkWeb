@@ -1,4 +1,5 @@
 import { PropsObject } from '../core';
+import { parseQueryString } from '../core/utils';
 
 interface PageViewProps extends PropsObject {
     title: string;
@@ -16,18 +17,7 @@ export function getPageViewedProps(
         'client_secret'
     ]
 ): PageViewProps {
-    let query = undefined;
-
-    const qs = location.search;
-    if (qs.length > 0) {
-        query = qs
-            .substring(1)
-            .split('&')
-            .map(vars => vars.split('='))
-            .map(pairs => pairs.map(decodeURIComponent))
-            .filter(pairs => excludedQueryKeys.indexOf(pairs[0]) === -1)
-            .reduce((q, pair) => ({ ...q, [pair[0]]: pair[1] }), {});
-    }
+    const query = parseQueryString(location.search, excludedQueryKeys);
 
     return {
         title: document.title,
