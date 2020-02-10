@@ -71,6 +71,7 @@ interface BellPromptConfig {
         tooltip?: {
             subscribe?: string;
         };
+        thanksForSubscribing?: string;
     };
     colors?: {
         bell?: {

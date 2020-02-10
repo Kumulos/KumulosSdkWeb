@@ -205,3 +205,30 @@ $quintEasing: cubic-bezier(0.23, 1, 0.32, 1);
         transform: translate(0px, -50%);
     }
 }
+
+@keyframes kumulos-toast-in-out {
+    0% {
+        opacity: 0;
+        transform: translate3d(-50%, 100%, 0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(-50%, 0, 0);
+    }
+}
+
+.kumulos-toast {
+    display: inline-block;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: $tooltip-background;
+    z-index: 1100;
+    padding: 12px;
+    font: 16px helvetica, sans-serif;
+    color: #eee;
+    border-radius: 8px 8px 0 0;
+    animation: kumulos-toast-in-out 0.25s $quintEasing;
+}

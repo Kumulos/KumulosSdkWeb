@@ -188,6 +188,12 @@ class Overlay extends Component<OverlayProps, never> {
     }
 }
 
+class Toast extends Component<{ message: string }, never> {
+    render() {
+        return <div class="kumulos-toast">{this.props.message}</div>;
+    }
+}
+
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
@@ -197,7 +203,37 @@ interface UiProps {
     currentlyRequestingPrompt?: PromptConfig;
 }
 
-export default class Ui extends Component<UiProps, never> {
+interface UiState {
+    toastQueue: string[];
+}
+
+export default class Ui extends Component<UiProps, UiState> {
+    constructor(props: UiProps) {
+        super(props);
+
+        this.state = {
+            toastQueue: []
+        };
+    }
+
+    dequeueToast = () => {
+        this.setState({
+            toastQueue: this.state.toastQueue.slice(1)
+        });
+    };
+
+    showToast(message?: string) {
+        if (!message || !message.length) {
+            return;
+        }
+
+        this.setState({
+            toastQueue: [...this.state.toastQueue, message]
+        });
+
+        setTimeout(this.dequeueToast, 3200);
+    }
+
     render() {
         return createPortal(
             <Fragment>
@@ -208,6 +244,9 @@ export default class Ui extends Component<UiProps, never> {
                         prompt={this.props.currentlyRequestingPrompt}
                         subscriptionState={this.props.subscriptionState}
                     />
+                )}
+                {this.state.toastQueue.length > 0 && (
+                    <Toast message={this.state.toastQueue[0]} />
                 )}
             </Fragment>,
             document.body

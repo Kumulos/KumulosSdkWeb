@@ -30,6 +30,7 @@ export class PromptManager {
     private currentlyRequestingPrompt?: PromptConfig;
     private pushOpsManager?: PushOpsManager;
     private channels: Channel[];
+    private ui?: Ui;
 
     constructor(client: Kumulos, ctx: Context) {
         this.prompts = {};
@@ -91,6 +92,10 @@ export class PromptManager {
 
         await this.handlePromptActions(prompt);
 
+        if (this.subscriptionState === 'subscribed') {
+            this.ui?.showToast(prompt.labels?.thanksForSubscribing);
+        }
+
         const idx = this.activePrompts.indexOf(prompt);
         this.activePrompts.splice(idx, 1);
 
@@ -137,6 +142,7 @@ export class PromptManager {
 
         render(
             <Ui
+                ref={r => (this.ui = r)}
                 prompts={this.activePrompts}
                 subscriptionState={this.subscriptionState}
                 promptManagerState={this.state as PromptManagerState}
