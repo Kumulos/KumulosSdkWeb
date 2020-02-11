@@ -12,3 +12,4 @@ export interface PushOpsManager {
     handleAutoResubscription(ctx: Context): Promise<void>;
 }
 export default function getPushOpsManager(ctx: Context): Promise<PushOpsManager>;
+export declare function trackOpenFromQuery(ctx: Context): void;

@@ -1,7 +1,8 @@
-import { Context } from '..';
+import { Context, EventType, trackEvent } from '..';
+import { getBrowserName, parseQueryString } from '../utils';
+
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
-import { getBrowserName } from '../utils';
 import { loadConfig } from '../config';
 
 export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
@@ -9,6 +10,10 @@ export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 export enum TokenType {
     W3C = 3,
     SAFARI = 4
+}
+
+enum MessageType {
+    PUSH = 1
 }
 
 export interface PushOpsManager {
@@ -41,4 +46,23 @@ export default function getPushOpsManager(
     }
 
     return manager;
+}
+
+export function trackOpenFromQuery(ctx: Context) {
+    const browser = getBrowserName();
+
+    if (browser !== 'safari') {
+        return;
+    }
+
+    const params = parseQueryString();
+
+    if (!params?.['knid']) {
+        return;
+    }
+
+    trackEvent(ctx, EventType.MESSAGE_OPENED, {
+        type: MessageType.PUSH,
+        id: Number(params['knid'])
+    });
 }

@@ -12,10 +12,10 @@ import {
     trackEvent,
     trackInstallDetails
 } from './core';
+import getPushOpsManager, { trackOpenFromQuery } from './core/push';
 
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
-import getPushOpsManager from './core/push';
 import { persistConfig } from './core/storage';
 import { registerServiceWorker } from './core/utils';
 
@@ -31,6 +31,7 @@ export default class Kumulos {
 
         persistConfig(config);
         trackInstallDetails(this.context);
+        trackOpenFromQuery(this.context);
 
         this.serviceWorkerReg = registerServiceWorker(
             this.context.serviceWorkerPath
