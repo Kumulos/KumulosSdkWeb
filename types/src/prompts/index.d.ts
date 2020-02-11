@@ -1,6 +1,8 @@
-import { Context } from '../core';
+import { Context, PromptConfig } from '../core';
+import Kumulos from '..';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting';
 export declare class PromptManager {
+    private readonly kumulosClient;
     private readonly context;
     private readonly uiRoot;
     private state?;
@@ -10,13 +12,18 @@ export declare class PromptManager {
     private activePrompts;
     private currentlyRequestingPrompt?;
     private pushOpsManager?;
-    constructor(ctx: Context);
+    private channels;
+    private ui?;
+    constructor(client: Kumulos, ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;
+    private onPromptAccepted;
     private onPromptDeclined;
+    private handlePromptActions;
     private render;
     private evaluateTriggers;
+    promptActionNeedsTaken(prompt: PromptConfig): boolean;
     private deferPromptActivation;
     private activatePrompt;
     private activatePrompts;

@@ -23,7 +23,7 @@ interface PromptUiProps {
     config: PromptConfig;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
 }
 
@@ -45,14 +45,10 @@ class Tooltip extends Component<TooltipProps, never> {
 
 class Bell extends Component<PromptUiProps, never> {
     onRequestNativePrompt = () => {
-        this.props.requestNativePrompt(this.props.config);
+        this.props.onPromptAccepted(this.props.config);
     };
 
     render() {
-        if (this.props.subscriptionState !== 'unsubscribed') {
-            return null;
-        }
-
         const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-bell-container kumulos-bell-container-${this.props.config.position}`;
         const tooltipPos = inversePosition(this.props.config.position);
         const bgColor = this.props.config.colors?.bell?.bg;
@@ -94,11 +90,19 @@ class Bell extends Component<PromptUiProps, never> {
 interface OverlayProps {
     promptState: PromptManagerState;
     prompt?: PromptConfig;
+    subscriptionState: PushSubscriptionState;
 }
 
 class Overlay extends Component<OverlayProps, never> {
     updateBlurState() {
         const blurClass = 'kumulos-overlay-blur';
+
+        if (
+            this.props.subscriptionState !== 'unsubscribed' &&
+            !document.body.classList.contains(blurClass)
+        ) {
+            return;
+        }
 
         if (
             this.props.promptState === 'requesting' &&
@@ -123,9 +127,14 @@ class Overlay extends Component<OverlayProps, never> {
     }
 
     render() {
-        const { promptState, prompt } = this.props;
+        const { promptState, prompt, subscriptionState } = this.props;
 
-        if (!prompt || promptState !== 'requesting' || !prompt.overlay) {
+        if (
+            !prompt ||
+            promptState !== 'requesting' ||
+            !prompt.overlay ||
+            subscriptionState !== 'unsubscribed'
+        ) {
             return null;
         }
 
@@ -179,16 +188,52 @@ class Overlay extends Component<OverlayProps, never> {
     }
 }
 
+class Toast extends Component<{ message: string }, never> {
+    render() {
+        return <div class="kumulos-toast">{this.props.message}</div>;
+    }
+}
+
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    requestNativePrompt: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
     currentlyRequestingPrompt?: PromptConfig;
 }
 
-export default class Ui extends Component<UiProps, never> {
+interface UiState {
+    toastQueue: string[];
+}
+
+export default class Ui extends Component<UiProps, UiState> {
+    constructor(props: UiProps) {
+        super(props);
+
+        this.state = {
+            toastQueue: []
+        };
+    }
+
+    dequeueToast = () => {
+        this.setState({
+            toastQueue: this.state.toastQueue.slice(1)
+        });
+    };
+
+    showToast(message?: string) {
+        if (!message || !message.length) {
+            return;
+        }
+
+        this.setState({
+            toastQueue: [...this.state.toastQueue, message]
+        });
+
+        setTimeout(this.dequeueToast, 3200);
+    }
+
     render() {
         return createPortal(
             <Fragment>
@@ -197,7 +242,11 @@ export default class Ui extends Component<UiProps, never> {
                     <Overlay
                         promptState={this.props.promptManagerState}
                         prompt={this.props.currentlyRequestingPrompt}
+                        subscriptionState={this.props.subscriptionState}
                     />
+                )}
+                {this.state.toastQueue.length > 0 && (
+                    <Toast message={this.state.toastQueue[0]} />
                 )}
             </Fragment>,
             document.body
@@ -212,7 +261,7 @@ export default class Ui extends Component<UiProps, never> {
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
                         promptManagerState={this.props.promptManagerState}
-                        requestNativePrompt={this.props.requestNativePrompt}
+                        onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
                     />
                 );

@@ -5,6 +5,8 @@ import getPushOpsManager, {
 } from '../core/push';
 import { h, render } from 'preact';
 
+import { Channel } from '../core/channels';
+import Kumulos from '..';
 import Ui from './ui';
 import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
@@ -16,6 +18,7 @@ export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 // requesting -> ready
 
 export class PromptManager {
+    private readonly kumulosClient: Kumulos;
     private readonly context: Context;
     private readonly uiRoot: HTMLDivElement;
 
@@ -26,16 +29,20 @@ export class PromptManager {
     private activePrompts: PromptConfig[];
     private currentlyRequestingPrompt?: PromptConfig;
     private pushOpsManager?: PushOpsManager;
+    private channels: Channel[];
+    private ui?: Ui;
 
-    constructor(ctx: Context) {
+    constructor(client: Kumulos, ctx: Context) {
         this.prompts = {};
         this.eventQueue = [];
         this.activePrompts = [];
+        this.channels = [];
 
         this.uiRoot = document.createElement('div');
         this.uiRoot.id = 'kumulos-ui-root';
         document.body.appendChild(this.uiRoot);
 
+        this.kumulosClient = client;
         this.context = ctx;
 
         this.setState('loading');
@@ -78,9 +85,55 @@ export class PromptManager {
         this.setState('ready');
     };
 
+    private onPromptAccepted = async (prompt: PromptConfig) => {
+        if (this.subscriptionState === 'unsubscribed') {
+            await this.onRequestNativePrompt(prompt);
+        }
+
+        await this.handlePromptActions(prompt);
+
+        if (this.subscriptionState === 'subscribed') {
+            this.ui?.showToast(prompt.labels?.thanksForSubscribing);
+        }
+
+        const idx = this.activePrompts.indexOf(prompt);
+        this.activePrompts.splice(idx, 1);
+
+        this.render();
+    };
+
     private onPromptDeclined = (prompt: PromptConfig) => {
         // TODO record state etc.
     };
+
+    private async handlePromptActions(prompt: PromptConfig) {
+        if (!prompt.actions) {
+            return;
+        }
+
+        console.info('Will handle actions: ', prompt.actions);
+
+        const channelsToSub = prompt.actions
+            .map(a => a.channelUuid)
+            .filter(uuid =>
+                this.channels.find(
+                    c => c.uuid === uuid && c.subscribed === false
+                )
+            );
+
+        if (!channelsToSub.length) {
+            console.info('No channels to subscribe to found, aborting');
+            return;
+        }
+
+        await this.kumulosClient
+            .getChannelSubscriptionManager()
+            .subscribe(channelsToSub);
+
+        this.channels = await this.kumulosClient
+            .getChannelSubscriptionManager()
+            .listChannels();
+    }
 
     private render() {
         if (!this.subscriptionState || !this.state) {
@@ -89,10 +142,11 @@ export class PromptManager {
 
         render(
             <Ui
+                ref={r => (this.ui = r)}
                 prompts={this.activePrompts}
                 subscriptionState={this.subscriptionState}
                 promptManagerState={this.state as PromptManagerState}
-                requestNativePrompt={this.onRequestNativePrompt}
+                onPromptAccepted={this.onPromptAccepted}
                 onPromptDeclined={this.onPromptDeclined}
                 currentlyRequestingPrompt={this.currentlyRequestingPrompt}
             />,
@@ -101,11 +155,6 @@ export class PromptManager {
     }
 
     private evaluateTriggers() {
-        // TODO future allow this to run to show alternate UIs
-        if (this.subscriptionState === 'subscribed') {
-            return;
-        }
-
         console.info('Evaluating prompt triggers');
 
         const matchedPrompts = [];
@@ -114,7 +163,10 @@ export class PromptManager {
             for (let i = 0; i < this.eventQueue.length; ++i) {
                 const event = this.eventQueue[i];
 
-                if (triggerMatched(prompt, event)) {
+                if (
+                    triggerMatched(prompt, event) &&
+                    this.promptActionNeedsTaken(prompt)
+                ) {
                     matchedPrompts.push(prompt);
                 }
             }
@@ -124,6 +176,24 @@ export class PromptManager {
 
         this.activatePrompts(matchedPrompts);
         this.eventQueue = [];
+    }
+
+    promptActionNeedsTaken(prompt: PromptConfig): boolean {
+        if (this.subscriptionState === 'unsubscribed') {
+            return true;
+        }
+
+        const channelsToSub = prompt.actions?.map(a => a.channelUuid) ?? [];
+        const needsToSub =
+            this.channels.filter(
+                c => channelsToSub.indexOf(c.uuid) > -1 && !c.subscribed
+            ).length > 0;
+
+        if (needsToSub) {
+            return true;
+        }
+
+        return false;
     }
 
     private deferPromptActivation(prompt: PromptConfig) {
@@ -204,14 +274,32 @@ export class PromptManager {
     private async loadPrompts(): Promise<void> {
         if (this.context.pushPrompts !== 'auto') {
             this.prompts = { ...this.context.pushPrompts };
-            return;
+        } else {
+            try {
+                this.prompts = await loadPromptConfigs(this.context);
+            } catch (e) {
+                console.error('Failed to load prompts', e);
+                this.prompts = {};
+            }
         }
 
-        try {
-            this.prompts = await loadPromptConfigs(this.context);
-        } catch (e) {
-            console.error('Failed to load prompts', e);
-            this.prompts = {};
+        for (let id in this.prompts) {
+            const hasChannelOp = Boolean(
+                this.prompts[id].actions?.filter(
+                    a => a.type === 'subscribeToChannel'
+                )?.length
+            );
+
+            if (hasChannelOp) {
+                try {
+                    this.channels = await this.kumulosClient
+                        .getChannelSubscriptionManager()
+                        .listChannels();
+                } catch (e) {
+                    // Noop
+                }
+                break;
+            }
         }
 
         return Promise.resolve();
