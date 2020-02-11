@@ -1,15 +1,34 @@
-import { Context, EventType, trackEvent } from './core';
+import {
+    Configuration,
+    Context,
+    EventType,
+    assertConfigValid,
+    trackEvent
+} from './core';
+import { getContextFromStoredConfig, persistConfig } from './core/storage';
 
-import { getContextFromStoredConfig } from './core/storage';
 import getPushOpsManager from './core/push';
 
 // Little bit of a hack, see: https://github.com/Microsoft/TypeScript/issues/14877#issuecomment-340279293
-declare var self: ServiceWorkerGlobalScope;
+declare var self: ServiceWorkerGlobalScope & { KUMULOS_INIT?: Configuration };
 
 function withContext(fn: (ctx: Context) => any): Promise<void> {
-    return getContextFromStoredConfig().then(ctx =>
-        ctx ? fn(ctx) : undefined
-    );
+    return getContextFromStoredConfig().then(ctx => {
+        if (ctx) {
+            return fn(ctx);
+        }
+
+        if (!self.KUMULOS_INIT) {
+            return;
+        }
+
+        assertConfigValid(self.KUMULOS_INIT);
+
+        return persistConfig(self.KUMULOS_INIT).then(config => {
+            ctx = new Context(config);
+            return fn(ctx);
+        });
+    });
 }
 
 // See https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/skipWaiting
