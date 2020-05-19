@@ -31,6 +31,10 @@ export enum EventType {
     PAGE_VIEWED = 'k.pageViewed'
 }
 
+export enum MessageType {
+    PUSH = 1
+}
+
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
 export type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export type FilterValue = number | boolean | string | string[];
@@ -106,6 +110,36 @@ type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };
 type SdkEventHandler = (event: SdkEvent) => void;
 
+export enum WorkerMessageType {
+    KPushReceived = 'KPushReceived'
+}
+export type WorkerMessage = {
+    type: WorkerMessageType.KPushReceived;
+    data: {
+        title: string;
+        msg: string;
+        data: {
+            'k.message': {
+                type: MessageType.PUSH;
+                data: {
+                    id: number;
+                };
+            };
+            [key: string]: any;
+        };
+        url: string | null;
+        image: string | null;
+        icon: string | null;
+    };
+};
+
+export function isWorkerMessage(data: any): data is WorkerMessage {
+    return (
+        (data as WorkerMessage).type !== undefined &&
+        WorkerMessageType[(data as WorkerMessage).type] !== undefined
+    );
+}
+
 export class Context {
     readonly apiKey: string;
     readonly secretKey: string;
@@ -173,6 +207,14 @@ export function assertConfigValid(config: any) {
         config.serviceWorkerPath.length === 0
     ) {
         throw "Optional configuration key 'serviceWorkerPath' must be non-empty string (if supplied)";
+    }
+
+    if (config.onPushReceived && typeof config.onPushReceived !== 'function') {
+        throw "Optional configuration key 'onPushReceived' must be a function";
+    }
+
+    if (config.onPushOpened && typeof config.onPushOpened !== 'function') {
+        throw "Optional configuration key 'onPushOpened' must be a function";
     }
 }
 

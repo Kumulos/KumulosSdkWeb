@@ -21,7 +21,14 @@ export function del(key: IDBValidKey): Promise<void> {
 }
 
 export function persistConfig(config: Configuration): Promise<Configuration> {
-    return set<Configuration>('config', config);
+    return set<Configuration>('config', {
+        apiKey: config.apiKey,
+        secretKey: config.secretKey,
+        vapidPublicKey: config.vapidPublicKey,
+        serviceWorkerPath: config.serviceWorkerPath,
+        autoResubscribe: config.autoResubscribe,
+        pushPrompts: config.pushPrompts
+    });
 }
 
 export function getContextFromStoredConfig(): Promise<Context | undefined> {

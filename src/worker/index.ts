@@ -2,12 +2,14 @@ import {
     Configuration,
     Context,
     EventType,
+    WorkerMessageType,
     assertConfigValid,
     trackEvent
-} from './core';
-import { getContextFromStoredConfig, persistConfig } from './core/storage';
+} from '../core';
+import { getContextFromStoredConfig, persistConfig } from '../core/storage';
 
-import getPushOpsManager from './core/push';
+import { broadcastFromWorker } from './utils';
+import getPushOpsManager from '../core/push';
 
 // Little bit of a hack, see: https://github.com/Microsoft/TypeScript/issues/14877#issuecomment-340279293
 declare var self: ServiceWorkerGlobalScope & { KUMULOS_INIT?: Configuration };
@@ -66,6 +68,11 @@ self.addEventListener('push', event => {
             id: messageData.data.id
         });
 
+        const receivedEventBroadcast = broadcastFromWorker({
+            type: WorkerMessageType.KPushReceived,
+            data: payload
+        });
+
         const notificationShown = self.registration.showNotification(
             payload.title,
             {
@@ -77,7 +84,11 @@ self.addEventListener('push', event => {
             }
         );
 
-        return Promise.all([deliveryTracked, notificationShown]);
+        return Promise.all([
+            notificationShown,
+            receivedEventBroadcast,
+            deliveryTracked
+        ]);
     });
 
     event.waitUntil(workCompleted);

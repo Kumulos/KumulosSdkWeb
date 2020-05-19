@@ -4,11 +4,13 @@ import {
     InstallId,
     PropsObject,
     UserId,
+    WorkerMessageType,
     assertConfigValid,
     associateUser,
     clearUserAssociation,
     getInstallId,
     getUserId,
+    isWorkerMessage,
     trackEvent,
     trackInstallDetails
 } from './core';
@@ -19,14 +21,34 @@ import { PromptManager } from './prompts';
 import { persistConfig } from './core/storage';
 import { registerServiceWorker } from './core/utils';
 
+interface KumulosPushNotification {
+    id: number;
+    title: string;
+    message: string;
+    url?: string;
+    iconUrl?: string;
+    imageUrl?: string;
+    data: {
+        [key: string]: any;
+    };
+}
+
+interface KumulosConfig extends Configuration {
+    onPushReceived?: (payload: KumulosPushNotification) => void;
+    onPushOpened?: (payload: KumulosPushNotification) => void;
+}
+
 export default class Kumulos {
+    private readonly config: KumulosConfig;
     private readonly context: Context;
     private readonly serviceWorkerReg: Promise<ServiceWorkerRegistration>;
     private readonly promptManager: PromptManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
-    constructor(config: Configuration) {
+    constructor(config: KumulosConfig) {
         assertConfigValid(config);
+
+        this.config = config;
         this.context = new Context(config);
 
         persistConfig(config);
@@ -38,6 +60,11 @@ export default class Kumulos {
         );
 
         this.promptManager = new PromptManager(this, this.context);
+
+        navigator.serviceWorker.addEventListener(
+            'message',
+            this.onWorkerMessage
+        );
     }
 
     getInstallId(): Promise<InstallId> {
@@ -86,4 +113,34 @@ export default class Kumulos {
 
         return this.channelSubscriptionManager;
     }
+
+    private onWorkerMessage = (e: MessageEvent) => {
+        if (e.origin !== location.origin) {
+            return;
+        }
+
+        if (!isWorkerMessage(e.data)) {
+            return;
+        }
+
+        switch (e.data.type) {
+            case WorkerMessageType.KPushReceived: {
+                const payload = e.data.data;
+                const userData = { ...payload.data };
+                delete userData['k.message'];
+
+                const push: KumulosPushNotification = {
+                    id: payload.data['k.message'].data.id,
+                    title: payload.title,
+                    message: payload.msg,
+                    data: userData,
+                    url: payload.url ?? undefined,
+                    iconUrl: payload.icon ?? undefined,
+                    imageUrl: payload.image ?? undefined
+                };
+
+                this.config.onPushReceived?.(push);
+            }
+        }
+    };
 }

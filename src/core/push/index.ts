@@ -1,4 +1,4 @@
-import { Context, EventType, trackEvent } from '..';
+import { Context, EventType, MessageType, trackEvent } from '..';
 import { getBrowserName, parseQueryString } from '../utils';
 
 import SafariPushManager from './safari';
@@ -10,10 +10,6 @@ export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 export enum TokenType {
     W3C = 3,
     SAFARI = 4
-}
-
-enum MessageType {
-    PUSH = 1
 }
 
 export interface PushOpsManager {
