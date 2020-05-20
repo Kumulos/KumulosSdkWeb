@@ -1,4 +1,4 @@
-import { Context, EventType, MessageType, trackEvent } from '..';
+import { Context, EventType, trackEvent } from '..';
 import { getBrowserName, parseQueryString } from '../utils';
 
 import SafariPushManager from './safari';
@@ -6,6 +6,10 @@ import W3cPushManager from './w3c';
 import { loadConfig } from '../config';
 
 export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+
+export enum MessageType {
+    PUSH = 1
+}
 
 export enum TokenType {
     W3C = 3,
