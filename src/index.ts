@@ -14,24 +14,19 @@ import {
     trackEvent,
     trackInstallDetails
 } from './core';
-import getPushOpsManager, { trackOpenFromQuery } from './core/push';
+import {
+    getMostRecentlyOpenedPushPayload,
+    persistConfig
+} from './core/storage';
+import getPushOpsManager, {
+    KumulosPushNotification,
+    notificationFromPayload,
+    trackOpenFromQuery
+} from './core/push';
 
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
-import { persistConfig } from './core/storage';
 import { registerServiceWorker } from './core/utils';
-
-interface KumulosPushNotification {
-    id: number;
-    title: string;
-    message: string;
-    url?: string;
-    iconUrl?: string;
-    imageUrl?: string;
-    data: {
-        [key: string]: any;
-    };
-}
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -65,6 +60,8 @@ export default class Kumulos {
             'message',
             this.onWorkerMessage
         );
+
+        this.maybeFireOpenedHandler();
     }
 
     getInstallId(): Promise<InstallId> {
@@ -125,23 +122,22 @@ export default class Kumulos {
 
         switch (e.data.type) {
             case WorkerMessageType.KPushReceived: {
-                const payload = e.data.data;
-                const userData = { ...payload.data };
-                delete userData['k.message'];
-
-                const push: KumulosPushNotification = {
-                    id: payload.data['k.message'].data.id,
-                    title: payload.title,
-                    message: payload.msg,
-                    data: userData,
-                    url: payload.url ?? undefined,
-                    iconUrl: payload.icon ?? undefined,
-                    imageUrl: payload.image ?? undefined
-                };
-
+                const push = notificationFromPayload(e.data.data);
                 this.config.onPushReceived?.(push);
+
                 break;
             }
         }
     };
+
+    private async maybeFireOpenedHandler() {
+        const payload = await getMostRecentlyOpenedPushPayload();
+        if (!payload) {
+            return;
+        }
+
+        const push = notificationFromPayload(payload);
+
+        this.config.onPushOpened?.(push);
+    }
 }

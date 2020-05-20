@@ -6,6 +6,8 @@ import {
     set as idbSet
 } from './idb-keyval';
 
+import { PushPayload } from '../push';
+
 const store = new Store('kumulos', 'default');
 
 export function get<T>(key: IDBValidKey): Promise<T> {
@@ -35,4 +37,20 @@ export function getContextFromStoredConfig(): Promise<Context | undefined> {
     return get<Configuration>('config').then(config =>
         config ? new Context(config) : undefined
     );
+}
+
+export function persistOpenedPushPayload(
+    payload: PushPayload
+): Promise<PushPayload> {
+    return set('mostRecentOpenedPushPayload', payload);
+}
+
+export async function getMostRecentlyOpenedPushPayload(): Promise<
+    PushPayload | undefined
+> {
+    const paylaod = await get<PushPayload>('mostRecentOpenedPushPayload');
+
+    await del('mostRecentOpenedPushPayload');
+
+    return paylaod ?? undefined;
 }

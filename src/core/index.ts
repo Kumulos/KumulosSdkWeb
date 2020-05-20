@@ -1,6 +1,8 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
+import { PushPayload } from './push';
+
 const SDK_VERSION = '1.4.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
@@ -109,23 +111,6 @@ export interface Configuration {
 type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };
 type SdkEventHandler = (event: SdkEvent) => void;
-
-export interface PushPayload {
-    title: string;
-    msg: string;
-    data: {
-        'k.message': {
-            type: MessageType.PUSH;
-            data: {
-                id: number;
-            };
-        };
-        [key: string]: any;
-    };
-    url: string | null;
-    image: string | null;
-    icon: string | null;
-}
 
 export enum WorkerMessageType {
     KPushReceived = 'KPushReceived'

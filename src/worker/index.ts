@@ -6,7 +6,11 @@ import {
     assertConfigValid,
     trackEvent
 } from '../core';
-import { getContextFromStoredConfig, persistConfig } from '../core/storage';
+import {
+    getContextFromStoredConfig,
+    persistConfig,
+    persistOpenedPushPayload
+} from '../core/storage';
 
 import { broadcastFromWorker } from './utils';
 import getPushOpsManager from '../core/push';
@@ -120,9 +124,13 @@ self.addEventListener('notificationclick', event => {
 
         const url = payload.url ?? '/';
 
-        const windowOpened = self.clients.openWindow(url);
+        const payloadPersisted = persistOpenedPushPayload(payload);
 
-        return Promise.all([openTracked, windowOpened]);
+        return payloadPersisted.then(() => {
+            const windowOpened = self.clients.openWindow(url);
+
+            return Promise.all([windowOpened, openTracked]);
+        });
     });
 
     event.waitUntil(workCompleted);
