@@ -1,3 +1,4 @@
+import { PushPayload } from './push';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
@@ -17,6 +18,9 @@ export declare enum EventType {
     USER_ASSOCIATED = "k.stats.userAssociated",
     USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared",
     PAGE_VIEWED = "k.pageViewed"
+}
+export declare enum MessageType {
+    PUSH = 1
 }
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
@@ -90,6 +94,14 @@ export declare type SdkEvent<T = any> = {
     data: T;
 };
 declare type SdkEventHandler = (event: SdkEvent) => void;
+export declare enum WorkerMessageType {
+    KPushReceived = "KPushReceived"
+}
+export declare type WorkerMessage = {
+    type: WorkerMessageType.KPushReceived;
+    data: PushPayload;
+};
+export declare function isKumulosWorkerMessage(data: any): data is WorkerMessage;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;
