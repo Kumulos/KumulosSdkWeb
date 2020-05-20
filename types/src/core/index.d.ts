@@ -1,4 +1,3 @@
-import { PushPayload } from './push';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
@@ -91,14 +90,6 @@ export declare type SdkEvent<T = any> = {
     data: T;
 };
 declare type SdkEventHandler = (event: SdkEvent) => void;
-export declare enum WorkerMessageType {
-    KPushReceived = "KPushReceived"
-}
-export declare type WorkerMessage = {
-    type: WorkerMessageType.KPushReceived;
-    data: PushPayload;
-};
-export declare function isKumulosWorkerMessage(data: any): data is WorkerMessage;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;

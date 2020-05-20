@@ -4,16 +4,15 @@ import {
     InstallId,
     PropsObject,
     UserId,
-    WorkerMessageType,
     assertConfigValid,
     associateUser,
     clearUserAssociation,
     getInstallId,
     getUserId,
-    isKumulosWorkerMessage,
     trackEvent,
     trackInstallDetails
 } from './core';
+import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
     getMostRecentlyOpenedPushPayload,
     persistConfig

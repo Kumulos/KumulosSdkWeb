@@ -1,4 +1,5 @@
-import { Configuration, WorkerMessage } from '../core';
+import { Configuration } from '../core';
+import { WorkerMessage } from './messaging';
 
 // Little bit of a hack, see: https://github.com/Microsoft/TypeScript/issues/14877#issuecomment-340279293
 declare var self: ServiceWorkerGlobalScope & { KUMULOS_INIT?: Configuration };

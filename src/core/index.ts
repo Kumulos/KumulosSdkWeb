@@ -1,8 +1,6 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-import { PushPayload } from './push';
-
 const SDK_VERSION = '1.5.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
@@ -107,21 +105,6 @@ export interface Configuration {
 type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };
 type SdkEventHandler = (event: SdkEvent) => void;
-
-export enum WorkerMessageType {
-    KPushReceived = 'KPushReceived'
-}
-export type WorkerMessage = {
-    type: WorkerMessageType.KPushReceived;
-    data: PushPayload;
-};
-
-export function isKumulosWorkerMessage(data: any): data is WorkerMessage {
-    return (
-        (data as WorkerMessage).type !== undefined &&
-        WorkerMessageType[(data as WorkerMessage).type] !== undefined
-    );
-}
 
 export class Context {
     readonly apiKey: string;

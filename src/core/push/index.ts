@@ -7,13 +7,13 @@ import { loadConfig } from '../config';
 
 export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 
-export enum MessageType {
-    PUSH = 1
-}
-
 export enum TokenType {
     W3C = 3,
     SAFARI = 4
+}
+
+export enum MessageType {
+    PUSH = 1
 }
 
 export interface PushOpsManager {

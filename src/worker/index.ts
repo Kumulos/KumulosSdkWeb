@@ -2,7 +2,6 @@ import {
     Configuration,
     Context,
     EventType,
-    WorkerMessageType,
     assertConfigValid,
     trackEvent
 } from '../core';
@@ -12,6 +11,7 @@ import {
     persistOpenedPushPayload
 } from '../core/storage';
 
+import { WorkerMessageType } from './messaging';
 import { broadcastFromWorker } from './utils';
 import getPushOpsManager from '../core/push';
 
