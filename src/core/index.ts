@@ -110,30 +110,32 @@ type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };
 type SdkEventHandler = (event: SdkEvent) => void;
 
+export interface PushPayload {
+    title: string;
+    msg: string;
+    data: {
+        'k.message': {
+            type: MessageType.PUSH;
+            data: {
+                id: number;
+            };
+        };
+        [key: string]: any;
+    };
+    url: string | null;
+    image: string | null;
+    icon: string | null;
+}
+
 export enum WorkerMessageType {
     KPushReceived = 'KPushReceived'
 }
 export type WorkerMessage = {
     type: WorkerMessageType.KPushReceived;
-    data: {
-        title: string;
-        msg: string;
-        data: {
-            'k.message': {
-                type: MessageType.PUSH;
-                data: {
-                    id: number;
-                };
-            };
-            [key: string]: any;
-        };
-        url: string | null;
-        image: string | null;
-        icon: string | null;
-    };
+    data: PushPayload;
 };
 
-export function isWorkerMessage(data: any): data is WorkerMessage {
+export function isKumulosWorkerMessage(data: any): data is WorkerMessage {
     return (
         (data as WorkerMessage).type !== undefined &&
         WorkerMessageType[(data as WorkerMessage).type] !== undefined

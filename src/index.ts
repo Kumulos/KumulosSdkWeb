@@ -10,7 +10,7 @@ import {
     clearUserAssociation,
     getInstallId,
     getUserId,
-    isWorkerMessage,
+    isKumulosWorkerMessage,
     trackEvent,
     trackInstallDetails
 } from './core';
@@ -119,7 +119,7 @@ export default class Kumulos {
             return;
         }
 
-        if (!isWorkerMessage(e.data)) {
+        if (!isKumulosWorkerMessage(e.data)) {
             return;
         }
 
@@ -140,6 +140,7 @@ export default class Kumulos {
                 };
 
                 this.config.onPushReceived?.(push);
+                break;
             }
         }
     };
