@@ -3,7 +3,7 @@ import { del, get, set } from './storage';
 
 import { PushPayload } from './push';
 
-const SDK_VERSION = '1.4.0';
+const SDK_VERSION = '1.5.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
