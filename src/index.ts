@@ -55,10 +55,12 @@ export default class Kumulos {
 
         this.promptManager = new PromptManager(this, this.context);
 
-        navigator.serviceWorker.addEventListener(
-            'message',
-            this.onWorkerMessage
-        );
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener(
+                'message',
+                this.onWorkerMessage
+            );
+        }
 
         this.maybeFireOpenedHandler();
     }
