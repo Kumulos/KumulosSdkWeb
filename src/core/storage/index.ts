@@ -48,9 +48,9 @@ export function persistOpenedPushPayload(
 export async function getMostRecentlyOpenedPushPayload(): Promise<
     PushPayload | undefined
 > {
-    const paylaod = await get<PushPayload>('mostRecentOpenedPushPayload');
+    const payload = await get<PushPayload>('mostRecentOpenedPushPayload');
 
     await del('mostRecentOpenedPushPayload');
 
-    return paylaod ?? undefined;
+    return payload ?? undefined;
 }
