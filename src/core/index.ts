@@ -1,7 +1,7 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-const SDK_VERSION = '1.4.0';
+const SDK_VERSION = '1.5.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -173,6 +173,14 @@ export function assertConfigValid(config: any) {
         config.serviceWorkerPath.length === 0
     ) {
         throw "Optional configuration key 'serviceWorkerPath' must be non-empty string (if supplied)";
+    }
+
+    if (config.onPushReceived && typeof config.onPushReceived !== 'function') {
+        throw "Optional configuration key 'onPushReceived' must be a function";
+    }
+
+    if (config.onPushOpened && typeof config.onPushOpened !== 'function') {
+        throw "Optional configuration key 'onPushOpened' must be a function";
     }
 }
 

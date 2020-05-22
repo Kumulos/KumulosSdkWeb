@@ -12,21 +12,37 @@ import {
     trackEvent,
     trackInstallDetails
 } from './core';
-import getPushOpsManager, { trackOpenFromQuery } from './core/push';
+import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
+import {
+    getMostRecentlyOpenedPushPayload,
+    persistConfig
+} from './core/storage';
+import getPushOpsManager, {
+    KumulosPushNotification,
+    notificationFromPayload,
+    trackOpenFromQuery
+} from './core/push';
 
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
-import { persistConfig } from './core/storage';
 import { registerServiceWorker } from './core/utils';
 
+interface KumulosConfig extends Configuration {
+    onPushReceived?: (payload: KumulosPushNotification) => void;
+    onPushOpened?: (payload: KumulosPushNotification) => void;
+}
+
 export default class Kumulos {
+    private readonly config: KumulosConfig;
     private readonly context: Context;
     private readonly serviceWorkerReg: Promise<ServiceWorkerRegistration>;
     private readonly promptManager: PromptManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
-    constructor(config: Configuration) {
+    constructor(config: KumulosConfig) {
         assertConfigValid(config);
+
+        this.config = config;
         this.context = new Context(config);
 
         persistConfig(config);
@@ -38,6 +54,15 @@ export default class Kumulos {
         );
 
         this.promptManager = new PromptManager(this, this.context);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener(
+                'message',
+                this.onWorkerMessage
+            );
+        }
+
+        this.maybeFireOpenedHandler();
     }
 
     getInstallId(): Promise<InstallId> {
@@ -85,5 +110,35 @@ export default class Kumulos {
         }
 
         return this.channelSubscriptionManager;
+    }
+
+    private onWorkerMessage = (e: MessageEvent) => {
+        if (e.origin !== location.origin) {
+            return;
+        }
+
+        if (!isKumulosWorkerMessage(e.data)) {
+            return;
+        }
+
+        switch (e.data.type) {
+            case WorkerMessageType.KPushReceived: {
+                const push = notificationFromPayload(e.data.data);
+                this.config.onPushReceived?.(push);
+
+                break;
+            }
+        }
+    };
+
+    private async maybeFireOpenedHandler() {
+        const payload = await getMostRecentlyOpenedPushPayload();
+        if (!payload) {
+            return;
+        }
+
+        const push = notificationFromPayload(payload);
+
+        this.config.onPushOpened?.(push);
     }
 }

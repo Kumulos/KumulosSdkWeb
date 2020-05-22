@@ -59,7 +59,7 @@ module.exports = [
     {
         mode: environment,
         entry: {
-            worker: './src/worker.ts'
+            worker: './src/worker/index.ts'
         },
         devtool,
         module: moduleCfg,

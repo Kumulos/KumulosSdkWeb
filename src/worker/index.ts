@@ -4,10 +4,16 @@ import {
     EventType,
     assertConfigValid,
     trackEvent
-} from './core';
-import { getContextFromStoredConfig, persistConfig } from './core/storage';
+} from '../core';
+import {
+    getContextFromStoredConfig,
+    persistConfig,
+    persistOpenedPushPayload
+} from '../core/storage';
 
-import getPushOpsManager from './core/push';
+import { WorkerMessageType } from './messaging';
+import { broadcastFromWorker } from './utils';
+import getPushOpsManager from '../core/push';
 
 // Little bit of a hack, see: https://github.com/Microsoft/TypeScript/issues/14877#issuecomment-340279293
 declare var self: ServiceWorkerGlobalScope & { KUMULOS_INIT?: Configuration };
@@ -66,6 +72,11 @@ self.addEventListener('push', event => {
             id: messageData.data.id
         });
 
+        const receivedEventBroadcast = broadcastFromWorker({
+            type: WorkerMessageType.KPushReceived,
+            data: payload
+        });
+
         const notificationShown = self.registration.showNotification(
             payload.title,
             {
@@ -77,7 +88,11 @@ self.addEventListener('push', event => {
             }
         );
 
-        return Promise.all([deliveryTracked, notificationShown]);
+        return Promise.all([
+            notificationShown,
+            receivedEventBroadcast,
+            deliveryTracked
+        ]);
     });
 
     event.waitUntil(workCompleted);
@@ -109,9 +124,13 @@ self.addEventListener('notificationclick', event => {
 
         const url = payload.url ?? '/';
 
-        const windowOpened = self.clients.openWindow(url);
+        const payloadPersisted = persistOpenedPushPayload(payload);
 
-        return Promise.all([openTracked, windowOpened]);
+        return payloadPersisted.then(() => {
+            const windowOpened = self.clients.openWindow(url);
+
+            return Promise.all([windowOpened, openTracked]);
+        });
     });
 
     event.waitUntil(workCompleted);

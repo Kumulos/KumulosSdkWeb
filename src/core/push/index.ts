@@ -12,7 +12,7 @@ export enum TokenType {
     SAFARI = 4
 }
 
-enum MessageType {
+export enum MessageType {
     PUSH = 1
 }
 
@@ -26,6 +26,35 @@ export interface PushOpsManager {
     ): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
     handleAutoResubscription(ctx: Context): Promise<void>;
+}
+
+export interface KumulosPushNotification {
+    id: number;
+    title: string;
+    message: string;
+    url?: string;
+    iconUrl?: string;
+    imageUrl?: string;
+    data: {
+        [key: string]: any;
+    };
+}
+
+export interface PushPayload {
+    title: string;
+    msg: string;
+    data: {
+        'k.message': {
+            type: MessageType.PUSH;
+            data: {
+                id: number;
+            };
+        };
+        [key: string]: any;
+    };
+    url: string | null;
+    image: string | null;
+    icon: string | null;
 }
 
 let manager: Promise<PushOpsManager>;
@@ -65,4 +94,22 @@ export function trackOpenFromQuery(ctx: Context) {
         type: MessageType.PUSH,
         id: Number(params['knid'])
     });
+}
+
+export function notificationFromPayload(
+    payload: PushPayload
+): KumulosPushNotification {
+    const userData = { ...payload.data };
+    delete userData['k.message'];
+
+    const push: KumulosPushNotification = {
+        id: payload.data['k.message'].data.id,
+        title: payload.title,
+        message: payload.msg,
+        data: userData,
+        url: payload.url ?? undefined,
+        iconUrl: payload.icon ?? undefined,
+        imageUrl: payload.image ?? undefined
+    };
+    return push;
 }
