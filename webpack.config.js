@@ -28,6 +28,9 @@ const optimization = {
     minimizer: [
         new TerserPlugin({
             parallel: true,
+            extractComments: {
+                banner: false
+            },
             terserOptions: {
                 compress: {
                     // IE10 issues
