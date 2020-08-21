@@ -1,5 +1,5 @@
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const environment = process.env.NODE_ENV || 'development';
 const isProd = environment === 'production';
@@ -26,9 +26,9 @@ const resolve = {
 const optimization = {
     minimize: isProd,
     minimizer: [
-        new UglifyJsPlugin({
+        new TerserPlugin({
             parallel: true,
-            uglifyOptions: {
+            terserOptions: {
                 compress: {
                     // IE10 issues
                     typeofs: false,
