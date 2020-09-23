@@ -8,9 +8,10 @@ function propIn(filterValue: FilterValue, propValue: any): boolean {
     }
 
     if (typeof propValue === 'string') {
-        const tests = filterValue.map(
-            v => new RegExp(escapeRegExp(v).replace(/\\\*/g, '.*'), 'g')
-        );
+        const tests = filterValue.map(v => {
+            const pattern = `^${escapeRegExp(v).replace(/\\\*/g, '.*')}$`;
+            return new RegExp(pattern, 'g');
+        });
         const filterMatched = tests.reduce(
             (matched, matcher) => matched || matcher.test(String(propValue)),
             false
