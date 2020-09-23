@@ -1,6 +1,6 @@
 {
     "name": "@kumulos/web",
-    "version": "1.5.2",
+    "version": "1.5.3",
     "description": "Official SDK for integrating Kumulos services with your web projects",
     "main": "dist/index.js",
     "types": "types/src/index.d.ts",
@@ -15,7 +15,7 @@
         "dev": "webpack --watch",
         "dist": "NODE_ENV=production webpack -p",
         "snippet": "tsc -t es2015 --outFile dist/snippet.js src/web/snippet.ts && uglifyjs dist/snippet.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "jest"
     },
     "repository": {
         "type": "git",
@@ -24,13 +24,16 @@
     "author": "Kumulos Ltd. <support@kumulos.com>",
     "license": "MIT",
     "devDependencies": {
+        "@types/jest": "^26.0.14",
         "css-loader": "^3.4.0",
+        "jest": "^26.4.2",
         "node-sass": "^4.14.1",
         "prettier": "^1.19.1",
         "sass-loader": "^8.0.0",
         "style-loader": "^1.0.2",
         "terser": "^5.2.1",
         "terser-webpack-plugin": "^4.1.0",
+        "ts-jest": "^26.4.0",
         "ts-loader": "^6.2.0",
         "typescript": "^3.9.2",
         "webpack": "^4.41.2",

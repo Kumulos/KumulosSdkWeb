@@ -3,3 +3,4 @@ node_modules
 dist/*
 !dist/index.js
 !dist/worker.js
+*.spec.d.ts
