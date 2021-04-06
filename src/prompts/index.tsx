@@ -138,8 +138,6 @@ export class PromptManager {
     }
 
     private render() {
-        console.info(this.subscriptionState, this.state);
-
         if (!this.subscriptionState || !this.state) {
             return;
         }
