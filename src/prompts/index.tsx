@@ -40,13 +40,15 @@ export class PromptManager {
 
         this.uiRoot = document.createElement('div');
         this.uiRoot.id = 'kumulos-ui-root';
-        document.body.appendChild(this.uiRoot);
-
         this.kumulosClient = client;
         this.context = ctx;
 
-        this.setState('loading');
         ctx.subscribe('eventTracked', this.onEventTracked);
+
+        document.addEventListener('DOMContentLoaded', () => {
+          document.body.appendChild(this.uiRoot);
+          this.setState('loading');
+        });
     }
 
     private onEventTracked = (e: SdkEvent) => {
@@ -136,6 +138,8 @@ export class PromptManager {
     }
 
     private render() {
+        console.info(this.subscriptionState, this.state);
+
         if (!this.subscriptionState || !this.state) {
             return;
         }
