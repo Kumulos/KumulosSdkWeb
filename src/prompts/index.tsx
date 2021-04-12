@@ -1,4 +1,4 @@
-import { Context, EventPayload, PromptConfig, SdkEvent } from '../core';
+import { Context, EventPayload, PromptConfig, PromptReminder, SdkEvent } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
@@ -10,6 +10,7 @@ import Kumulos from '..';
 import Ui from './ui';
 import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
+import { persistReminder } from '../core/storage';
 
 export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
@@ -104,8 +105,14 @@ export class PromptManager {
         this.render();
     };
 
-    private onPromptDeclined = (prompt: PromptConfig) => {
-        // TODO record state etc.
+    private onPromptDeclined = async (prompt: PromptConfig) => {
+        if (!prompt.reminderDurationDays) {
+          return;
+        }
+
+        await persistReminder({
+          declinedOn: Date.now()
+        });
     };
 
     private async handlePromptActions(prompt: PromptConfig) {

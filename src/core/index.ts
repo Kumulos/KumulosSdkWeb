@@ -124,6 +124,10 @@ export interface Configuration {
     autoResubscribe?: boolean;
 }
 
+export interface PromptReminder {
+    declinedOn: number;
+}
+
 type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };
 type SdkEventHandler = (event: SdkEvent) => void;
