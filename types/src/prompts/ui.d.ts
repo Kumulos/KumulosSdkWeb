@@ -1,9 +1,23 @@
-import './bell.scss';
-import './overlay.scss';
 import { Component, h } from 'preact';
 import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
+export declare const DEFAULT_SUBSCRIBE_LABEL = "Subscribe for notifications";
+export declare function inversePosition(pos: string): 'left' | 'right';
+export declare function isMobile(): boolean;
+export interface PromptUiProps {
+    config: PromptConfig;
+    subscriptionState: PushSubscriptionState;
+    promptManagerState: PromptManagerState;
+    onPromptAccepted: (prompt: PromptConfig) => void;
+    onPromptDeclined: (prompt: PromptConfig) => void;
+}
+interface TooltipProps {
+    position: 'left' | 'right';
+}
+export declare class Tooltip extends Component<TooltipProps, never> {
+    render(): h.JSX.Element;
+}
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;

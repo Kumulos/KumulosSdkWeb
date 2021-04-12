@@ -47,9 +47,13 @@ interface ChannelSubAction {
     channelUuid: string;
 }
 declare type PromptAction = ChannelSubAction;
-interface BellPromptConfig {
+interface ConfigColor {
+    bg?: string;
+    fg?: string;
+}
+interface BasePromptConfig {
     uuid: string;
-    type: 'bell';
+    type: string;
     trigger: PromptTrigger;
     labels?: {
         tooltip?: {
@@ -58,16 +62,33 @@ interface BellPromptConfig {
         thanksForSubscribing?: string;
     };
     colors?: {
-        bell?: {
-            bg?: string;
-            fg?: string;
-        };
+        [key: string]: ConfigColor;
     };
-    position: 'bottom-left' | 'bottom-right';
+    position: string;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
+    reminderDurationDays?: number;
 }
-export declare type PromptConfig = BellPromptConfig;
+export interface BellPromptConfig extends BasePromptConfig {
+    type: 'bell';
+    trigger: PromptTrigger;
+    position: 'bottom-left' | 'bottom-right';
+}
+export interface AlertPromptConfig extends BasePromptConfig {
+    type: 'alert';
+    trigger: PromptTrigger;
+    position: 'top';
+    labels?: {
+        tooltip: undefined;
+        thanksForSubscribing?: string;
+        heading?: string;
+        body?: string;
+        cancel?: string;
+        accept?: string;
+    };
+    iconUrl?: string;
+}
+export declare type PromptConfig = BellPromptConfig | AlertPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };
