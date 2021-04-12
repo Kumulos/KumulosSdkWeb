@@ -1,0 +1,76 @@
+@import '../common.scss';
+
+.kumulos-bell-container {
+    position: fixed;
+
+    &-bottom-left {
+        bottom: 15px;
+        left: 15px;
+    }
+
+    &-bottom-right {
+        bottom: 15px;
+        right: 15px;
+    }
+}
+
+.kumulos-bell {
+    transition: transform 0.2s $quintEasing,
+        box-shadow 0.2s $quintEasing;
+    will-change: transform, box-shadow, width, height;
+
+    border-radius: 100%;
+    border-color: #fff;
+    background: rgb(76, 136, 224);
+    box-shadow: 1px 2px 2px 0 $shadow-color;
+
+    width: 60px;
+    height: 60px;
+
+    padding: 10px;
+
+    // Note the scale/width/height in all states have been chosen such that they resolve to whole numbers.
+    // This helps reduce blur of the SVG icon due to resterisation in Webkit.
+    transform: scale(0.9);
+
+    cursor: pointer;
+
+    &:hover {
+        transform: scale(1);
+        box-shadow: 1px 2px 3px 1px $shadow-color;
+    }
+
+    &:active {
+        transform: scale(0.8);
+        box-shadow: 1px 2px 2px 0 $shadow-color;
+    }
+
+    animation: kumulos-anim-fade-in 0.2s ease-in;
+    backface-visibility: hidden;
+
+    svg {
+        fill: #fff;
+        animation: kumulos-anim-shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+        animation-delay: 0.3s;
+    }
+
+    &:before {
+        content: '';
+        display: block;
+        width: 85%;
+        height: 85%;
+        border: solid 1px;
+        border-radius: 100%;
+        ;
+        border-color: inherit;
+        ;
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 7.5% 0 0 7.5%;
+    }
+}
+
+.kumulos-bell-inner {
+    border-radius: 100%;
+}
