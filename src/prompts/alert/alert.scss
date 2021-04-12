@@ -1,0 +1,107 @@
+@import '../common.scss';
+
+.kumulos-alert-container {
+    transition: transform 0.2s $quintEasing, box-shadow 0.2s $quintEasing;
+    will-change: transform, box-shadow, width, height;
+
+    background: #fff;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    font-family: helvetica, sans-serif;
+
+    animation: kumulos-anim-fade-in 0.2s ease-in;
+    backface-visibility: hidden;
+}
+
+@media only screen and (min-device-width: 480px){
+  .kumulos-alert-container {
+    border-radius: 3px;
+    border-color: #fff;
+
+    left: 50%;
+
+    width: 500px;
+    height: auto;
+    min-height: 250px;
+
+    margin-left: -250px;
+
+    box-shadow: 0 0 3px 1px $shadow-color;
+  }
+}
+
+
+.kumulos-alert-header {
+  display: flex;
+  font-size: 24px;
+
+  h1 {
+    font-size: inherit;
+    flex: 1;
+    margin: 0;
+  }
+
+  .kumulos-alert-icon {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+.kumulos-alert-body {
+  flex: 1;
+}
+
+.kumulos-alert-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+
+.kumulos-alert-action-button {
+  border: none;
+
+  margin-left: 10px;
+  padding: 7px 10px;
+
+  min-width: 100px;
+
+  text-transform: uppercase;
+  font-size: 16px;
+  font-weight: 600;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.kumulos-alert-action-button-cancel {
+    background: none;
+    color: #555;
+
+    &:hover {
+      background: #eee;
+    }
+}
+
+.kumulos-alert-action-button-confirm {
+    border-radius: 3px;
+    box-shadow: 1px 3px 3px $shadow-color;
+
+    background: rgb(76, 136, 224);
+    color: #fff;
+
+    &:hover {
+      opacity: 0.8;
+    }
+}
