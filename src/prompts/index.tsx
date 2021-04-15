@@ -110,7 +110,9 @@ export class PromptManager {
           return;
         }
 
+        // TODO - store prompt uuid & do we want to support ala:
         await persistReminder({
+          promptUuid: prompt.uuid,
           declinedOn: Date.now()
         });
     };
