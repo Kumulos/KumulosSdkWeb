@@ -47,23 +47,16 @@ interface ChannelSubAction {
     channelUuid: string;
 }
 declare type PromptAction = ChannelSubAction;
-interface ConfigColor {
-    bg?: string;
-    fg?: string;
+interface BasePromptConfig {
+    uuid: string;
+    type: string;
+    trigger: PromptTrigger;
+    position: string;
 }
 interface BasePromptConfig {
     uuid: string;
     type: string;
     trigger: PromptTrigger;
-    labels?: {
-        tooltip?: {
-            subscribe?: string;
-        };
-        thanksForSubscribing?: string;
-    };
-    colors?: {
-        [key: string]: ConfigColor;
-    };
     position: string;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
@@ -73,18 +66,41 @@ export interface BellPromptConfig extends BasePromptConfig {
     type: 'bell';
     trigger: PromptTrigger;
     position: 'bottom-left' | 'bottom-right';
+    labels?: {
+        tooltip?: {
+            subscribe?: string;
+        };
+        thanksForSubscribing?: string;
+    };
+    colors?: {
+        bell?: {
+            fg?: string;
+            bg?: string;
+        };
+    };
 }
 export interface AlertPromptConfig extends BasePromptConfig {
     type: 'alert';
     trigger: PromptTrigger;
-    position: 'top';
+    position: 'top-center';
     labels?: {
-        tooltip: undefined;
         thanksForSubscribing?: string;
-        heading?: string;
-        body?: string;
-        cancel?: string;
-        accept?: string;
+        alert?: {
+            heading?: string;
+            body?: string;
+            declineAction?: string;
+            acceptAction?: string;
+        };
+    };
+    colors?: {
+        alert?: {
+            fg?: string;
+            bg?: string;
+            declineActionFg?: string;
+            declineActionBg?: string;
+            acceptActionFg?: string;
+            acceptActionBg?: string;
+        };
     };
     iconUrl?: string;
 }
@@ -104,6 +120,10 @@ export interface Configuration {
     serviceWorkerPath?: string;
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
+}
+export interface PromptReminder {
+    promptUuid: string;
+    declinedOn: number;
 }
 declare type SdkEventType = 'eventTracked';
 export declare type SdkEvent<T = any> = {

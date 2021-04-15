@@ -12,9 +12,13 @@ export class Bell extends Component<PromptUiProps, never> {
 
   render() {
       const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-bell-container kumulos-bell-container-${this.props.config.position}`;
-      const tooltipPos = inversePosition(this.props.config.position);
-      const config = this.props.config as BellPromptConfig;
+      const { config } = this.props;
 
+      if (config.type !== 'bell') {
+          return null;
+      }
+
+      const tooltipPos = inversePosition(config.position);
       const bgColor = config.colors?.bell?.bg;
       const fgColor = config.colors?.bell?.fg;
 
@@ -42,7 +46,7 @@ export class Bell extends Component<PromptUiProps, never> {
                       </svg>
                   </div>
                   <Tooltip position={tooltipPos}>
-                      {this.props.config.labels?.tooltip?.subscribe ??
+                      {config.labels?.tooltip?.subscribe ??
                           DEFAULT_SUBSCRIBE_LABEL}
                   </Tooltip>
               </div>
