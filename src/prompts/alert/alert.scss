@@ -33,6 +33,7 @@
     width: 500px;
     height: auto;
     min-height: 250px;
+    max-height: 100%;
 
     margin-left: -250px;
 
@@ -60,6 +61,7 @@
 .kumulos-alert-body {
   flex: 1;
   white-space: pre-wrap;
+  overflow-y: auto;
 }
 
 .kumulos-alert-actions {
