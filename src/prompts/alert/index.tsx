@@ -67,8 +67,8 @@ export class Alert extends Component<PromptUiProps, never> {
             </div>
 
             <div className="kumulos-alert-actions">
-                <button type="button" style={declineActionStyle} className="kumulos-alert-action-button kumulos-alert-action-button-cancel">{cancel}</button>
-                <button type="button" style={acceptActionStyle} className="kumulos-alert-action-button kumulos-alert-action-button-confirm">{accept}</button>
+                <button type="button" style={declineActionStyle} className="kumulos-alert-action-button kumulos-alert-action-button-cancel" onClick={this.onRequestCancel}>{cancel}</button>
+                <button type="button" style={acceptActionStyle} className="kumulos-alert-action-button kumulos-alert-action-button-confirm" onClick={this.onRequestNativePrompt}>{accept}</button>
             </div>
         </div>
     );
