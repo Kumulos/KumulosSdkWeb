@@ -33,10 +33,16 @@ export function persistConfig(config: Configuration): Promise<Configuration> {
     });
 }
 
-export function persistReminder(
+export function persistPromptReminder(
     reminder: PromptReminder
 ): Promise<PromptReminder> {
-    return set<PromptReminder>('reminder', reminder);
+    return set<PromptReminder>(`reminder.${reminder.promptUuid}`, reminder);
+}
+
+export async function getPromptReminder(
+    promptUuid: string
+): Promise<PromptReminder> {
+    return await get<PromptReminder>(`reminder.${promptUuid}`);
 }
 
 export function getContextFromStoredConfig(): Promise<Context | undefined> {

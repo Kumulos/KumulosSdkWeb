@@ -1,5 +1,4 @@
 import './bell.scss';
-import '../overlay.scss';
 
 import { Component, h } from 'preact';
 import { BellPromptConfig } from "../../core";

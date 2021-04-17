@@ -24,6 +24,8 @@ export declare class PromptManager {
     private render;
     private evaluateTriggers;
     promptActionNeedsTaken(prompt: PromptConfig): boolean;
+    private hasLapsed;
+    private hasPromptReminderElapsed;
     private deferPromptActivation;
     private activatePrompt;
     private activatePrompts;

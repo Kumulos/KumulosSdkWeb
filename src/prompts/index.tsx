@@ -1,4 +1,4 @@
-import { Context, EventPayload, PromptConfig, PromptReminder, SdkEvent } from '../core';
+import { Context, EventPayload, PromptConfig, SdkEvent, PromptReminder, ReminderTimeUnit } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
@@ -10,9 +10,16 @@ import Kumulos from '..';
 import Ui from './ui';
 import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
-import { persistReminder } from '../core/storage';
+import { persistPromptReminder, getPromptReminder } from '../core/storage';
+import { PromptReminderDelayConfig } from '../core'
 
 export type PromptManagerState = 'loading' | 'ready' | 'requesting';
+
+const REMINDER_TIME_UNIT_TO_MILLIS = {
+    [ReminderTimeUnit.MINUTES]: 1000 * 60,
+    [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
+    [ReminderTimeUnit.DAYS]: 1000 * 60 * 60 * 24,
+};
 
 // loading -> ready
 // ready -> requesting
@@ -106,15 +113,14 @@ export class PromptManager {
     };
 
     private onPromptDeclined = async (prompt: PromptConfig) => {
-        if (!prompt.reminderDurationDays) {
-          return;
+        if (prompt.declinedPromptReminderDelay) {
+            await persistPromptReminder({ promptUuid: prompt.uuid, declinedOn: Date.now() });
         }
 
-        // TODO - store prompt uuid & do we want to support ala:
-        await persistReminder({
-          promptUuid: prompt.uuid,
-          declinedOn: Date.now()
-        });
+        const idx = this.activePrompts.indexOf(prompt);
+        this.activePrompts.splice(idx, 1);
+
+        this.render();
     };
 
     private async handlePromptActions(prompt: PromptConfig) {
@@ -165,7 +171,7 @@ export class PromptManager {
         );
     }
 
-    private evaluateTriggers() {
+    private async evaluateTriggers() {
         console.info('Evaluating prompt triggers');
 
         const matchedPrompts = [];
@@ -176,14 +182,13 @@ export class PromptManager {
 
                 if (
                     triggerMatched(prompt, event) &&
-                    this.promptActionNeedsTaken(prompt)
+                    this.promptActionNeedsTaken(prompt) &&
+                    await this.hasLapsed(prompt)
                 ) {
                     matchedPrompts.push(prompt);
                 }
             }
         }
-
-        // TODO filter out declined/ask again after (need to merge some persistent state into memory)
 
         this.activatePrompts(matchedPrompts);
         this.eventQueue = [];
@@ -205,6 +210,24 @@ export class PromptManager {
         }
 
         return false;
+    }
+
+    private async hasLapsed(prompt: PromptConfig): Promise<boolean> {
+        if (!prompt.declinedPromptReminderDelay) {
+            return true;
+        }
+
+        const reminder = await getPromptReminder(prompt.uuid);
+
+        if (!reminder) {
+            return true;
+        }
+
+        return this.hasPromptReminderElapsed(reminder, prompt.declinedPromptReminderDelay);
+    }
+
+    private async hasPromptReminderElapsed(reminder: PromptReminder, delayConfig: PromptReminderDelayConfig): Promise<boolean> {
+        return Date.now() - reminder.declinedOn > REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] * delayConfig.duration;
     }
 
     private deferPromptActivation(prompt: PromptConfig) {
@@ -276,7 +299,7 @@ export class PromptManager {
                 this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
                     this.context
                 );
-                this.evaluateTriggers();
+                await this.evaluateTriggers();
                 this.render();
                 break;
         }

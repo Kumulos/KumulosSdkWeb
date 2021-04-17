@@ -1,8 +1,6 @@
 import './alert.scss';
-import '../overlay.scss';
 
 import { Component, h } from 'preact';
-import { AlertPromptConfig } from "../../core";
 import { PromptUiProps } from "../ui";
 
 export class Alert extends Component<PromptUiProps, never> {

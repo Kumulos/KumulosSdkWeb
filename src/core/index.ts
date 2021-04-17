@@ -63,11 +63,15 @@ interface ChannelSubAction {
 
 type PromptAction = ChannelSubAction;
 
-interface BasePromptConfig {
-    uuid: string;
-    type: string;
-    trigger: PromptTrigger;
-    position: string;
+export enum ReminderTimeUnit {
+    MINUTES = 'mins',
+    HOURS = 'hours',
+    DAYS = 'days'
+}
+
+export interface PromptReminderDelayConfig {
+    duration: number;
+    timeUnit: ReminderTimeUnit;
 }
 
 interface BasePromptConfig {
@@ -77,7 +81,7 @@ interface BasePromptConfig {
     position: string;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
-    reminderDurationDays?: number;
+    declinedPromptReminderDelay?: PromptReminderDelayConfig;
 }
 
 export interface BellPromptConfig extends BasePromptConfig {
