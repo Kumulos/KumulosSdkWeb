@@ -124,10 +124,10 @@ export interface Configuration {
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
 }
-export interface PromptReminder {
+export declare type PromptReminder = {
     promptUuid: string;
     declinedOn: number;
-}
+} | 'suppressed';
 declare type SdkEventType = 'eventTracked';
 export declare type SdkEvent<T = any> = {
     type: SdkEventType;

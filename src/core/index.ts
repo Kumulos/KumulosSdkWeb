@@ -146,10 +146,12 @@ export interface Configuration {
     autoResubscribe?: boolean;
 }
 
-export interface PromptReminder {
-    promptUuid: string;
-    declinedOn: number;
-}
+export type PromptReminder =
+    | {
+          promptUuid: string;
+          declinedOn: number;
+      }
+    | 'suppressed';
 
 type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };

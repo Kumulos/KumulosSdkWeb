@@ -106,21 +106,12 @@ export class PromptManager {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
 
-        const idx = this.activePrompts.indexOf(prompt);
-        this.activePrompts.splice(idx, 1);
-
-        this.render();
+       this.hidePrompt(prompt);
     };
 
-    private onPromptDeclined = async (prompt: PromptConfig) => {
-        if (prompt.declinedPromptReminderDelay) {
-            await persistPromptReminder({ promptUuid: prompt.uuid, declinedOn: Date.now() });
-        }
-
-        const idx = this.activePrompts.indexOf(prompt);
-        this.activePrompts.splice(idx, 1);
-
-        this.render();
+    private onPromptDeclined = (prompt: PromptConfig) => {
+        this.maybePersistReminder(prompt);
+        this.hidePrompt(prompt);
     };
 
     private async handlePromptActions(prompt: PromptConfig) {
@@ -179,11 +170,12 @@ export class PromptManager {
             const prompt = this.prompts[id];
             for (let i = 0; i < this.eventQueue.length; ++i) {
                 const event = this.eventQueue[i];
+                const promptSuppressed = await this.isPromptSuppressed(prompt);
 
                 if (
+                    !promptSuppressed &&
                     triggerMatched(prompt, event) &&
-                    this.promptActionNeedsTaken(prompt) &&
-                    await this.hasLapsed(prompt)
+                    this.promptActionNeedsTaken(prompt)
                 ) {
                     matchedPrompts.push(prompt);
                 }
@@ -212,22 +204,53 @@ export class PromptManager {
         return false;
     }
 
-    private async hasLapsed(prompt: PromptConfig): Promise<boolean> {
-        if (!prompt.declinedPromptReminderDelay) {
-            return true;
+    private maybePersistReminder(prompt: PromptConfig) {
+        if (prompt.type !== 'alert') {
+            return;
+        }
+
+        const reminder = prompt.declinedPromptReminderDelay
+            ? { promptUuid: prompt.uuid, declinedOn: Date.now() }
+            : 'suppressed';
+
+        persistPromptReminder(
+            prompt.uuid,
+            reminder
+        );
+    }
+
+    private hidePrompt(prompt: PromptConfig) {
+        const idx = this.activePrompts.indexOf(prompt);
+        this.activePrompts.splice(idx, 1);
+
+        this.render();
+    }
+
+    private async isPromptSuppressed(prompt: PromptConfig): Promise<boolean> {
+        if (prompt.type !== 'alert') {
+            return Promise.resolve(false);
         }
 
         const reminder = await getPromptReminder(prompt.uuid);
 
         if (!reminder) {
+            return false;
+        }
+
+        if ('suppressed' === reminder) {
             return true;
         }
 
-        return this.hasPromptReminderElapsed(reminder, prompt.declinedPromptReminderDelay);
+        if (!prompt.declinedPromptReminderDelay) {
+            return false;
+        }
+
+
+        return !this.hasPromptReminderElapsed(reminder.declinedOn, prompt.declinedPromptReminderDelay);
     }
 
-    private async hasPromptReminderElapsed(reminder: PromptReminder, delayConfig: PromptReminderDelayConfig): Promise<boolean> {
-        return Date.now() - reminder.declinedOn > REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] * delayConfig.duration;
+    private hasPromptReminderElapsed(declinedOnMillis: number, delayConfig: PromptReminderDelayConfig): boolean {
+        return Date.now() - declinedOnMillis > REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] * delayConfig.duration;
     }
 
     private deferPromptActivation(prompt: PromptConfig) {
