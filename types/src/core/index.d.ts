@@ -133,7 +133,6 @@ export interface Configuration {
     autoResubscribe?: boolean;
 }
 export declare type PromptReminder = {
-    promptUuid: string;
     declinedOn: number;
 } | 'suppressed';
 declare type SdkEventType = 'eventTracked';

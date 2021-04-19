@@ -159,7 +159,6 @@ export interface Configuration {
 
 export type PromptReminder =
     | {
-          promptUuid: string;
           declinedOn: number;
       }
     | 'suppressed';

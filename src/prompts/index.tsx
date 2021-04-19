@@ -219,7 +219,7 @@ export class PromptManager {
         }
 
         const reminder = uiActions.decline.type === 'remind'
-            ? { promptUuid: prompt.uuid, declinedOn: Date.now() }
+            ? { declinedOn: Date.now() }
             : 'suppressed';
 
         persistPromptReminder(prompt.uuid, reminder);
