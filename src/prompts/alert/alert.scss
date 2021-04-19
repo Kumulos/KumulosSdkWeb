@@ -1,9 +1,6 @@
 @import '../common.scss';
 
 .kumulos-alert-container {
-    transition: transform 0.2s $quintEasing, box-shadow 0.2s $quintEasing;
-    will-change: transform, box-shadow, width, height;
-
     background: #fff;
 
     position: fixed;
@@ -18,7 +15,7 @@
     display: flex;
     flex-direction: column;
 
-    font-family: helvetica, sans-serif;
+    font-family: $defaultFont;
 
     animation: kumulos-anim-fade-in 0.2s ease-in;
     backface-visibility: hidden;
@@ -26,7 +23,7 @@
 
 @media only screen and (min-device-width: 480px){
   .kumulos-alert-container {
-    border-radius: 3px;
+    border-radius: 0 0 3px 3px;
     border-color: #fff;
 
     left: 50%;

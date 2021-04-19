@@ -3,6 +3,8 @@ $tooltip-background: #222;
 // https://easings.net/en#easeOutQuint
 $quintEasing: cubic-bezier(0.23, 1, 0.32, 1);
 
+$defaultFont: helvetica, sans-serif;
+
 .kumulos-prompt {
     box-sizing: border-box;
 
@@ -152,7 +154,8 @@ $quintEasing: cubic-bezier(0.23, 1, 0.32, 1);
     background: $tooltip-background;
     z-index: 1100;
     padding: 12px;
-    font: 16px helvetica, sans-serif;
+    font-size: 16px;
+    font-family: $defaultFont;
     color: #eee;
     border-radius: 8px 8px 0 0;
     animation: kumulos-toast-in-out 0.25s $quintEasing;

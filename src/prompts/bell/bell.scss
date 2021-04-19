@@ -17,7 +17,6 @@
 .kumulos-bell {
     transition: transform 0.2s $quintEasing,
         box-shadow 0.2s $quintEasing;
-    will-change: transform, box-shadow, width, height;
 
     border-radius: 100%;
     border-color: #fff;
