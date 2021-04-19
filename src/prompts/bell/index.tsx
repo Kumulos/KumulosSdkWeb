@@ -4,7 +4,7 @@ import { Component, h } from 'preact';
 import { BellPromptConfig } from "../../core";
 import { DEFAULT_SUBSCRIBE_LABEL, inversePosition, PromptUiProps, Tooltip } from "../ui";
 
-export class Bell extends Component<PromptUiProps, never> {
+export class Bell extends Component<PromptUiProps<BellPromptConfig>, never> {
   onRequestNativePrompt = () => {
       this.props.onPromptAccepted(this.props.config);
   };
@@ -12,10 +12,6 @@ export class Bell extends Component<PromptUiProps, never> {
   render() {
       const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-bell-container kumulos-bell-container-${this.props.config.position}`;
       const { config } = this.props;
-
-      if (config.type !== 'bell') {
-          return null;
-      }
 
       const tooltipPos = inversePosition(config.position);
       const bgColor = config.colors?.bell?.bg;

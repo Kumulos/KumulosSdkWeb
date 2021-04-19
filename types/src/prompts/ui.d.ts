@@ -6,8 +6,8 @@ import { PushSubscriptionState } from '../core/push';
 export declare const DEFAULT_SUBSCRIBE_LABEL = "Subscribe for notifications";
 export declare function inversePosition(pos: string): 'left' | 'right';
 export declare function isMobile(): boolean;
-export interface PromptUiProps {
-    config: PromptConfig;
+export interface PromptUiProps<T extends PromptConfig> {
+    config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (prompt: PromptConfig) => void;

@@ -20,8 +20,8 @@ export function isMobile(): boolean {
     return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
 }
 
-export interface PromptUiProps {
-    config: PromptConfig;
+export interface PromptUiProps<T extends PromptConfig> {
+    config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (prompt: PromptConfig) => void;

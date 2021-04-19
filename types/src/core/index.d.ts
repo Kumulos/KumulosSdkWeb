@@ -46,6 +46,13 @@ interface ChannelSubAction {
     type: 'subscribeToChannel';
     channelUuid: string;
 }
+interface DeclinePromptAction {
+    type: 'decline';
+}
+interface RemindPromptAction {
+    type: 'remind';
+    delay: PromptReminderDelayConfig;
+}
 declare type PromptAction = ChannelSubAction;
 export declare enum ReminderTimeUnit {
     MINUTES = "mins",
@@ -56,6 +63,11 @@ export interface PromptReminderDelayConfig {
     duration: number;
     timeUnit: ReminderTimeUnit;
 }
+export interface PromptUiActions {
+    uiActions: {
+        decline: DeclinePromptAction | RemindPromptAction;
+    };
+}
 interface BasePromptConfig {
     uuid: string;
     type: string;
@@ -63,11 +75,9 @@ interface BasePromptConfig {
     position: string;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
-    declinedPromptReminderDelay?: PromptReminderDelayConfig;
 }
 export interface BellPromptConfig extends BasePromptConfig {
     type: 'bell';
-    trigger: PromptTrigger;
     position: 'bottom-left' | 'bottom-right';
     labels?: {
         tooltip?: {
@@ -82,30 +92,28 @@ export interface BellPromptConfig extends BasePromptConfig {
         };
     };
 }
-export interface AlertPromptConfig extends BasePromptConfig {
+export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: 'alert';
-    trigger: PromptTrigger;
     position: 'top-center';
-    labels?: {
+    labels: {
         thanksForSubscribing?: string;
-        alert?: {
-            heading?: string;
-            body?: string;
-            declineAction?: string;
-            acceptAction?: string;
+        alert: {
+            heading: string;
+            body: string;
+            declineAction: string;
+            acceptAction: string;
         };
     };
-    colors?: {
-        alert?: {
-            fg?: string;
-            bg?: string;
-            declineActionFg?: string;
-            declineActionBg?: string;
-            acceptActionFg?: string;
-            acceptActionBg?: string;
+    colors: {
+        alert: {
+            fg: string;
+            bg: string;
+            declineActionFg: string;
+            declineActionBg: string;
+            acceptActionFg: string;
+            acceptActionBg: string;
         };
     };
-    iconUrl?: string;
 }
 export declare type PromptConfig = BellPromptConfig | AlertPromptConfig;
 export declare type PromptConfigs = {

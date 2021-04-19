@@ -1,4 +1,11 @@
-import { Context, EventPayload, PromptConfig, SdkEvent, PromptReminder, ReminderTimeUnit } from '../core';
+import {
+    Context,
+    EventPayload,
+    PromptConfig,
+    SdkEvent,
+    PromptUiActions,
+    ReminderTimeUnit
+} from '../core';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
@@ -11,14 +18,14 @@ import Ui from './ui';
 import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
 import { persistPromptReminder, getPromptReminder } from '../core/storage';
-import { PromptReminderDelayConfig } from '../core'
+import { PromptReminderDelayConfig } from '../core';
 
 export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
 const REMINDER_TIME_UNIT_TO_MILLIS = {
     [ReminderTimeUnit.MINUTES]: 1000 * 60,
     [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
-    [ReminderTimeUnit.DAYS]: 1000 * 60 * 60 * 24,
+    [ReminderTimeUnit.DAYS]: 1000 * 60 * 60 * 24
 };
 
 // loading -> ready
@@ -54,8 +61,8 @@ export class PromptManager {
         ctx.subscribe('eventTracked', this.onEventTracked);
 
         document.addEventListener('DOMContentLoaded', () => {
-          document.body.appendChild(this.uiRoot);
-          this.setState('loading');
+            document.body.appendChild(this.uiRoot);
+            this.setState('loading');
         });
     }
 
@@ -106,7 +113,7 @@ export class PromptManager {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
 
-       this.hidePrompt(prompt);
+        this.hidePrompt(prompt);
     };
 
     private onPromptDeclined = (prompt: PromptConfig) => {
@@ -205,18 +212,17 @@ export class PromptManager {
     }
 
     private maybePersistReminder(prompt: PromptConfig) {
-        if (prompt.type !== 'alert') {
+        const { uiActions } = prompt as PromptUiActions;
+
+        if (!uiActions) {
             return;
         }
 
-        const reminder = prompt.declinedPromptReminderDelay
+        const reminder = uiActions.decline.type === 'remind'
             ? { promptUuid: prompt.uuid, declinedOn: Date.now() }
             : 'suppressed';
 
-        persistPromptReminder(
-            prompt.uuid,
-            reminder
-        );
+        persistPromptReminder(prompt.uuid, reminder);
     }
 
     private hidePrompt(prompt: PromptConfig) {
@@ -227,10 +233,6 @@ export class PromptManager {
     }
 
     private async isPromptSuppressed(prompt: PromptConfig): Promise<boolean> {
-        if (prompt.type !== 'alert') {
-            return Promise.resolve(false);
-        }
-
         const reminder = await getPromptReminder(prompt.uuid);
 
         if (!reminder) {
@@ -241,16 +243,27 @@ export class PromptManager {
             return true;
         }
 
-        if (!prompt.declinedPromptReminderDelay) {
+        const { uiActions } = prompt as PromptUiActions;
+
+        if (uiActions.decline.type !== 'remind') {
             return false;
         }
 
-
-        return !this.hasPromptReminderElapsed(reminder.declinedOn, prompt.declinedPromptReminderDelay);
+        return !this.hasPromptReminderElapsed(
+            reminder.declinedOn,
+            uiActions.decline.delay
+        );
     }
 
-    private hasPromptReminderElapsed(declinedOnMillis: number, delayConfig: PromptReminderDelayConfig): boolean {
-        return Date.now() - declinedOnMillis > REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] * delayConfig.duration;
+    private hasPromptReminderElapsed(
+        declinedOnMillis: number,
+        delayConfig: PromptReminderDelayConfig
+    ): boolean {
+        return (
+            Date.now() - declinedOnMillis >
+            REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] *
+                delayConfig.duration
+        );
     }
 
     private deferPromptActivation(prompt: PromptConfig) {
