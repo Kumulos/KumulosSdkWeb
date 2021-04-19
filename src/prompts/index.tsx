@@ -23,7 +23,6 @@ import { PromptReminderDelayConfig } from '../core';
 export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
 const REMINDER_TIME_UNIT_TO_MILLIS = {
-    [ReminderTimeUnit.MINUTES]: 1000 * 60,
     [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
     [ReminderTimeUnit.DAYS]: 1000 * 60 * 60 * 24
 };

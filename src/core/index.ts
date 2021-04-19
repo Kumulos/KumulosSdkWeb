@@ -73,7 +73,6 @@ interface RemindPromptAction {
 type PromptAction = ChannelSubAction;
 
 export enum ReminderTimeUnit {
-    MINUTES = 'mins',
     HOURS = 'hours',
     DAYS = 'days'
 }
