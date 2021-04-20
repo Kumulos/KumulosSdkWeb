@@ -5,7 +5,8 @@ import {
     SdkEvent,
     PromptUiActions,
     ReminderTimeUnit,
-    PlatformConfig
+    PlatformConfig,
+    UiActionType
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -223,11 +224,16 @@ export class PromptManager {
             return;
         }
 
-        const reminder = uiActions.decline.type === 'remind'
-            ? { declinedOn: Date.now() }
-            : 'suppressed';
+        const { type } = uiActions.decline;
 
-        persistPromptReminder(prompt.uuid, reminder);
+        switch (type) {
+            case UiActionType.REMIND:
+                return persistPromptReminder(prompt.uuid, { declinedOn: Date.now() });
+            case UiActionType.DECLINE:
+                return persistPromptReminder(prompt.uuid, 'suppressed');
+            default:
+                return console.warn(`Unsupported decline action type ${type} supported for prompt ${prompt.uuid}, fall back to always show this prompt when declined`);
+        }
     }
 
     private hidePrompt(prompt: PromptConfig) {
