@@ -3,6 +3,7 @@ import './alert.scss';
 import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
 import { AlertPromptConfig } from '../../core';
+import { PlatformConfigContext } from '../ui-context';
 
 export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
     onRequestNativePrompt = () => {
@@ -32,9 +33,6 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
             declineActionFg
         } = config.colors.alert;
 
-        // deal with icon
-        const iconUrl = '';
-
         const containerStyle = {
             backgroundColor: bg,
             color: fg
@@ -51,35 +49,39 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
         };
 
         return (
-            <div style={containerStyle} className={classes}>
-                <div className="kumulos-alert-header">
-                    <h1>{heading}</h1>
-                    <div className="kumulos-alert-icon">
-                        <img src={iconUrl} />
+            <PlatformConfigContext.Consumer>
+                {config =>
+                    <div style={containerStyle} className={classes}>
+                        <div className="kumulos-alert-header">
+                            <h1>{heading}</h1>
+                            <div className="kumulos-alert-icon">
+                                <img src={config?.iconUrl} />
+                            </div>
+                        </div>
+
+                        <div className="kumulos-alert-body">{body}</div>
+
+                        <div className="kumulos-alert-actions">
+                            <button
+                                type="button"
+                                style={declineActionStyle}
+                                className="kumulos-alert-action-button kumulos-alert-action-button-cancel"
+                                onClick={this.onRequestCancel}
+                            >
+                                {declineAction}
+                            </button>
+                            <button
+                                type="button"
+                                style={acceptActionStyle}
+                                className="kumulos-alert-action-button kumulos-alert-action-button-confirm"
+                                onClick={this.onRequestNativePrompt}
+                            >
+                                {acceptAction}
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div className="kumulos-alert-body">{body}</div>
-
-                <div className="kumulos-alert-actions">
-                    <button
-                        type="button"
-                        style={declineActionStyle}
-                        className="kumulos-alert-action-button kumulos-alert-action-button-cancel"
-                        onClick={this.onRequestCancel}
-                    >
-                        {declineAction}
-                    </button>
-                    <button
-                        type="button"
-                        style={acceptActionStyle}
-                        className="kumulos-alert-action-button kumulos-alert-action-button-confirm"
-                        onClick={this.onRequestNativePrompt}
-                    >
-                        {acceptAction}
-                    </button>
-                </div>
-            </div>
+            }
+            </PlatformConfigContext.Consumer>
         );
     }
 }

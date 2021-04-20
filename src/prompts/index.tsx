@@ -4,7 +4,8 @@ import {
     PromptConfig,
     SdkEvent,
     PromptUiActions,
-    ReminderTimeUnit
+    ReminderTimeUnit,
+    PlatformConfig
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -19,6 +20,8 @@ import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
 import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
+import { PlatformConfigContext } from './ui-context';
+import { loadConfig } from '../core/config';
 
 export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
@@ -45,6 +48,7 @@ export class PromptManager {
     private pushOpsManager?: PushOpsManager;
     private channels: Channel[];
     private ui?: Ui;
+    private platformConfig?: PlatformConfig;
 
     constructor(client: Kumulos, ctx: Context) {
         this.prompts = {};
@@ -150,20 +154,22 @@ export class PromptManager {
     }
 
     private render() {
-        if (!this.subscriptionState || !this.state) {
+        if (!this.subscriptionState || !this.state || !this.platformConfig) {
             return;
         }
 
         render(
-            <Ui
-                ref={r => (this.ui = r)}
-                prompts={this.activePrompts}
-                subscriptionState={this.subscriptionState}
-                promptManagerState={this.state as PromptManagerState}
-                onPromptAccepted={this.onPromptAccepted}
-                onPromptDeclined={this.onPromptDeclined}
-                currentlyRequestingPrompt={this.currentlyRequestingPrompt}
-            />,
+            <PlatformConfigContext.Provider value={this.platformConfig}>
+                <Ui
+                    ref={r => (this.ui = r)}
+                    prompts={this.activePrompts}
+                    subscriptionState={this.subscriptionState}
+                    promptManagerState={this.state as PromptManagerState}
+                    onPromptAccepted={this.onPromptAccepted}
+                    onPromptDeclined={this.onPromptDeclined}
+                    currentlyRequestingPrompt={this.currentlyRequestingPrompt}
+                />
+            </PlatformConfigContext.Provider>,
             this.uiRoot
         );
     }
@@ -341,15 +347,17 @@ export class PromptManager {
     }
 
     private async loadPrompts(): Promise<void> {
+        this.platformConfig = await loadConfig(this.context);
+
+        if (null === this.platformConfig) {
+            console.error('Failed to load prompts config');
+            return;
+        }
+
         if (this.context.pushPrompts !== 'auto') {
             this.prompts = { ...this.context.pushPrompts };
         } else {
-            try {
-                this.prompts = await loadPromptConfigs(this.context);
-            } catch (e) {
-                console.error('Failed to load prompts', e);
-                this.prompts = {};
-            }
+            this.prompts =  { ...this.platformConfig.prompts || {} };
         }
 
         for (let id in this.prompts) {

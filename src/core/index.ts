@@ -61,12 +61,17 @@ interface ChannelSubAction {
     channelUuid: string;
 }
 
+export enum UiActionType {
+    DECLINE = 'decline',
+    REMIND = 'remind'
+}
+
 interface DeclinePromptAction {
-    type: 'decline';
+    type: UiActionType.DECLINE;
 }
 
 interface RemindPromptAction {
-    type: 'remind';
+    type: UiActionType.REMIND;
     delay: PromptReminderDelayConfig;
 }
 
@@ -143,6 +148,7 @@ export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {
     publicKey: string;
+    iconUrl?: string;
     prompts: PromptConfigs;
     safariPushId: string | null;
 }

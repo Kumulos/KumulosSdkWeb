@@ -14,6 +14,7 @@ export declare class PromptManager {
     private pushOpsManager?;
     private channels;
     private ui?;
+    private platformConfig?;
     constructor(client: Kumulos, ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;
