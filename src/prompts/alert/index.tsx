@@ -63,7 +63,7 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
                             <button
                                 type="button"
                                 style={declineActionStyle}
-                                className="kumulos-alert-action-button kumulos-alert-action-button-cancel"
+                                className="kumulos-action-button kumulos-action-button-cancel"
                                 onClick={this.onRequestCancel}
                             >
                                 {declineAction}
@@ -71,7 +71,7 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
                             <button
                                 type="button"
                                 style={acceptActionStyle}
-                                className="kumulos-alert-action-button kumulos-alert-action-button-confirm"
+                                className="kumulos-action-button kumulos-action-button-confirm"
                                 onClick={this.onRequestNativePrompt}
                             >
                                 {acceptAction}
