@@ -1,5 +1,3 @@
-import './alert.scss';
-
 import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
 import { AlertPromptConfig } from '../../core';

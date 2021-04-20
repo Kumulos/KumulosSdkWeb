@@ -1,5 +1,3 @@
-import './bell.scss';
-
 import { Component, h } from 'preact';
 import { BellPromptConfig } from "../../core";
 import { DEFAULT_SUBSCRIBE_LABEL, inversePosition, PromptUiProps, Tooltip } from "../ui";

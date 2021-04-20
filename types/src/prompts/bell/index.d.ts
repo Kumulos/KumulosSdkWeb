@@ -1,4 +1,3 @@
-import './bell.scss';
 import { Component, h } from 'preact';
 import { BellPromptConfig } from "../../core";
 import { PromptUiProps } from "../ui";

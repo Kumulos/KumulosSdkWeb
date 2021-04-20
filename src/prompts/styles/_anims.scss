@@ -1,0 +1,71 @@
+
+// Based on https://css-tricks.com/snippets/css/shake-css-keyframe-animation/
+@keyframes kumulos-anim-shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-2px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(2px, 0, 0);
+    }
+}
+
+@keyframes kumulos-anim-fade-in {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes kumulos-reveal-left {
+    0% {
+        opacity: 0;
+        transform: translate(10px, -50%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0px, -50%);
+    }
+}
+
+@keyframes kumulos-reveal-right {
+    0% {
+        opacity: 0;
+        transform: translate(-10px, -50%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0px, -50%);
+    }
+}
+
+@keyframes kumulos-toast-in-out {
+    0% {
+        opacity: 0;
+        transform: translate3d(-50%, 100%, 0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(-50%, 0, 0);
+    }
+}

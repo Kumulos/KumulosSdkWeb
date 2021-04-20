@@ -1,4 +1,5 @@
 import './overlay.scss';
+import './prompts.scss';
 import { Component, h } from 'preact';
 import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';

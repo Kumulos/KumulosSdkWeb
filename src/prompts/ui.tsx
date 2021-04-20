@@ -1,4 +1,5 @@
 import './overlay.scss';
+import './prompts.scss';
 
 import { Component, Fragment, h } from 'preact';
 
