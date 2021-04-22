@@ -30,4 +30,4 @@ Release:
 -   [ ] Create tag from master matching chosen version
 -   [ ] Fill out release notes
 -   [ ] Run `npm publish --access public`
--   [ ] Publish `dist/worker.js` and `dist/web-bundle.js` to CDN
+-   [ ] Publish `dist/worker.js` and `dist/web-bundle.js` to CDN (re-run `npm run dist` locally to update `web-bundle.js`)
