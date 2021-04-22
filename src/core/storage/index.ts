@@ -1,4 +1,4 @@
-import { Configuration, Context } from '../index';
+import { Configuration, Context, PromptReminder, PromptConfig } from '../index';
 import {
     Store,
     del as idbDel,
@@ -31,6 +31,19 @@ export function persistConfig(config: Configuration): Promise<Configuration> {
         autoResubscribe: config.autoResubscribe,
         pushPrompts: config.pushPrompts
     });
+}
+
+export function persistPromptReminder(
+    promptUuid: string,
+    reminder: PromptReminder
+) {
+    return set(`reminder.${promptUuid}`, reminder);
+}
+
+export async function getPromptReminder(
+    promptUuid: string
+): Promise<PromptReminder | undefined> {
+    return await get<PromptReminder | undefined>(`reminder.${promptUuid}`);
 }
 
 export function getContextFromStoredConfig(): Promise<Context | undefined> {

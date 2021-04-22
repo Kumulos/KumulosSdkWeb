@@ -1,7 +1,7 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-const SDK_VERSION = '1.5.4';
+const SDK_VERSION = '1.6.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -61,12 +61,50 @@ interface ChannelSubAction {
     channelUuid: string;
 }
 
+export enum UiActionType {
+    DECLINE = 'decline',
+    REMIND = 'remind'
+}
+
+interface DeclinePromptAction {
+    type: UiActionType.DECLINE;
+}
+
+interface RemindPromptAction {
+    type: UiActionType.REMIND;
+    delay: PromptReminderDelayConfig;
+}
+
 type PromptAction = ChannelSubAction;
 
-interface BellPromptConfig {
+export enum ReminderTimeUnit {
+    HOURS = 'hours',
+    DAYS = 'days'
+}
+
+export interface PromptReminderDelayConfig {
+    duration: number;
+    timeUnit: ReminderTimeUnit;
+}
+
+export interface PromptUiActions {
+    uiActions: {
+        decline: DeclinePromptAction | RemindPromptAction;
+    };
+}
+
+interface BasePromptConfig {
     uuid: string;
-    type: 'bell';
+    type: string;
     trigger: PromptTrigger;
+    position: string;
+    overlay?: PromptOverlayConfig;
+    actions?: PromptAction[];
+}
+
+export interface BellPromptConfig extends BasePromptConfig {
+    type: 'bell';
+    position: 'bottom-left' | 'bottom-right';
     labels?: {
         tooltip?: {
             subscribe?: string;
@@ -75,20 +113,42 @@ interface BellPromptConfig {
     };
     colors?: {
         bell?: {
-            bg?: string;
             fg?: string;
+            bg?: string;
         };
     };
-    position: 'bottom-left' | 'bottom-right';
-    overlay?: PromptOverlayConfig;
-    actions?: PromptAction[];
 }
 
-export type PromptConfig = BellPromptConfig;
+export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
+    type: 'alert';
+    position: 'top-center';
+    labels: {
+        thanksForSubscribing?: string;
+        alert: {
+            heading: string;
+            body: string;
+            declineAction: string;
+            acceptAction: string;
+        };
+    };
+    colors: {
+        alert: {
+            fg: string;
+            bg: string;
+            declineActionFg: string;
+            declineActionBg: string;
+            acceptActionFg: string;
+            acceptActionBg: string;
+        };
+    };
+}
+
+export type PromptConfig = BellPromptConfig | AlertPromptConfig;
 export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {
     publicKey: string;
+    iconUrl?: string;
     prompts: PromptConfigs;
     safariPushId: string | null;
 }
@@ -101,6 +161,12 @@ export interface Configuration {
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
 }
+
+export type PromptReminder =
+    | {
+          declinedOn: number;
+      }
+    | 'suppressed';
 
 type SdkEventType = 'eventTracked';
 export type SdkEvent<T = any> = { type: SdkEventType; data: T };

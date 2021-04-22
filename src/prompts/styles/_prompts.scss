@@ -1,0 +1,11 @@
+.kumulos-prompt {
+    box-sizing: border-box;
+
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
+
+    z-index: 1000;
+}

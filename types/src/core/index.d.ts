@@ -46,11 +46,42 @@ interface ChannelSubAction {
     type: 'subscribeToChannel';
     channelUuid: string;
 }
+export declare enum UiActionType {
+    DECLINE = "decline",
+    REMIND = "remind"
+}
+interface DeclinePromptAction {
+    type: UiActionType.DECLINE;
+}
+interface RemindPromptAction {
+    type: UiActionType.REMIND;
+    delay: PromptReminderDelayConfig;
+}
 declare type PromptAction = ChannelSubAction;
-interface BellPromptConfig {
+export declare enum ReminderTimeUnit {
+    HOURS = "hours",
+    DAYS = "days"
+}
+export interface PromptReminderDelayConfig {
+    duration: number;
+    timeUnit: ReminderTimeUnit;
+}
+export interface PromptUiActions {
+    uiActions: {
+        decline: DeclinePromptAction | RemindPromptAction;
+    };
+}
+interface BasePromptConfig {
     uuid: string;
-    type: 'bell';
+    type: string;
     trigger: PromptTrigger;
+    position: string;
+    overlay?: PromptOverlayConfig;
+    actions?: PromptAction[];
+}
+export interface BellPromptConfig extends BasePromptConfig {
+    type: 'bell';
+    position: 'bottom-left' | 'bottom-right';
     labels?: {
         tooltip?: {
             subscribe?: string;
@@ -59,20 +90,41 @@ interface BellPromptConfig {
     };
     colors?: {
         bell?: {
-            bg?: string;
             fg?: string;
+            bg?: string;
         };
     };
-    position: 'bottom-left' | 'bottom-right';
-    overlay?: PromptOverlayConfig;
-    actions?: PromptAction[];
 }
-export declare type PromptConfig = BellPromptConfig;
+export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
+    type: 'alert';
+    position: 'top-center';
+    labels: {
+        thanksForSubscribing?: string;
+        alert: {
+            heading: string;
+            body: string;
+            declineAction: string;
+            acceptAction: string;
+        };
+    };
+    colors: {
+        alert: {
+            fg: string;
+            bg: string;
+            declineActionFg: string;
+            declineActionBg: string;
+            acceptActionFg: string;
+            acceptActionBg: string;
+        };
+    };
+}
+export declare type PromptConfig = BellPromptConfig | AlertPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };
 export interface PlatformConfig {
     publicKey: string;
+    iconUrl?: string;
     prompts: PromptConfigs;
     safariPushId: string | null;
 }
@@ -84,6 +136,9 @@ export interface Configuration {
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
 }
+export declare type PromptReminder = {
+    declinedOn: number;
+} | 'suppressed';
 declare type SdkEventType = 'eventTracked';
 export declare type SdkEvent<T = any> = {
     type: SdkEventType;

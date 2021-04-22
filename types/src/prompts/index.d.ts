@@ -14,6 +14,7 @@ export declare class PromptManager {
     private pushOpsManager?;
     private channels;
     private ui?;
+    private platformConfig?;
     constructor(client: Kumulos, ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;
@@ -24,6 +25,10 @@ export declare class PromptManager {
     private render;
     private evaluateTriggers;
     promptActionNeedsTaken(prompt: PromptConfig): boolean;
+    private maybePersistReminder;
+    private hidePrompt;
+    private isPromptSuppressed;
+    private hasPromptReminderElapsed;
     private deferPromptActivation;
     private activatePrompt;
     private activatePrompts;

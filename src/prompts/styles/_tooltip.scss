@@ -1,0 +1,56 @@
+.kumulos-tooltip-parent {
+    .kumulos-tooltip {
+        display: none;
+    }
+
+    &:hover .kumulos-tooltip {
+        display: block;
+    }
+}
+
+.kumulos-tooltip {
+    background: $tooltip-background;
+    position: absolute;
+    top: 50%;
+    padding: 8px 12px;
+    font: 14px helvetica, sans-serif;
+    color: #eee;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 1100;
+    pointer-events: none;
+    transform: translateY(-50%);
+    will-change: opacity, transform;
+
+    &:after {
+        content: "";
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 50%;
+        right: 100%;
+        border: solid transparent;
+        border-width: 8px;
+        margin-top: -8px;
+    }
+
+    &-right {
+        left: calc(100% + 12px);
+        animation: kumulos-reveal-right 0.2s $quintEasing;
+
+        &:after {
+            border-right-color: $tooltip-background;
+            right: 100%;
+        }
+    }
+
+    &-left {
+        right: calc(100% + 12px);
+        animation: kumulos-reveal-left 0.2s $quintEasing;
+
+        &:after {
+            border-left-color: $tooltip-background;
+            left: 100%;
+        }
+    }
+}
