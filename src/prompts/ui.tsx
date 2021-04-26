@@ -1,4 +1,5 @@
 import './overlay.scss';
+import './underlay.scss';
 import './prompts.scss';
 
 import { Component, Fragment, h } from 'preact';
@@ -152,6 +153,26 @@ class Toast extends Component<{ message: string }, never> {
     }
 }
 
+interface UnderlayProps {
+    prompt?: PromptConfig;
+}
+
+const Underlay = ({ prompt }: UnderlayProps) => {
+    const underlay = prompt?.underlay;
+
+    if (undefined === underlay) {
+        return null;
+    }
+
+    const underlayStyle = {
+        backgroundColor: underlay.colors.bg
+    };
+
+    return (
+        <div style={underlayStyle} className="kumulos-prompt-underlay"></div>
+    );
+};
+
 interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
@@ -195,6 +216,8 @@ export default class Ui extends Component<UiProps, UiState> {
     render() {
         return createPortal(
             <Fragment>
+                {this.renderUnderlay()}
+
                 {this.props.prompts.map(this.renderPrompt, this)}
                 {!isMobile() && (
                     <Overlay
@@ -209,6 +232,13 @@ export default class Ui extends Component<UiProps, UiState> {
             </Fragment>,
             document.body
         );
+    }
+
+    renderUnderlay() {
+        const { prompts } = this.props;
+        const lastPrompt = prompts?.[prompts.length - 1];
+
+        return <Underlay prompt={lastPrompt} />;
     }
 
     renderPrompt(prompt: PromptConfig) {
@@ -232,7 +262,7 @@ export default class Ui extends Component<UiProps, UiState> {
                         onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
                     />
-                )
+                );
             default:
                 return null;
         }

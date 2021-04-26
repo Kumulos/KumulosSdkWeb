@@ -71,6 +71,11 @@ export interface PromptUiActions {
         decline: DeclinePromptAction | RemindPromptAction;
     };
 }
+export interface UnderlayConfig {
+    colors: {
+        bg: string;
+    };
+}
 interface BasePromptConfig {
     uuid: string;
     type: string;
@@ -78,6 +83,7 @@ interface BasePromptConfig {
     position: string;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
+    underlay?: UnderlayConfig;
 }
 export interface BellPromptConfig extends BasePromptConfig {
     type: 'bell';

@@ -1,0 +1,17 @@
+.kumulos-prompt-underlay {
+    display: none;
+}
+
+@media (min-device-width: 480px) {
+    .kumulos-prompt-underlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+
+        background-color: rgba(0, 0, 0, 0.3);
+
+        display: block;
+    }
+}
