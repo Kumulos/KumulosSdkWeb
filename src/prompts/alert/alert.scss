@@ -19,52 +19,59 @@
     backface-visibility: hidden;
 }
 
-@media only screen and (min-device-width: 480px){
-  .kumulos-alert-container {
-    border-radius: 0 0 3px 3px;
-    border-color: #fff;
+@media only screen and (min-device-width: 480px) {
+    .kumulos-alert-container {
+        left: 50%;
 
-    left: 50%;
+        width: 500px;
+        min-height: 250px;
+        margin-left: -250px;
 
-    width: 500px;
-    height: auto;
-    min-height: 250px;
+        border-color: #fff;
+        box-shadow: 0 0 3px 1px $shadow-color;
 
-    margin-left: -250px;
+        height: auto;
 
-    box-shadow: 0 0 3px 1px $shadow-color;
-  }
+        &.kumulos-prompt-position-top-center {
+            border-radius: 0 0 3px 3px;
+        }
+
+        &.kumulos-prompt-position-center {
+            border-radius: 3px;
+            top: 50%;
+            transform: translate(0, -50%);
+        }
+    }
 }
 
-
 .kumulos-alert-header {
-  display: flex;
-  font-size: 24px;
+    display: flex;
+    font-size: 24px;
 
-  h1 {
-    font-size: inherit;
-    flex: 1;
-    margin: 0;
-  }
-
-  .kumulos-alert-icon {
-    width: 70px;
-    height: 70px;
-
-    img {
-        width: 100%;
+    h1 {
+        font-size: inherit;
+        flex: 1;
+        margin: 0;
     }
-  }
+
+    .kumulos-alert-icon {
+        width: 70px;
+        height: 70px;
+
+        img {
+            width: 100%;
+        }
+    }
 }
 
 .kumulos-alert-body {
-  flex: 1;
-  white-space: pre-wrap;
-  overflow-y: auto;
+    flex: 1;
+    white-space: pre-wrap;
+    overflow-y: auto;
 }
 
 .kumulos-alert-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
 }

@@ -13,8 +13,8 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
     };
 
     renderAlert = (platformConfig?: PlatformConfig) => {
-        const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-alert-container`;
         const config = this.props.config;
+        const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-alert-container kumulos-prompt-position-${config.position}`;
 
         const {
             heading,
@@ -77,7 +77,7 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
                 </div>
             </div>
         );
-    }
+    };
 
     render() {
         return (
@@ -86,5 +86,4 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
             </PlatformConfigContext.Consumer>
         );
     }
-
 }
