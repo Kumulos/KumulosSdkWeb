@@ -256,7 +256,7 @@ export class PromptManager {
 
         const { uiActions } = prompt as PromptUiActions;
 
-        if (uiActions.decline.type !== 'remind') {
+        if (uiActions.decline.type !== UiActionType.REMIND) {
             return false;
         }
 
