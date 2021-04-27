@@ -11,6 +11,7 @@ import { createPortal } from 'preact/compat';
 import { getBrowserName } from '../core/utils';
 import { Bell } from './bell';
 import { Alert } from './alert';
+import { Strip } from './strip';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -256,6 +257,16 @@ export default class Ui extends Component<UiProps, UiState> {
             case 'alert':
                 return (
                     <Alert
+                        config={prompt}
+                        subscriptionState={this.props.subscriptionState}
+                        promptManagerState={this.props.promptManagerState}
+                        onPromptAccepted={this.props.onPromptAccepted}
+                        onPromptDeclined={this.props.onPromptDeclined}
+                    />
+                );
+            case 'strip':
+                return (
+                    <Strip
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
                         promptManagerState={this.props.promptManagerState}
