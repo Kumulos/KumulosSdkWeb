@@ -11,7 +11,6 @@ import { createPortal } from 'preact/compat';
 import { getBrowserName } from '../core/utils';
 import { Bell } from './bell';
 import { Alert } from './alert';
-import { Strip } from './strip';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
