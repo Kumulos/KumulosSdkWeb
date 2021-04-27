@@ -255,18 +255,9 @@ export default class Ui extends Component<UiProps, UiState> {
                     />
                 );
             case 'alert':
-                return (
-                    <Alert
-                        config={prompt}
-                        subscriptionState={this.props.subscriptionState}
-                        promptManagerState={this.props.promptManagerState}
-                        onPromptAccepted={this.props.onPromptAccepted}
-                        onPromptDeclined={this.props.onPromptDeclined}
-                    />
-                );
             case 'strip':
                 return (
-                    <Strip
+                    <Alert
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
                         promptManagerState={this.props.promptManagerState}

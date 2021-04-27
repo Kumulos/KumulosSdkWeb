@@ -1,9 +1,25 @@
 import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
-import { AlertPromptConfig, PlatformConfig } from '../../core';
+import {
+    AlertPromptConfig,
+    PlatformConfig,
+    StripPromptConfig,
+    PromptTypeName
+} from '../../core';
 import { PlatformConfigContext } from '../ui-context';
 
-export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
+const styles = {
+    iconStyle: {
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundSize: 'cover'
+    }
+};
+
+export class Alert extends Component<
+    PromptUiProps<AlertPromptConfig | StripPromptConfig>,
+    never
+> {
     onRequestNativePrompt = () => {
         this.props.onPromptAccepted(this.props.config);
     };
@@ -14,14 +30,13 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
 
     renderAlert = (platformConfig?: PlatformConfig) => {
         const config = this.props.config;
-        const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-alert-container kumulos-prompt-position-${config.position}`;
+        const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-${config.type}-container kumulos-prompt-position-${config.position}`;
 
-        const {
-            heading,
-            body,
-            declineAction,
-            acceptAction
-        } = config.labels.alert;
+        const { heading, body, declineAction, acceptAction } =
+            config.type === PromptTypeName.ALERT
+                ? config.labels.alert
+                : config.labels.strip;
+
         const {
             bg,
             fg,
@@ -29,7 +44,10 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
             acceptActionFg,
             declineActionBg,
             declineActionFg
-        } = config.colors.alert;
+        } =
+            config.type === PromptTypeName.ALERT
+                ? config.colors.alert
+                : config.colors.strip;
 
         const containerStyle = {
             backgroundColor: bg,
@@ -46,18 +64,26 @@ export class Alert extends Component<PromptUiProps<AlertPromptConfig>, never> {
             color: acceptActionFg
         };
 
+        const iconStyle = {
+            ...styles.iconStyle,
+            backgroundImage: `url(${platformConfig?.iconUrl})`
+        };
+
         return (
             <div style={containerStyle} className={classes}>
-                <div className="kumulos-alert-header">
-                    <h1>{heading}</h1>
-                    <div className="kumulos-alert-icon">
-                        <img src={platformConfig?.iconUrl} />
+                <div
+                    style={iconStyle}
+                    className={`kumulos-${config.type}-icon`}
+                ></div>
+
+                <div className={`kumulos-${config.type}-content`}>
+                    <div className={`kumulos-${config.type}-header`}>
+                        <h1>{heading}</h1>
                     </div>
+                    <div className={`kumulos-${config.type}-body`}>{body}</div>
                 </div>
 
-                <div className="kumulos-alert-body">{body}</div>
-
-                <div className="kumulos-alert-actions">
+                <div className={`kumulos-${config.type}-actions`}>
                     <button
                         type="button"
                         style={declineActionStyle}
