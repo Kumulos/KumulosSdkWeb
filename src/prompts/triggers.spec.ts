@@ -1,4 +1,9 @@
-import { KumulosEvent, PromptConfig } from '../core';
+import {
+    KumulosEvent,
+    PromptConfig,
+    PromptPosition,
+    PromptTypeName
+} from '../core';
 
 import { triggerMatched } from './triggers';
 
@@ -23,10 +28,10 @@ test.each(cases)(
     }
 );
 
-function newPageViewPrompt(pathFilter: string): PromptConfig {
+function newPageViewPrompt(pathFilter: string): Partial<PromptConfig> {
     return {
-        position: 'bottom-left',
-        type: 'bell',
+        position: PromptPosition.BOTTOM_LEFT,
+        type: PromptTypeName.BELL,
         uuid: 'prompt-1',
         trigger: {
             event: 'pageViewed',

@@ -31,6 +31,14 @@ export enum EventType {
     PAGE_VIEWED = 'k.pageViewed'
 }
 
+export enum PromptTypeName {
+    BELL = 'bell',
+    ALERT = 'alert',
+    STRIP = 'strip'
+}
+
+export const PROMPT_TYPE_NAMES = [PromptTypeName.BELL, PromptTypeName.ALERT];
+
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
 export type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export type FilterValue = number | boolean | string | string[];
@@ -99,58 +107,111 @@ export interface UnderlayConfig {
     };
 }
 
+export enum PromptPosition {
+    TOP_LEFT = 'top-left',
+    TOP_CENTER = 'top-center',
+    TOP_RIGHT = 'top-right',
+    CENTER_LEFT = 'center-left',
+    CENTER = 'center',
+    CENTER_RIGHT = 'center-right',
+    BOTTOM_LEFT = 'bottom-left',
+    BOTTOM_CENTER = 'bottom-center',
+    BOTTOM_RIGHT = 'bottom-right',
+    TOP = 'top',
+    BOTTOM = 'bottom'
+}
+
 interface BasePromptConfig {
     uuid: string;
-    type: string;
+    type: PromptTypeName;
     trigger: PromptTrigger;
-    position: string;
+    position: PromptPosition;
+    labels: any;
+    colors: any;
     overlay?: PromptOverlayConfig;
-    actions?: PromptAction[];
+    actions: any[];
     underlay?: UnderlayConfig;
 }
 
-export interface BellPromptConfig extends BasePromptConfig {
-    type: 'bell';
-    position: 'bottom-left' | 'bottom-right';
-    labels?: {
-        tooltip?: {
-            subscribe?: string;
-        };
-        thanksForSubscribing?: string;
+interface BellLabelConfig {
+    tooltip: {
+        subscribe: string;
     };
-    colors?: {
-        bell?: {
-            fg?: string;
-            bg?: string;
-        };
+    thanksForSubscribing: string;
+}
+
+export interface BellColorConfig {
+    bell: {
+        fg: string;
+        bg: string;
+    };
+}
+
+export interface BellPromptConfig extends BasePromptConfig {
+    type: PromptTypeName.BELL;
+    labels: BellLabelConfig;
+    colors: BellColorConfig;
+}
+
+interface AlertLabelConfig {
+    thanksForSubscribing: string;
+    alert: {
+        heading: string;
+        body: string;
+        declineAction: string;
+        acceptAction: string;
+    };
+}
+
+export interface AlertColorConfig {
+    alert: {
+        fg: string;
+        bg: string;
+        declineActionFg: string;
+        declineActionBg: string;
+        acceptActionFg: string;
+        acceptActionBg: string;
     };
 }
 
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
-    type: 'alert';
-    position: 'top-center';
-    labels: {
-        thanksForSubscribing?: string;
-        alert: {
-            heading: string;
-            body: string;
-            declineAction: string;
-            acceptAction: string;
-        };
-    };
-    colors: {
-        alert: {
-            fg: string;
-            bg: string;
-            declineActionFg: string;
-            declineActionBg: string;
-            acceptActionFg: string;
-            acceptActionBg: string;
-        };
+    type: PromptTypeName.ALERT;
+    labels: AlertLabelConfig;
+    colors: AlertColorConfig;
+}
+
+interface StripLabelConfig {
+    thanksForSubscribing: string;
+    strip: {
+        heading: string;
+        body: string;
+        declineAction: string;
+        acceptAction: string;
     };
 }
 
-export type PromptConfig = BellPromptConfig | AlertPromptConfig;
+export interface StripColorConfig {
+    strip: {
+        fg: string;
+        bg: string;
+        declineActionFg: string;
+        declineActionBg: string;
+        acceptActionFg: string;
+        acceptActionBg: string;
+    };
+}
+
+export interface StripPromptConfig extends BasePromptConfig, PromptUiActions {
+    type: PromptTypeName.STRIP;
+    labels: StripLabelConfig;
+    colors: StripColorConfig;
+    position: PromptPosition.TOP | PromptPosition.BOTTOM;
+}
+
+export type PromptConfig =
+    | BellPromptConfig
+    | AlertPromptConfig
+    | StripPromptConfig;
 export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {
