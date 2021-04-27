@@ -18,6 +18,8 @@
     animation: kumulos-anim-fade-in 0.2s ease-in;
     backface-visibility: hidden;
 
+    box-shadow: 0 0 3px 1px $shadow-color;
+
     &.kumulos-prompt-position-top {
         top: 0;
     }
