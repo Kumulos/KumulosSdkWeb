@@ -3,7 +3,7 @@ import { PromptUiProps } from '../ui';
 import {
     AlertPromptConfig,
     PlatformConfig,
-    StripPromptConfig,
+    BannerPromptConfig,
     PromptTypeName
 } from '../../core';
 import { PlatformConfigContext } from '../ui-context';
@@ -17,7 +17,7 @@ const styles = {
 };
 
 export class Alert extends Component<
-    PromptUiProps<AlertPromptConfig | StripPromptConfig>,
+    PromptUiProps<AlertPromptConfig | BannerPromptConfig>,
     never
 > {
     onRequestNativePrompt = () => {
@@ -35,7 +35,7 @@ export class Alert extends Component<
         const { heading, body, declineAction, acceptAction } =
             config.type === PromptTypeName.ALERT
                 ? config.labels.alert
-                : config.labels.strip;
+                : config.labels.banner;
 
         const {
             bg,
@@ -47,7 +47,7 @@ export class Alert extends Component<
         } =
             config.type === PromptTypeName.ALERT
                 ? config.colors.alert
-                : config.colors.strip;
+                : config.colors.banner;
 
         const containerStyle = {
             backgroundColor: bg,

@@ -281,7 +281,7 @@ export default class Ui extends Component<UiProps, UiState> {
                     />
                 );
             case 'alert':
-            case 'strip':
+            case 'banner':
                 return (
                     <Alert
                         config={prompt}

@@ -34,7 +34,7 @@ export enum EventType {
 export enum PromptTypeName {
     BELL = 'bell',
     ALERT = 'alert',
-    STRIP = 'strip'
+    BANNER = 'banner'
 }
 
 export const PROMPT_TYPE_NAMES = [PromptTypeName.BELL, PromptTypeName.ALERT];
@@ -180,9 +180,9 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     colors: AlertColorConfig;
 }
 
-interface StripLabelConfig {
+interface BannerLabelConfig {
     thanksForSubscribing: string;
-    strip: {
+    banner: {
         heading: string;
         body: string;
         declineAction: string;
@@ -190,8 +190,8 @@ interface StripLabelConfig {
     };
 }
 
-export interface StripColorConfig {
-    strip: {
+export interface BannerColorConfig {
+    banner: {
         fg: string;
         bg: string;
         declineActionFg: string;
@@ -201,17 +201,17 @@ export interface StripColorConfig {
     };
 }
 
-export interface StripPromptConfig extends BasePromptConfig, PromptUiActions {
-    type: PromptTypeName.STRIP;
-    labels: StripLabelConfig;
-    colors: StripColorConfig;
+export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
+    type: PromptTypeName.BANNER;
+    labels: BannerLabelConfig;
+    colors: BannerColorConfig;
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
 }
 
 export type PromptConfig =
     | BellPromptConfig
     | AlertPromptConfig
-    | StripPromptConfig;
+    | BannerPromptConfig;
 export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {
