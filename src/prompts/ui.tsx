@@ -157,21 +157,48 @@ interface UnderlayProps {
     prompt?: PromptConfig;
 }
 
-const Underlay = ({ prompt }: UnderlayProps) => {
-    const underlay = prompt?.underlay;
+class Underlay extends Component<UnderlayProps, never> {
+    blurClass = 'kumulos-underlay-blur';
 
-    if (undefined === underlay) {
-        return null;
+    updateBlurState() {
+        if (this.props.prompt?.overlay) {
+            document.body.classList.add(this.blurClass);
+        } else {
+            document.body.classList.remove(this.blurClass);
+        }
     }
 
-    const underlayStyle = {
-        backgroundColor: underlay.colors.bg
-    };
+    componentDidMount() {
+        this.updateBlurState();
+    }
 
-    return (
-        <div style={underlayStyle} className="kumulos-prompt-underlay"></div>
-    );
-};
+    componentDidUpdate() {
+        this.updateBlurState();
+    }
+
+    componentWillUnmount() {
+        document.body.classList.remove(this.blurClass);
+    }
+
+    render() {
+        const underlay = this.props.prompt?.underlay;
+
+        if (undefined === underlay) {
+            return null;
+        }
+
+        const underlayStyle = {
+            backgroundColor: underlay.colors.bg
+        };
+
+        return (
+            <div
+                style={underlayStyle}
+                className="kumulos-prompt-underlay"
+            ></div>
+        );
+    }
+}
 
 interface UiProps {
     prompts: PromptConfig[];
