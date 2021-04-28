@@ -1,45 +1,30 @@
-export declare const PUSH_BASE_URL = 'https://push.kumulos.com';
+export declare const PUSH_BASE_URL = "https://push.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
-declare type Jsonish =
-    | string
-    | number
-    | boolean
-    | null
-    | {
-          [key: string]: Jsonish;
-      }
-    | {
-          toJSON: () => any;
-      }
-    | Jsonish[]
-    | undefined;
+declare type Jsonish = string | number | boolean | null | {
+    [key: string]: Jsonish;
+} | {
+    toJSON: () => any;
+} | Jsonish[] | undefined;
 export declare type PropsObject = {
     [key: string]: Jsonish;
 };
 export declare enum EventType {
-    MESSAGE_DELIVERED = 'k.message.delivered',
-    MESSAGE_OPENED = 'k.message.opened',
-    PUSH_REGISTERED = 'k.push.deviceRegistered',
-    INSTALL_TRACKED = 'k.stats.installTracked',
-    USER_ASSOCIATED = 'k.stats.userAssociated',
-    USER_ASSOCIATION_CLEARED = 'k.stats.userAssociationCleared',
-    PAGE_VIEWED = 'k.pageViewed'
+    MESSAGE_DELIVERED = "k.message.delivered",
+    MESSAGE_OPENED = "k.message.opened",
+    PUSH_REGISTERED = "k.push.deviceRegistered",
+    INSTALL_TRACKED = "k.stats.installTracked",
+    USER_ASSOCIATED = "k.stats.userAssociated",
+    USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared",
+    PAGE_VIEWED = "k.pageViewed"
 }
 export declare enum PromptTypeName {
-    BELL = 'bell',
-    ALERT = 'alert',
-    BANNER = 'banner'
+    BELL = "bell",
+    ALERT = "alert",
+    BANNER = "banner"
 }
 export declare const PROMPT_TYPE_NAMES: PromptTypeName[];
-export declare type FilterOperator =
-    | 'in'
-    | 'IN'
-    | '='
-    | '>'
-    | '<'
-    | '>='
-    | '<=';
+export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
 export declare type PropFilter = [string, FilterOperator, FilterValue];
 interface PromptTrigger {
@@ -64,8 +49,8 @@ interface PromptOverlayConfig {
     };
 }
 export declare enum UiActionType {
-    DECLINE = 'decline',
-    REMIND = 'remind'
+    DECLINE = "decline",
+    REMIND = "remind"
 }
 interface DeclinePromptAction {
     type: UiActionType.DECLINE;
@@ -75,8 +60,8 @@ interface RemindPromptAction {
     delay: PromptReminderDelayConfig;
 }
 export declare enum ReminderTimeUnit {
-    HOURS = 'hours',
-    DAYS = 'days'
+    HOURS = "hours",
+    DAYS = "days"
 }
 export interface PromptReminderDelayConfig {
     duration: number;
@@ -93,17 +78,17 @@ export interface UnderlayConfig {
     };
 }
 export declare enum PromptPosition {
-    TOP_LEFT = 'top-left',
-    TOP_CENTER = 'top-center',
-    TOP_RIGHT = 'top-right',
-    CENTER_LEFT = 'center-left',
-    CENTER = 'center',
-    CENTER_RIGHT = 'center-right',
-    BOTTOM_LEFT = 'bottom-left',
-    BOTTOM_CENTER = 'bottom-center',
-    BOTTOM_RIGHT = 'bottom-right',
-    TOP = 'top',
-    BOTTOM = 'bottom'
+    TOP_LEFT = "top-left",
+    TOP_CENTER = "top-center",
+    TOP_RIGHT = "top-right",
+    CENTER_LEFT = "center-left",
+    CENTER = "center",
+    CENTER_RIGHT = "center-right",
+    BOTTOM_LEFT = "bottom-left",
+    BOTTOM_CENTER = "bottom-center",
+    BOTTOM_RIGHT = "bottom-right",
+    TOP = "top",
+    BOTTOM = "bottom"
 }
 interface BasePromptConfig {
     uuid: string;
@@ -182,10 +167,7 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     colors: BannerColorConfig;
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
 }
-export declare type PromptConfig =
-    | BellPromptConfig
-    | AlertPromptConfig
-    | BannerPromptConfig;
+export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };
@@ -203,11 +185,9 @@ export interface Configuration {
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
 }
-export declare type PromptReminder =
-    | {
-          declinedOn: number;
-      }
-    | 'suppressed';
+export declare type PromptReminder = {
+    declinedOn: number;
+} | 'suppressed';
 declare type SdkEventType = 'eventTracked';
 export declare type SdkEvent<T = any> = {
     type: SdkEventType;
@@ -220,11 +200,9 @@ export declare class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts:
-        | {
-              [key: string]: PromptConfig;
-          }
-        | 'auto';
+    readonly pushPrompts: {
+        [key: string]: PromptConfig;
+    } | 'auto';
     readonly autoResubscribe: boolean;
     private readonly subscribers;
     constructor(config: Configuration);
@@ -234,11 +212,7 @@ export declare class Context {
 export declare function assertConfigValid(config: any): void;
 export declare function getInstallId(): Promise<InstallId>;
 export declare function getUserId(): Promise<UserId>;
-export declare function associateUser(
-    ctx: Context,
-    id: UserId,
-    attributes?: PropsObject
-): Promise<void>;
+export declare function associateUser(ctx: Context, id: UserId, attributes?: PropsObject): Promise<void>;
 export declare function clearUserAssociation(ctx: Context): Promise<void>;
 export declare type KumulosEvent = {
     type: string;
@@ -248,10 +222,6 @@ export declare type KumulosEvent = {
     data?: PropsObject;
 };
 export declare type EventPayload = KumulosEvent[];
-export declare function trackEvent(
-    ctx: Context,
-    type: string,
-    properties?: PropsObject
-): Promise<Response>;
+export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response>;
 export declare function trackInstallDetails(ctx: Context): Promise<void>;
 export {};
