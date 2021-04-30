@@ -37,7 +37,7 @@ export default class Ui extends Component<UiProps, UiState> {
     dequeueToast: () => void;
     showToast(message?: string): void;
     render(): import("preact").VNode<any>;
-    maybeRenderPromptUnderlay(): h.JSX.Element | null;
+    maybeRenderPromptBackgroundMask(): h.JSX.Element | null;
     renderPrompt(prompt: PromptConfig): h.JSX.Element | null;
 }
 export {};

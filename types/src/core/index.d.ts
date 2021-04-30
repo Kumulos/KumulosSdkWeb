@@ -76,7 +76,7 @@ export interface PromptUiActions {
         decline: DeclinePromptAction | RemindPromptAction;
     };
 }
-export interface UnderlayConfig {
+export interface BackgroundMaskConfig {
     colors: {
         bg: string;
     };
@@ -101,7 +101,6 @@ interface BasePromptConfig {
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
-    underlay?: UnderlayConfig;
 }
 interface BellLabelConfig {
     tooltip: {
@@ -145,6 +144,7 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
     position: PromptPosition.TOP | PromptPosition.CENTER;
+    backgroundMask?: BackgroundMaskConfig;
 }
 interface BannerLabelConfig {
     thanksForSubscribing: string;
@@ -170,6 +170,7 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     labels: BannerLabelConfig;
     colors: BannerColorConfig;
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
+    backgroundMask?: BackgroundMaskConfig;
 }
 export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
 export declare type PromptConfigs = {

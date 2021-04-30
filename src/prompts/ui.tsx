@@ -4,7 +4,12 @@ import './prompts.scss';
 
 import { Component, Fragment, h, JSX } from 'preact';
 
-import { PromptConfig } from '../core';
+import {
+    PromptConfig,
+    PromptTypeName,
+    AlertPromptConfig,
+    BannerPromptConfig
+} from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
@@ -201,7 +206,7 @@ export default class Ui extends Component<UiProps, UiState> {
     render() {
         return createPortal(
             <Fragment>
-                {this.maybeRenderPromptUnderlay()}
+                {this.maybeRenderPromptBackgroundMask()}
 
                 {this.props.prompts.map(this.renderPrompt, this)}
                 {!isMobile() && (
@@ -219,17 +224,22 @@ export default class Ui extends Component<UiProps, UiState> {
         );
     }
 
-    maybeRenderPromptUnderlay() {
+    maybeRenderPromptBackgroundMask() {
         const { prompts } = this.props;
 
-        const firstPromptWithUnderlay = prompts.filter(p => !!p.underlay)[0];
+        const firstPromptWithMask = prompts.filter(
+            p =>
+                (p.type === PromptTypeName.ALERT ||
+                    p.type === PromptTypeName.BANNER) &&
+                !!p.backgroundMask
+        )[0] as AlertPromptConfig | BannerPromptConfig;
 
-        if (!firstPromptWithUnderlay) {
+        if (!firstPromptWithMask) {
             return null;
         }
 
         const style = {
-            backgroundColor: firstPromptWithUnderlay.underlay!.colors.bg
+            backgroundColor: firstPromptWithMask.backgroundMask!.colors.bg
         };
 
         return <BackgroundMask style={style} />;

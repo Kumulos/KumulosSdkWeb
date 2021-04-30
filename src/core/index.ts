@@ -99,7 +99,7 @@ export interface PromptUiActions {
     };
 }
 
-export interface UnderlayConfig {
+export interface BackgroundMaskConfig {
     colors: {
         bg: string;
     };
@@ -126,7 +126,6 @@ interface BasePromptConfig {
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
-    underlay?: UnderlayConfig;
 }
 
 interface BellLabelConfig {
@@ -176,6 +175,7 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
     position: PromptPosition.TOP | PromptPosition.CENTER;
+    backgroundMask?: BackgroundMaskConfig;
 }
 
 interface BannerLabelConfig {
@@ -204,6 +204,7 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     labels: BannerLabelConfig;
     colors: BannerColorConfig;
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
+    backgroundMask?: BackgroundMaskConfig;
 }
 
 export type PromptConfig =
