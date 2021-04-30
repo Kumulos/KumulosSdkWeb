@@ -1,5 +1,5 @@
+import './background-mask.scss';
 import './overlay.scss';
-import './underlay.scss';
 import './prompts.scss';
 import { Component, h } from 'preact';
 import { PromptConfig } from '../core';
@@ -37,7 +37,7 @@ export default class Ui extends Component<UiProps, UiState> {
     dequeueToast: () => void;
     showToast(message?: string): void;
     render(): import("preact").VNode<any>;
-    renderUnderlay(): h.JSX.Element;
+    maybeRenderPromptUnderlay(): h.JSX.Element | null;
     renderPrompt(prompt: PromptConfig): h.JSX.Element | null;
 }
 export {};

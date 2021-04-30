@@ -1,8 +1,8 @@
+import './background-mask.scss';
 import './overlay.scss';
-import './underlay.scss';
 import './prompts.scss';
 
-import { Component, Fragment, h } from 'preact';
+import { Component, Fragment, h, JSX } from 'preact';
 
 import { PromptConfig } from '../core';
 import { PromptManagerState } from '.';
@@ -53,38 +53,6 @@ interface OverlayProps {
 }
 
 class Overlay extends Component<OverlayProps, never> {
-    updateBlurState() {
-        const blurClass = 'kumulos-overlay-blur';
-
-        if (
-            this.props.subscriptionState !== 'unsubscribed' &&
-            !document.body.classList.contains(blurClass)
-        ) {
-            return;
-        }
-
-        if (
-            this.props.promptState === 'requesting' &&
-            this.props.prompt?.overlay
-        ) {
-            document.body.classList.add(blurClass);
-        } else {
-            document.body.classList.remove(blurClass);
-        }
-    }
-
-    componentDidMount() {
-        this.updateBlurState();
-    }
-
-    componentDidUpdate() {
-        this.updateBlurState();
-    }
-
-    componentWillUnmount() {
-        document.body.classList.remove('kumulos-overlay-blur');
-    }
-
     render() {
         const { promptState, prompt, subscriptionState } = this.props;
 
@@ -104,9 +72,9 @@ class Overlay extends Component<OverlayProps, never> {
         };
 
         return (
-            <div
-                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
+            <BackgroundMask
                 style={style}
+                classes={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
             >
                 <div
                     class="kumulos-overlay-strip"
@@ -142,7 +110,7 @@ class Overlay extends Component<OverlayProps, never> {
                         </div>
                     </div>
                 </div>
-            </div>
+            </BackgroundMask>
         );
     }
 }
@@ -153,18 +121,17 @@ class Toast extends Component<{ message: string }, never> {
     }
 }
 
-interface UnderlayProps {
-    prompt?: PromptConfig;
+interface BackgroundMaskProps {
+    classes?: string;
+    style?: JSX.CSSProperties;
 }
 
-class Underlay extends Component<UnderlayProps, never> {
-    blurClass = 'kumulos-underlay-blur';
+class BackgroundMask extends Component<BackgroundMaskProps, never> {
+    blurClass = 'kumulos-background-mask-blur';
 
     updateBlurState() {
-        if (this.props.prompt?.overlay) {
+        if (!document.body.classList.contains(this.blurClass)) {
             document.body.classList.add(this.blurClass);
-        } else {
-            document.body.classList.remove(this.blurClass);
         }
     }
 
@@ -181,21 +148,12 @@ class Underlay extends Component<UnderlayProps, never> {
     }
 
     render() {
-        const underlay = this.props.prompt?.underlay;
-
-        if (undefined === underlay) {
-            return null;
-        }
-
-        const underlayStyle = {
-            backgroundColor: underlay.colors.bg
-        };
+        const { classes, style } = this.props;
 
         return (
-            <div
-                style={underlayStyle}
-                className="kumulos-prompt-underlay"
-            ></div>
+            <div style={style} class={`kumulos-background-mask ${classes}`}>
+                {this.props.children}
+            </div>
         );
     }
 }
@@ -243,7 +201,7 @@ export default class Ui extends Component<UiProps, UiState> {
     render() {
         return createPortal(
             <Fragment>
-                {this.renderUnderlay()}
+                {this.maybeRenderPromptUnderlay()}
 
                 {this.props.prompts.map(this.renderPrompt, this)}
                 {!isMobile() && (
@@ -261,12 +219,20 @@ export default class Ui extends Component<UiProps, UiState> {
         );
     }
 
-    renderUnderlay() {
+    maybeRenderPromptUnderlay() {
         const { prompts } = this.props;
 
         const firstPromptWithUnderlay = prompts.filter(p => !!p.underlay)[0];
 
-        return <Underlay prompt={firstPromptWithUnderlay} />;
+        if (!firstPromptWithUnderlay) {
+            return null;
+        }
+
+        const style = {
+            backgroundColor: firstPromptWithUnderlay.underlay!.colors.bg
+        };
+
+        return <BackgroundMask style={style} />;
     }
 
     renderPrompt(prompt: PromptConfig) {

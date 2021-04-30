@@ -1,13 +1,13 @@
-body.kumulos-underlay-blur {
+body.kumulos-background-mask-blur {
     overflow: hidden;
 }
 
-.kumulos-underlay-blur
-    > *:not(.kumulos-prompt):not(.kumulos-overlay):not(.kumulos-prompt-underlay) {
+.kumulos-background-mask-blur
+    > *:not(.kumulos-prompt):not(.kumulos-overlay):not(.kumulos-background-mask) {
     filter: blur(3px);
 }
 
-.kumulos-prompt-underlay {
+.kumulos-background-mask {
     position: fixed;
     top: 0;
     left: 0;

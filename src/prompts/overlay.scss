@@ -1,11 +1,3 @@
-body.kumulos-overlay-blur {
-    overflow: hidden;
-}
-
-.kumulos-overlay-blur>*:not(.kumulos-overlay) {
-    filter: blur(3px);
-}
-
 .kumulos-overlay {
     box-sizing: border-box;
 
@@ -124,14 +116,6 @@ body.kumulos-overlay-blur {
 }
 
 @media (max-width: 900px) {
-    body.kumulos-overlay-blur {
-        overflow: auto;
-    }
-
-    .kumulos-overlay-blur>*:not(.kumulos-overlay) {
-        filter: none;
-    }
-
     .kumulos-overlay {
         display: none;
     }
