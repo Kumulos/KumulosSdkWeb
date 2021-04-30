@@ -2,7 +2,8 @@ body.kumulos-underlay-blur {
     overflow: hidden;
 }
 
-.kumulos-underlay-blur > *:not(.kumulos-prompt):not(.kumulos-overlay) {
+.kumulos-underlay-blur
+    > *:not(.kumulos-prompt):not(.kumulos-overlay):not(.kumulos-prompt-underlay) {
     filter: blur(3px);
 }
 
