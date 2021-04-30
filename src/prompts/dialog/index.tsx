@@ -16,7 +16,7 @@ const styles = {
     }
 };
 
-export class Alert extends Component<
+export class Dialog extends Component<
     PromptUiProps<AlertPromptConfig | BannerPromptConfig>,
     never
 > {

@@ -10,7 +10,7 @@ import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
 import { getBrowserName } from '../core/utils';
 import { Bell } from './bell';
-import { Alert } from './alert';
+import { Dialog } from './dialog';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -250,7 +250,7 @@ export default class Ui extends Component<UiProps, UiState> {
             case 'alert':
             case 'banner':
                 return (
-                    <Alert
+                    <Dialog
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
                         promptManagerState={this.props.promptManagerState}
