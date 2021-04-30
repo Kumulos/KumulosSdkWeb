@@ -79,7 +79,10 @@ class Overlay extends Component<OverlayProps, never> {
         return (
             <BackgroundMask
                 style={style}
-                classes={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
+                // maintains backwards compat with existing blur class that
+                // was being applied directly by this component previously
+                blurClass="kumulos-overlay-blur"
+                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
             >
                 <div
                     class="kumulos-overlay-strip"
@@ -127,17 +130,38 @@ class Toast extends Component<{ message: string }, never> {
 }
 
 interface BackgroundMaskProps {
-    classes?: string;
+    class?: string;
+    blurClass?: string;
     style?: JSX.CSSProperties;
 }
 
-class BackgroundMask extends Component<BackgroundMaskProps, never> {
-    blurClass = 'kumulos-background-mask-blur';
+interface BackgroundMaskState {
+    blurClasses: string[];
+}
+
+class BackgroundMask extends Component<
+    BackgroundMaskProps,
+    BackgroundMaskState
+> {
+    constructor(props: BackgroundMaskProps) {
+        super(props);
+
+        const blurClasses = this.props.blurClass?.split(' ') ?? [];
+        blurClasses.push('kumulos-background-mask-blur');
+
+        this.state = {
+            blurClasses
+        };
+    }
 
     updateBlurState() {
-        if (!document.body.classList.contains(this.blurClass)) {
-            document.body.classList.add(this.blurClass);
-        }
+        const { blurClasses } = this.state;
+
+        blurClasses.forEach(blurClass => {
+            if (!document.body.classList.contains(blurClass)) {
+                document.body.classList.add(blurClass);
+            }
+        });
     }
 
     componentDidMount() {
@@ -149,14 +173,16 @@ class BackgroundMask extends Component<BackgroundMaskProps, never> {
     }
 
     componentWillUnmount() {
-        document.body.classList.remove(this.blurClass);
+        this.state.blurClasses.forEach(blurClass =>
+            document.body.classList.remove(blurClass)
+        );
     }
 
     render() {
-        const { classes, style } = this.props;
+        const { class: classNames, style } = this.props;
 
         return (
-            <div style={style} class={`kumulos-background-mask ${classes}`}>
+            <div style={style} class={`kumulos-background-mask ${classNames}`}>
                 {this.props.children}
             </div>
         );
