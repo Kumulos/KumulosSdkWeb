@@ -124,8 +124,6 @@ interface BasePromptConfig {
     type: PromptTypeName;
     trigger: PromptTrigger;
     position: PromptPosition;
-    labels: any;
-    colors: any;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
     underlay?: UnderlayConfig;
@@ -147,8 +145,8 @@ export interface BellColorConfig {
 
 export interface BellPromptConfig extends BasePromptConfig {
     type: PromptTypeName.BELL;
-    labels: BellLabelConfig;
-    colors: BellColorConfig;
+    labels?: BellLabelConfig;
+    colors?: BellColorConfig;
     position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
 

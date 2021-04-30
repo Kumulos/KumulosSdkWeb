@@ -1,2 +1,2 @@
 import { KumulosEvent, PromptConfig } from '../core';
-export declare function triggerMatched(prompt: Partial<PromptConfig>, event: KumulosEvent): boolean;
+export declare function triggerMatched(prompt: PromptConfig, event: KumulosEvent): boolean;

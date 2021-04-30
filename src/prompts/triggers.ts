@@ -46,12 +46,12 @@ function propLte(filterValue: FilterValue, propValue: any): boolean {
 }
 
 export function triggerMatched(
-    prompt: Partial<PromptConfig>,
+    prompt: PromptConfig,
     event: KumulosEvent
 ): boolean {
     const trigger = prompt.trigger;
 
-    if (trigger?.event !== event.type) {
+    if (trigger.event !== event.type) {
         return false;
     }
 

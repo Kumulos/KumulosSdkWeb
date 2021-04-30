@@ -28,7 +28,7 @@ test.each(cases)(
     }
 );
 
-function newPageViewPrompt(pathFilter: string): Partial<PromptConfig> {
+function newPageViewPrompt(pathFilter: string): PromptConfig {
     return {
         position: PromptPosition.BOTTOM_LEFT,
         type: PromptTypeName.BELL,
