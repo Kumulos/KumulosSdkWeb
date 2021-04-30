@@ -23,7 +23,6 @@ export declare enum PromptTypeName {
     ALERT = "alert",
     BANNER = "banner"
 }
-export declare const PROMPT_TYPE_NAMES: PromptTypeName[];
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
 export declare type PropFilter = [string, FilterOperator, FilterValue];
@@ -48,6 +47,10 @@ interface PromptOverlayConfig {
         text: string;
     };
 }
+interface ChannelSubAction {
+    type: 'subscribeToChannel';
+    channelUuid: string;
+}
 export declare enum UiActionType {
     DECLINE = "decline",
     REMIND = "remind"
@@ -59,6 +62,7 @@ interface RemindPromptAction {
     type: UiActionType.REMIND;
     delay: PromptReminderDelayConfig;
 }
+declare type PromptAction = ChannelSubAction;
 export declare enum ReminderTimeUnit {
     HOURS = "hours",
     DAYS = "days"
@@ -98,7 +102,7 @@ interface BasePromptConfig {
     labels: any;
     colors: any;
     overlay?: PromptOverlayConfig;
-    actions: any[];
+    actions?: PromptAction[];
     underlay?: UnderlayConfig;
 }
 interface BellLabelConfig {
@@ -117,6 +121,7 @@ export interface BellPromptConfig extends BasePromptConfig {
     type: PromptTypeName.BELL;
     labels: BellLabelConfig;
     colors: BellColorConfig;
+    position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
 interface AlertLabelConfig {
     thanksForSubscribing: string;
@@ -141,6 +146,7 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
+    position: PromptPosition.TOP | PromptPosition.CENTER;
 }
 interface BannerLabelConfig {
     thanksForSubscribing: string;

@@ -37,8 +37,6 @@ export enum PromptTypeName {
     BANNER = 'banner'
 }
 
-export const PROMPT_TYPE_NAMES = [PromptTypeName.BELL, PromptTypeName.ALERT];
-
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
 export type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export type FilterValue = number | boolean | string | string[];
@@ -129,7 +127,7 @@ interface BasePromptConfig {
     labels: any;
     colors: any;
     overlay?: PromptOverlayConfig;
-    actions: any[];
+    actions?: PromptAction[];
     underlay?: UnderlayConfig;
 }
 
@@ -151,6 +149,7 @@ export interface BellPromptConfig extends BasePromptConfig {
     type: PromptTypeName.BELL;
     labels: BellLabelConfig;
     colors: BellColorConfig;
+    position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
 
 interface AlertLabelConfig {
@@ -178,6 +177,7 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
+    position: PromptPosition.TOP | PromptPosition.CENTER;
 }
 
 interface BannerLabelConfig {
