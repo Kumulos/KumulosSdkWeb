@@ -263,9 +263,10 @@ export default class Ui extends Component<UiProps, UiState> {
 
     renderUnderlay() {
         const { prompts } = this.props;
-        const lastPrompt = prompts?.[prompts.length - 1];
 
-        return <Underlay prompt={lastPrompt} />;
+        const firstPromptWithUnderlay = prompts.filter(p => !!p.underlay)[0];
+
+        return <Underlay prompt={firstPromptWithUnderlay} />;
     }
 
     renderPrompt(prompt: PromptConfig) {
