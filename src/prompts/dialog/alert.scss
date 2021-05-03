@@ -1,0 +1,85 @@
+.kumulos-alert-container {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    font-family: $defaultFont;
+
+    animation: kumulos-anim-fade-in 0.2s ease-in;
+    backface-visibility: hidden;
+}
+
+@media only screen and (min-device-width: 480px) {
+    .kumulos-alert-container {
+        left: 50%;
+
+        width: 500px;
+        min-height: 250px;
+        margin-left: -250px;
+
+        box-shadow: 0 0 3px 1px $shadow-color;
+
+        height: auto;
+
+        &.kumulos-prompt-position-top-center {
+            border-radius: 0 0 3px 3px;
+        }
+
+        &.kumulos-prompt-position-center {
+            border-radius: 3px;
+            top: 120px;
+        }
+    }
+}
+
+.kumulos-alert-icon {
+    order: 2;
+    width: 60px;
+    height: 60px;
+    align-self: flex-start;
+}
+
+.kumulos-alert-content {
+    display: flex;
+    order: 1;
+    flex-direction: column;
+    flex: 1;
+    margin-right: 10px;
+}
+
+.kumulos-alert-header {
+    display: flex;
+    font-size: $defaultHeaderFontSize;
+    margin-bottom: 20px;
+
+    h1 {
+        font-size: inherit;
+        font-weight: 400;
+        margin: 0;
+    }
+}
+
+.kumulos-alert-body {
+    flex: 1;
+    white-space: pre-wrap;
+    overflow-y: auto;
+}
+
+.kumulos-alert-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    order: 3;
+    width: 100%;
+    height: 30px;
+    align-self: flex-end;
+}

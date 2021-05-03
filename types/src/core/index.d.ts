@@ -18,6 +18,11 @@ export declare enum EventType {
     USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared",
     PAGE_VIEWED = "k.pageViewed"
 }
+export declare enum PromptTypeName {
+    BELL = "bell",
+    ALERT = "alert",
+    BANNER = "banner"
+}
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
 export declare type PropFilter = [string, FilterOperator, FilterValue];
@@ -71,54 +76,103 @@ export interface PromptUiActions {
         decline: DeclinePromptAction | RemindPromptAction;
     };
 }
+export interface BackgroundMaskConfig {
+    colors: {
+        bg: string;
+    };
+}
+export declare enum PromptPosition {
+    TOP_LEFT = "top-left",
+    TOP_CENTER = "top-center",
+    TOP_RIGHT = "top-right",
+    CENTER_LEFT = "center-left",
+    CENTER = "center",
+    CENTER_RIGHT = "center-right",
+    BOTTOM_LEFT = "bottom-left",
+    BOTTOM_CENTER = "bottom-center",
+    BOTTOM_RIGHT = "bottom-right",
+    TOP = "top",
+    BOTTOM = "bottom"
+}
 interface BasePromptConfig {
     uuid: string;
-    type: string;
+    type: PromptTypeName;
     trigger: PromptTrigger;
-    position: string;
+    position: PromptPosition;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
 }
-export interface BellPromptConfig extends BasePromptConfig {
-    type: 'bell';
-    position: 'bottom-left' | 'bottom-right';
-    labels?: {
-        tooltip?: {
-            subscribe?: string;
-        };
-        thanksForSubscribing?: string;
+interface BellLabelConfig {
+    tooltip: {
+        subscribe: string;
     };
-    colors?: {
-        bell?: {
-            fg?: string;
-            bg?: string;
-        };
+    thanksForSubscribing: string;
+}
+export interface BellColorConfig {
+    bell: {
+        fg: string;
+        bg: string;
+    };
+}
+export interface BellPromptConfig extends BasePromptConfig {
+    type: PromptTypeName.BELL;
+    labels?: BellLabelConfig;
+    colors?: BellColorConfig;
+    position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
+}
+interface AlertLabelConfig {
+    thanksForSubscribing: string;
+    alert: {
+        heading: string;
+        body: string;
+        declineAction: string;
+        acceptAction: string;
+    };
+}
+export interface AlertColorConfig {
+    alert: {
+        fg: string;
+        bg: string;
+        declineActionFg: string;
+        declineActionBg: string;
+        acceptActionFg: string;
+        acceptActionBg: string;
     };
 }
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
-    type: 'alert';
-    position: 'top-center';
-    labels: {
-        thanksForSubscribing?: string;
-        alert: {
-            heading: string;
-            body: string;
-            declineAction: string;
-            acceptAction: string;
-        };
-    };
-    colors: {
-        alert: {
-            fg: string;
-            bg: string;
-            declineActionFg: string;
-            declineActionBg: string;
-            acceptActionFg: string;
-            acceptActionBg: string;
-        };
+    type: PromptTypeName.ALERT;
+    labels: AlertLabelConfig;
+    colors: AlertColorConfig;
+    position: PromptPosition.TOP | PromptPosition.CENTER;
+    backgroundMask?: BackgroundMaskConfig;
+}
+interface BannerLabelConfig {
+    thanksForSubscribing: string;
+    banner: {
+        heading: string;
+        body: string;
+        declineAction: string;
+        acceptAction: string;
     };
 }
-export declare type PromptConfig = BellPromptConfig | AlertPromptConfig;
+export interface BannerColorConfig {
+    banner: {
+        fg: string;
+        bg: string;
+        declineActionFg: string;
+        declineActionBg: string;
+        acceptActionFg: string;
+        acceptActionBg: string;
+    };
+}
+export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
+    type: PromptTypeName.BANNER;
+    labels: BannerLabelConfig;
+    colors: BannerColorConfig;
+    position: PromptPosition.TOP | PromptPosition.BOTTOM;
+    backgroundMask?: BackgroundMaskConfig;
+}
+export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };

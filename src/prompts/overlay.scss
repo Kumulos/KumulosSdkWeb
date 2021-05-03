@@ -1,8 +1,4 @@
-body.kumulos-overlay-blur {
-    overflow: hidden;
-}
-
-.kumulos-overlay-blur>*:not(.kumulos-overlay) {
+.kumulos-overlay-blur > *:not(.kumulos-overlay) {
     filter: blur(3px);
 }
 
@@ -16,12 +12,6 @@ body.kumulos-overlay-blur {
     }
 
     z-index: 2000;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
 
     &-strip {
         display: flex;
@@ -124,14 +114,6 @@ body.kumulos-overlay-blur {
 }
 
 @media (max-width: 900px) {
-    body.kumulos-overlay-blur {
-        overflow: auto;
-    }
-
-    .kumulos-overlay-blur>*:not(.kumulos-overlay) {
-        filter: none;
-    }
-
     .kumulos-overlay {
         display: none;
     }

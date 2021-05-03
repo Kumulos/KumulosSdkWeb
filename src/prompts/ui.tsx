@@ -1,15 +1,19 @@
-import './overlay.scss';
 import './prompts.scss';
 
-import { Component, Fragment, h } from 'preact';
+import { Component, Fragment, h, JSX } from 'preact';
 
-import { PromptConfig } from '../core';
+import {
+    PromptConfig,
+    PromptTypeName,
+    AlertPromptConfig,
+    BannerPromptConfig
+} from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
 import { getBrowserName } from '../core/utils';
 import { Bell } from './bell';
-import { Alert } from './alert';
+import { Dialog } from './dialog';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -52,38 +56,6 @@ interface OverlayProps {
 }
 
 class Overlay extends Component<OverlayProps, never> {
-    updateBlurState() {
-        const blurClass = 'kumulos-overlay-blur';
-
-        if (
-            this.props.subscriptionState !== 'unsubscribed' &&
-            !document.body.classList.contains(blurClass)
-        ) {
-            return;
-        }
-
-        if (
-            this.props.promptState === 'requesting' &&
-            this.props.prompt?.overlay
-        ) {
-            document.body.classList.add(blurClass);
-        } else {
-            document.body.classList.remove(blurClass);
-        }
-    }
-
-    componentDidMount() {
-        this.updateBlurState();
-    }
-
-    componentDidUpdate() {
-        this.updateBlurState();
-    }
-
-    componentWillUnmount() {
-        document.body.classList.remove('kumulos-overlay-blur');
-    }
-
     render() {
         const { promptState, prompt, subscriptionState } = this.props;
 
@@ -103,9 +75,12 @@ class Overlay extends Component<OverlayProps, never> {
         };
 
         return (
-            <div
-                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
+            <BackgroundMask
                 style={style}
+                // maintains backwards compat with existing blur class that
+                // was being applied directly by this component previously
+                blurClass="kumulos-overlay-blur"
+                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
             >
                 <div
                     class="kumulos-overlay-strip"
@@ -141,7 +116,7 @@ class Overlay extends Component<OverlayProps, never> {
                         </div>
                     </div>
                 </div>
-            </div>
+            </BackgroundMask>
         );
     }
 }
@@ -149,6 +124,72 @@ class Overlay extends Component<OverlayProps, never> {
 class Toast extends Component<{ message: string }, never> {
     render() {
         return <div class="kumulos-toast">{this.props.message}</div>;
+    }
+}
+
+interface BackgroundMaskProps {
+    class?: string;
+    blurClass?: string;
+    style?: JSX.CSSProperties;
+}
+
+interface BackgroundMaskState {
+    blurClasses: string[];
+}
+
+class BackgroundMask extends Component<
+    BackgroundMaskProps,
+    BackgroundMaskState
+> {
+    constructor(props: BackgroundMaskProps) {
+        super(props);
+
+        const blurClasses = this.props.blurClass?.split(' ') ?? [];
+        blurClasses.push('kumulos-background-mask-blur');
+
+        this.state = {
+            blurClasses
+        };
+    }
+
+    updateBlurState() {
+        const { blurClasses } = this.state;
+
+        blurClasses.forEach(blurClass => {
+            if (!document.body.classList.contains(blurClass)) {
+                document.body.classList.add(blurClass);
+            }
+        });
+    }
+
+    componentDidMount() {
+        this.updateBlurState();
+    }
+
+    componentDidUpdate() {
+        this.updateBlurState();
+    }
+
+    componentWillUnmount() {
+        this.state.blurClasses.forEach(blurClass =>
+            document.body.classList.remove(blurClass)
+        );
+    }
+
+    render() {
+        const { class: classNames, style } = this.props;
+
+        const classes = ['kumulos-background-mask'];
+
+        if (!!classNames) {
+            classes.push(classNames);
+        }
+
+        return (
+            <div style={style} class={classes.join(' ')}>
+                {this.props.children}
+            </div>
+        );
     }
 }
 
@@ -195,6 +236,8 @@ export default class Ui extends Component<UiProps, UiState> {
     render() {
         return createPortal(
             <Fragment>
+                {this.maybeRenderPromptBackgroundMask()}
+
                 {this.props.prompts.map(this.renderPrompt, this)}
                 {!isMobile() && (
                     <Overlay
@@ -211,7 +254,36 @@ export default class Ui extends Component<UiProps, UiState> {
         );
     }
 
+    maybeRenderPromptBackgroundMask() {
+        if ('requesting' === this.props.promptManagerState) {
+            return null;
+        }
+
+        const { prompts } = this.props;
+
+        const firstPromptWithMask = prompts.filter(
+            p =>
+                (p.type === PromptTypeName.ALERT ||
+                    p.type === PromptTypeName.BANNER) &&
+                !!p.backgroundMask
+        )[0] as AlertPromptConfig | BannerPromptConfig;
+
+        if (!firstPromptWithMask) {
+            return null;
+        }
+
+        const style = {
+            backgroundColor: firstPromptWithMask.backgroundMask!.colors.bg
+        };
+
+        return <BackgroundMask style={style} />;
+    }
+
     renderPrompt(prompt: PromptConfig) {
+        if ('requesting' === this.props.promptManagerState) {
+            return null;
+        }
+
         switch (prompt.type) {
             case 'bell':
                 return (
@@ -224,15 +296,16 @@ export default class Ui extends Component<UiProps, UiState> {
                     />
                 );
             case 'alert':
+            case 'banner':
                 return (
-                    <Alert
+                    <Dialog
                         config={prompt}
                         subscriptionState={this.props.subscriptionState}
                         promptManagerState={this.props.promptManagerState}
                         onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
                     />
-                )
+                );
             default:
                 return null;
         }
