@@ -17,7 +17,6 @@ import { h, render } from 'preact';
 import { Channel } from '../core/channels';
 import Kumulos from '..';
 import Ui from './ui';
-import { loadPromptConfigs } from './config';
 import { triggerMatched } from './triggers';
 import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
@@ -117,13 +116,23 @@ export class PromptManager {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
 
-        this.hidePrompt(prompt);
+        this.hideAndSuppressPrompts(prompt);
     };
 
     private onPromptDeclined = (prompt: PromptConfig) => {
         this.maybePersistReminder(prompt);
         this.hidePrompt(prompt);
     };
+
+    private hideAndSuppressPrompts(prompt: PromptConfig) {
+        const { subscriptionState } = this;
+
+        this.hidePrompt(prompt);
+
+        if (subscriptionState !== 'unsubscribed') {
+            this.activePrompts.forEach(p => this.hidePrompt(p));
+        }
+    }
 
     private async handlePromptActions(prompt: PromptConfig) {
         if (!prompt.actions) {
@@ -228,11 +237,15 @@ export class PromptManager {
 
         switch (type) {
             case UiActionType.REMIND:
-                return persistPromptReminder(prompt.uuid, { declinedOn: Date.now() });
+                return persistPromptReminder(prompt.uuid, {
+                    declinedOn: Date.now()
+                });
             case UiActionType.DECLINE:
                 return persistPromptReminder(prompt.uuid, 'suppressed');
             default:
-                return console.warn(`Unsupported decline action type ${type} supported for prompt ${prompt.uuid}, fall back to always show this prompt when declined`);
+                return console.warn(
+                    `Unsupported decline action type ${type} supported for prompt ${prompt.uuid}, fall back to always show this prompt when declined`
+                );
         }
     }
 
@@ -363,7 +376,7 @@ export class PromptManager {
         if (this.context.pushPrompts !== 'auto') {
             this.prompts = { ...this.context.pushPrompts };
         } else {
-            this.prompts =  { ...this.platformConfig.prompts || {} };
+            this.prompts = { ...(this.platformConfig.prompts || {}) };
         }
 
         for (let id in this.prompts) {

@@ -1,5 +1,3 @@
-import './background-mask.scss';
-import './overlay.scss';
 import './prompts.scss';
 
 import { Component, Fragment, h, JSX } from 'preact';
@@ -181,8 +179,14 @@ class BackgroundMask extends Component<
     render() {
         const { class: classNames, style } = this.props;
 
+        const classes = ['kumulos-background-mask'];
+
+        if (!!classNames) {
+            classes.push(classNames);
+        }
+
         return (
-            <div style={style} class={`kumulos-background-mask ${classNames}`}>
+            <div style={style} class={classes.join(' ')}>
                 {this.props.children}
             </div>
         );
@@ -251,6 +255,10 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     maybeRenderPromptBackgroundMask() {
+        if ('requesting' === this.props.promptManagerState) {
+            return null;
+        }
+
         const { prompts } = this.props;
 
         const firstPromptWithMask = prompts.filter(
@@ -272,6 +280,10 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     renderPrompt(prompt: PromptConfig) {
+        if ('requesting' === this.props.promptManagerState) {
+            return null;
+        }
+
         switch (prompt.type) {
             case 'bell':
                 return (

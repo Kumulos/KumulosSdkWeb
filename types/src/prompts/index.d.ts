@@ -21,6 +21,7 @@ export declare class PromptManager {
     private onRequestNativePrompt;
     private onPromptAccepted;
     private onPromptDeclined;
+    private hideAndSuppressPrompts;
     private handlePromptActions;
     private render;
     private evaluateTriggers;

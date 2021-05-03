@@ -1,5 +1,3 @@
-import './background-mask.scss';
-import './overlay.scss';
 import './prompts.scss';
 import { Component, h } from 'preact';
 import { PromptConfig } from '../core';
