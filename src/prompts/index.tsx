@@ -6,7 +6,8 @@ import {
     PromptUiActions,
     ReminderTimeUnit,
     PlatformConfig,
-    UiActionType
+    UiActionType,
+    UserChannelSelectDialogAction
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -22,6 +23,7 @@ import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
 import { PlatformConfigContext } from './ui-context';
 import { loadConfig } from '../core/config';
+import { handleChannelSubscriptionStrategies } from './channels/subscription-strategy';
 
 export type PromptManagerState = 'loading' | 'ready' | 'requesting';
 
@@ -67,6 +69,10 @@ export class PromptManager {
             document.body.appendChild(this.uiRoot);
             this.setState('loading');
         });
+    }
+
+    public getChannels() {
+        return this.channels;
     }
 
     private onEventTracked = (e: SdkEvent) => {
@@ -141,22 +147,11 @@ export class PromptManager {
 
         console.info('Will handle actions: ', prompt.actions);
 
-        const channelsToSub = prompt.actions
-            .map(a => a.channelUuid)
-            .filter(uuid =>
-                this.channels.find(
-                    c => c.uuid === uuid && c.subscribed === false
-                )
-            );
-
-        if (!channelsToSub.length) {
-            console.info('No channels to subscribe to found, aborting');
-            return;
-        }
-
-        await this.kumulosClient
-            .getChannelSubscriptionManager()
-            .subscribe(channelsToSub);
+        await handleChannelSubscriptionStrategies(
+            this,
+            this.kumulosClient.getChannelSubscriptionManager(),
+            prompt
+        );
 
         this.channels = await this.kumulosClient
             .getChannelSubscriptionManager()
@@ -165,6 +160,27 @@ export class PromptManager {
 
     private render() {
         if (!this.subscriptionState || !this.state || !this.platformConfig) {
+            return;
+        }
+
+        render(
+            <PlatformConfigContext.Provider value={this.platformConfig}>
+                <Ui
+                    ref={r => (this.ui = r)}
+                    prompts={this.activePrompts}
+                    subscriptionState={this.subscriptionState}
+                    promptManagerState={this.state as PromptManagerState}
+                    onPromptAccepted={this.onPromptAccepted}
+                    onPromptDeclined={this.onPromptDeclined}
+                    currentlyRequestingPrompt={this.currentlyRequestingPrompt}
+                />
+            </PlatformConfigContext.Provider>,
+            this.uiRoot
+        );
+    }
+
+    private renderChannelPrompt(action: UserChannelSelectDialogAction) {
+        if (!this.subscriptionState) {
             return;
         }
 

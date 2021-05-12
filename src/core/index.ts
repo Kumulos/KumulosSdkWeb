@@ -62,7 +62,41 @@ interface PromptOverlayConfig {
     };
 }
 
-interface ChannelSubAction {
+export interface ChannelDialogLabelsConfig {
+    heading: string;
+    confirmAction: string;
+}
+
+export interface ChannelDialogColorsConfig {
+    bg: string;
+    fg: string;
+    confirmActionBg: string;
+    confirmActionFg: string;
+}
+
+export interface ChannelDialogConfig {
+    labels: ChannelDialogLabelsConfig;
+    colors: ChannelDialogColorsConfig;
+    position: PromptPosition;
+}
+
+export interface MultiChannelSelectionConfig {
+    presentedUuids: string[] | 'all';
+    checkedUuids: string[] | 'none' | 'all';
+}
+
+export interface UserChannelSelectInlineAction {
+    type: 'userChannelSelectInline';
+    channels: MultiChannelSelectionConfig;
+}
+
+export interface UserChannelSelectDialogAction {
+    type: 'userChannelSelectDialog';
+    channels: MultiChannelSelectionConfig;
+    dialogConfig: ChannelDialogConfig;
+}
+
+export interface ChannelSubAction {
     type: 'subscribeToChannel';
     channelUuid: string;
 }
@@ -81,7 +115,10 @@ interface RemindPromptAction {
     delay: PromptReminderDelayConfig;
 }
 
-type PromptAction = ChannelSubAction;
+export type PromptAction =
+    | ChannelSubAction
+    | UserChannelSelectInlineAction
+    | UserChannelSelectDialogAction;
 
 export enum ReminderTimeUnit {
     HOURS = 'hours',
