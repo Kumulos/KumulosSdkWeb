@@ -1,3 +1,4 @@
+.kumulos-channel-dialog-container,
 .kumulos-alert-container {
     position: fixed;
 
@@ -19,6 +20,7 @@
 }
 
 @media only screen and (min-device-width: 480px) {
+    .kumulos-channel-dialog-container,
     .kumulos-alert-container {
         left: 50%;
 
@@ -41,6 +43,7 @@
     }
 }
 
+.kumulos-channel-dialog-icon,
 .kumulos-alert-icon {
     order: 2;
     width: 60px;
@@ -48,6 +51,7 @@
     align-self: flex-start;
 }
 
+.kumulos-channel-dialog-content,
 .kumulos-alert-content {
     display: flex;
     order: 1;
@@ -56,6 +60,7 @@
     margin-right: 10px;
 }
 
+.kumulos-channel-dialog-header,
 .kumulos-alert-header {
     display: flex;
     font-size: $defaultHeaderFontSize;
@@ -68,12 +73,14 @@
     }
 }
 
+.kumulos-channel-dialog-body,
 .kumulos-alert-body {
     flex: 1;
     white-space: pre-wrap;
     overflow-y: auto;
 }
 
+.kumulos-channel-dialog-actions,
 .kumulos-alert-actions {
     display: flex;
     justify-content: flex-end;

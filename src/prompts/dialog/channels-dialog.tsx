@@ -22,7 +22,7 @@ export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
 
     renderDialog = (platformConfig?: PlatformConfig) => {
         const { action } = this.props;
-        const classes = `kumulos-channel-dialog kumulos-channel-dialog-position-${action.dialogConfig.position}`;
+        const classes = `kumulos-channel-dialog-container kumulos-prompt-position-${action.dialogConfig.position}`;
 
         const { heading, confirmAction } = action.dialogConfig.labels;
         const {

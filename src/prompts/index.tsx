@@ -187,11 +187,10 @@ export class PromptManager {
             return;
         }
 
-        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
-
-        this.channels = await channelSubMgr.listChannels();
-
         console.info('Will handle actions: ', prompt.actions);
+
+        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
+        this.channels = await channelSubMgr.listChannels();
 
         await this.handleChannelSubActions(prompt);
         await this.handleChannelPostActions(prompt);
@@ -456,6 +455,7 @@ export class PromptManager {
                     this.context
                 );
                 await this.evaluateTriggers();
+                console.log('state - ready');
                 this.render();
                 break;
             case 'postaction':

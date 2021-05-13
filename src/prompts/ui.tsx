@@ -244,6 +244,8 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     render() {
+        console.log('ui render');
+
         return createPortal(
             <Fragment>
                 {this.maybeRenderPromptBackgroundMask()}
@@ -300,6 +302,8 @@ export default class Ui extends Component<UiProps, UiState> {
         if ('postaction' === this.props.promptManagerState) {
             return null;
         }
+
+        console.info('render prompt', this.props.promptManagerState, prompt);
 
         switch (prompt.type) {
             case 'bell':
