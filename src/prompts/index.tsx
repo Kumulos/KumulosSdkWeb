@@ -150,13 +150,13 @@ export class PromptManager {
             await this.onRequestNativePrompt(prompt);
         }
 
+        this.hideAndSuppressPrompts(prompt);
+
         await this.handlePromptActions(prompt);
 
         if (this.subscriptionState === 'subscribed') {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
-
-        this.hideAndSuppressPrompts(prompt);
     };
 
     private onPostActionConfirm = async (
