@@ -1,0 +1,55 @@
+.kumulos-checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    user-select: none;
+    line-height: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.kumulos-checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.kumulos-checkbox {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+
+.kumulos-checkbox-container:hover input ~ .kumulos-checkbox {
+    background-color: #eee;
+    display: block;
+}
+
+.kumulos-checkbox:after {
+    content: '';
+    position: absolute;
+    display: none;
+}
+
+.kumulos-checkbox-container input:checked ~ .kumulos-checkbox:after {
+    display: block;
+}
+
+.kumulos-checkbox-container .kumulos-checkbox:after {
+    left: 10px;
+    top: -5px;
+    width: 5px;
+    height: 15px;
+    border: solid #000;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}

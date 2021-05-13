@@ -1,6 +1,7 @@
 import { Component, h } from 'preact';
-import { PlatformConfig, UserChannelSelectDialogAction } from '../../core';
-import { PlatformConfigContext } from '../ui-context';
+import { UserChannelSelectDialogAction } from '../../core';
+import { UIContext, UIContextState } from '../ui-context';
+import { ChannelsList } from './channels-list';
 
 const styles = {
     iconStyle: {
@@ -20,7 +21,11 @@ export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
         this.props.onConfirm([]);
     };
 
-    renderDialog = (platformConfig?: PlatformConfig) => {
+    renderDialog = (uiContext?: UIContextState) => {
+        if (undefined === uiContext) {
+            return null;
+        }
+
         const { action } = this.props;
         const classes = `kumulos-channel-dialog-container kumulos-prompt-position-${action.dialogConfig.position}`;
 
@@ -44,7 +49,7 @@ export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
 
         const iconStyle = {
             ...styles.iconStyle,
-            backgroundImage: `url(${platformConfig?.iconUrl})`
+            backgroundImage: `url(${uiContext?.platformConfig.iconUrl})`
         };
 
         return (
@@ -58,7 +63,9 @@ export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
                     <div className="kumulos-channel-dialog-header">
                         <h1>{heading}</h1>
                     </div>
-                    <div className="kumulos-channel-dialog-body"></div>
+                    <div className="kumulos-channel-dialog-body">
+                        <ChannelsList channels={uiContext.channelList} />
+                    </div>
                 </div>
 
                 <div className="kumulos-channel-dialog-actions">
@@ -76,10 +83,6 @@ export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
     };
 
     render() {
-        return (
-            <PlatformConfigContext.Consumer>
-                {this.renderDialog}
-            </PlatformConfigContext.Consumer>
-        );
+        return <UIContext.Consumer>{this.renderDialog}</UIContext.Consumer>;
     }
 }

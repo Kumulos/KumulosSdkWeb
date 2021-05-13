@@ -7,7 +7,8 @@ import {
     PromptTypeName,
     AlertPromptConfig,
     BannerPromptConfig,
-    PromptAction
+    PromptAction,
+    UserChannelSelectInlineAction
 } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
@@ -32,7 +33,11 @@ export interface PromptUiProps<T extends PromptConfig> {
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (prompt: PromptConfig) => void;
-    onPromptDeclined: (prompt: PromptConfig) => void;
+    onPromptDeclined: (
+        prompt: PromptConfig,
+        selectedChannelUuids?: string[]
+    ) => void;
+    action?: UserChannelSelectInlineAction;
 }
 
 interface TooltipProps {
@@ -318,6 +323,13 @@ export default class Ui extends Component<UiProps, UiState> {
                 );
             case 'alert':
             case 'banner':
+                const postAction =
+                    prompt.type === PromptTypeName.ALERT &&
+                    this.props.currentPostAction?.type ===
+                        'userChannelSelectInline'
+                        ? this.props.currentPostAction
+                        : undefined;
+
                 return (
                     <Dialog
                         config={prompt}
@@ -325,6 +337,7 @@ export default class Ui extends Component<UiProps, UiState> {
                         promptManagerState={this.props.promptManagerState}
                         onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
+                        action={postAction}
                     />
                 );
             default:

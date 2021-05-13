@@ -15,7 +15,7 @@ import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
 } from '../core/push';
-import { h, render } from 'preact';
+import { h, render, createContext } from 'preact';
 
 import { Channel } from '../core/channels';
 import Kumulos from '..';
@@ -23,7 +23,7 @@ import Ui from './ui';
 import { triggerMatched } from './triggers';
 import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
-import { PlatformConfigContext } from './ui-context';
+import { UIContext } from './ui-context';
 import { loadConfig } from '../core/config';
 
 export type PromptManagerState =
@@ -255,7 +255,12 @@ export class PromptManager {
         }
 
         render(
-            <PlatformConfigContext.Provider value={this.platformConfig}>
+            <UIContext.Provider
+                value={{
+                    platformConfig: this.platformConfig,
+                    channelList: this.channels
+                }}
+            >
                 <Ui
                     ref={r => (this.ui = r)}
                     prompts={this.activePrompts}
@@ -267,7 +272,7 @@ export class PromptManager {
                     currentlyRequestingPrompt={this.currentlyRequestingPrompt}
                     currentPostAction={this.currentPostAction}
                 />
-            </PlatformConfigContext.Provider>,
+            </UIContext.Provider>,
             this.uiRoot
         );
     }

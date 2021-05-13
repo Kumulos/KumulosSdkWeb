@@ -2,11 +2,11 @@ import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
 import {
     AlertPromptConfig,
-    PlatformConfig,
     BannerPromptConfig,
     PromptTypeName
 } from '../../core';
-import { PlatformConfigContext } from '../ui-context';
+import { UIContext, UIContextState } from '../ui-context';
+import { ChannelsList } from './channels-list';
 
 const styles = {
     iconStyle: {
@@ -28,7 +28,11 @@ export class Dialog extends Component<
         this.props.onPromptDeclined(this.props.config);
     };
 
-    renderAlert = (platformConfig?: PlatformConfig) => {
+    renderAlert = (uiContext?: UIContextState) => {
+        if (undefined === uiContext) {
+            return null;
+        }
+
         const config = this.props.config;
         const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-${config.type}-container kumulos-prompt-position-${config.position}`;
 
@@ -66,7 +70,7 @@ export class Dialog extends Component<
 
         const iconStyle = {
             ...styles.iconStyle,
-            backgroundImage: `url(${platformConfig?.iconUrl})`
+            backgroundImage: `url(${uiContext.platformConfig.iconUrl})`
         };
 
         return (
@@ -80,7 +84,12 @@ export class Dialog extends Component<
                     <div className={`kumulos-${config.type}-header`}>
                         <h1>{heading}</h1>
                     </div>
-                    <div className={`kumulos-${config.type}-body`}>{body}</div>
+                    <div className={`kumulos-${config.type}-body`}>
+                        {body}
+                        {this.props.action && (
+                            <ChannelsList channels={uiContext.channelList} />
+                        )}
+                    </div>
                 </div>
 
                 <div className={`kumulos-${config.type}-actions`}>
@@ -106,10 +115,6 @@ export class Dialog extends Component<
     };
 
     render() {
-        return (
-            <PlatformConfigContext.Consumer>
-                {this.renderAlert}
-            </PlatformConfigContext.Consumer>
-        );
+        return <UIContext.Consumer>{this.renderAlert}</UIContext.Consumer>;
     }
 }

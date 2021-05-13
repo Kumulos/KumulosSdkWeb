@@ -1,2 +1,7 @@
 import { PlatformConfig } from '../core';
-export declare const PlatformConfigContext: import("preact").Context<PlatformConfig | undefined>;
+import { Channel } from '../core/channels';
+export interface UIContextState {
+    platformConfig: PlatformConfig;
+    channelList: Channel[];
+}
+export declare const UIContext: import("preact").Context<UIContextState | undefined>;
