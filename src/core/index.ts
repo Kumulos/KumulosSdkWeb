@@ -34,7 +34,8 @@ export enum EventType {
 export enum PromptTypeName {
     BELL = 'bell',
     ALERT = 'alert',
-    BANNER = 'banner'
+    BANNER = 'banner',
+    CHANNEL = 'channel'
 }
 
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
@@ -248,6 +249,7 @@ export type PromptConfig =
     | BellPromptConfig
     | AlertPromptConfig
     | BannerPromptConfig;
+
 export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {

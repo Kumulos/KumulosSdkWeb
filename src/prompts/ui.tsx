@@ -6,7 +6,8 @@ import {
     PromptConfig,
     PromptTypeName,
     AlertPromptConfig,
-    BannerPromptConfig
+    BannerPromptConfig,
+    PromptAction
 } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
@@ -14,6 +15,7 @@ import { createPortal } from 'preact/compat';
 import { getBrowserName } from '../core/utils';
 import { Bell } from './bell';
 import { Dialog } from './dialog';
+import { ChannelsDialog } from './dialog/channels-dialog';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -197,9 +199,17 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
+    onPromptAccepted: (
+        prompt: PromptConfig,
+        selectedChannelUuids?: string[]
+    ) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    onPostActionConfirm: (
+        prompt: PromptConfig,
+        selectedChannelUuids?: string[]
+    ) => void;
     currentlyRequestingPrompt?: PromptConfig;
+    currentPostAction?: PromptAction;
 }
 
 interface UiState {
@@ -239,6 +249,9 @@ export default class Ui extends Component<UiProps, UiState> {
                 {this.maybeRenderPromptBackgroundMask()}
 
                 {this.props.prompts.map(this.renderPrompt, this)}
+
+                {this.renderPostAction()}
+
                 {!isMobile() && (
                     <Overlay
                         promptState={this.props.promptManagerState}
@@ -284,6 +297,10 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
+        if ('postaction' === this.props.promptManagerState) {
+            return null;
+        }
+
         switch (prompt.type) {
             case 'bell':
                 return (
@@ -309,5 +326,44 @@ export default class Ui extends Component<UiProps, UiState> {
             default:
                 return null;
         }
+    }
+
+    renderPostAction() {
+        const {
+            promptManagerState,
+            currentPostAction,
+            currentlyRequestingPrompt
+        } = this.props;
+
+        console.info(
+            'render post action',
+            promptManagerState,
+            currentPostAction,
+            currentlyRequestingPrompt
+        );
+
+        if ('postaction' !== promptManagerState) {
+            return null;
+        }
+
+        if (!currentlyRequestingPrompt) {
+            return null;
+        }
+
+        if ('userChannelSelectDialog' !== currentPostAction?.type) {
+            return null;
+        }
+
+        return (
+            <ChannelsDialog
+                action={currentPostAction}
+                onConfirm={selectedChannelUuids => {
+                    this.props.onPostActionConfirm(
+                        currentlyRequestingPrompt,
+                        selectedChannelUuids
+                    );
+                }}
+            />
+        );
     }
 }

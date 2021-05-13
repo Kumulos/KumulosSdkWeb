@@ -12,12 +12,12 @@ const styles = {
 
 export interface ChannelsDialogProps {
     action: UserChannelSelectDialogAction;
-    onConfirm: () => void;
+    onConfirm: (selectedChannelUuids: string[]) => void;
 }
 
 export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
     onConfirm = () => {
-        this.props.onConfirm();
+        this.props.onConfirm([]);
     };
 
     renderDialog = (platformConfig?: PlatformConfig) => {

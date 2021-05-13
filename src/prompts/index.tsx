@@ -7,6 +7,8 @@ import {
     ReminderTimeUnit,
     PlatformConfig,
     UiActionType,
+    ChannelSubAction,
+    PromptAction,
     UserChannelSelectDialogAction
 } from '../core';
 import getPushOpsManager, {
@@ -23,9 +25,13 @@ import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
 import { PlatformConfigContext } from './ui-context';
 import { loadConfig } from '../core/config';
-import { handleChannelSubscriptionStrategies } from './channels/subscription-strategy';
 
-export type PromptManagerState = 'loading' | 'ready' | 'requesting';
+export type PromptManagerState =
+    | 'loading'
+    | 'ready'
+    | 'requesting'
+    | 'postaction'
+    | 'cleanup';
 
 const REMINDER_TIME_UNIT_TO_MILLIS = {
     [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
@@ -35,6 +41,8 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 // loading -> ready
 // ready -> requesting
 // requesting -> ready
+// ready -> postaction
+// postaction -> ready
 
 export class PromptManager {
     private readonly kumulosClient: Kumulos;
@@ -51,6 +59,7 @@ export class PromptManager {
     private channels: Channel[];
     private ui?: Ui;
     private platformConfig?: PlatformConfig;
+    private currentPostAction?: PromptAction;
 
     constructor(client: Kumulos, ctx: Context) {
         this.prompts = {};
@@ -73,6 +82,10 @@ export class PromptManager {
 
     public getChannels() {
         return this.channels;
+    }
+
+    public getState(): PromptManagerState | undefined {
+        return this.state;
     }
 
     private onEventTracked = (e: SdkEvent) => {
@@ -111,7 +124,28 @@ export class PromptManager {
         this.setState('ready');
     };
 
-    private onPromptAccepted = async (prompt: PromptConfig) => {
+    private onRequestPostActionPrompt = async (
+        prompt: PromptConfig,
+        action: PromptAction
+    ) => {
+        if ('postaction' === this.state) {
+            return;
+        }
+
+        if ('userChannelSelectDialog' !== action.type) {
+            return;
+        }
+
+        this.currentlyRequestingPrompt = prompt;
+        this.currentPostAction = action;
+
+        this.setState('postaction');
+    };
+
+    private onPromptAccepted = async (
+        prompt: PromptConfig,
+        selectedChannelUuids?: string[]
+    ) => {
         if (this.subscriptionState === 'unsubscribed') {
             await this.onRequestNativePrompt(prompt);
         }
@@ -122,6 +156,14 @@ export class PromptManager {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
 
+        this.hideAndSuppressPrompts(prompt);
+    };
+
+    private onPostActionConfirm = async (
+        prompt: PromptConfig,
+        selectedChannelUuids?: string[]
+    ) => {
+        this.setState('ready');
         this.hideAndSuppressPrompts(prompt);
     };
 
@@ -145,17 +187,67 @@ export class PromptManager {
             return;
         }
 
+        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
+
+        this.channels = await channelSubMgr.listChannels();
+
         console.info('Will handle actions: ', prompt.actions);
 
-        await handleChannelSubscriptionStrategies(
-            this,
-            this.kumulosClient.getChannelSubscriptionManager(),
-            prompt
+        await this.handleChannelSubActions(prompt);
+        await this.handleChannelPostActions(prompt);
+    }
+
+    private async handleChannelSubActions(prompt: PromptConfig): Promise<void> {
+        if (undefined === prompt.actions) {
+            return;
+        }
+
+        const actions = prompt.actions.filter<ChannelSubAction>(
+            (action: PromptAction): action is ChannelSubAction =>
+                action.type === 'subscribeToChannel'
         );
 
-        this.channels = await this.kumulosClient
+        const uuidsToSubscribe = actions
+            .filter(action => {
+                const channeltoSub = this.channels.find(
+                    c => c.uuid === action.channelUuid && c.subscribed === false
+                );
+
+                if (undefined === channeltoSub) {
+                    console.info(
+                        `Unable to subscribe to channel '${action.channelUuid}' as it does not exist`
+                    );
+                    return false;
+                }
+
+                return true;
+            })
+            .map(action => action.channelUuid);
+
+        await this.kumulosClient
             .getChannelSubscriptionManager()
-            .listChannels();
+            .subscribe(uuidsToSubscribe);
+    }
+
+    private async handleChannelPostActions(
+        prompt: PromptConfig
+    ): Promise<void> {
+        if (undefined === prompt.actions) {
+            return;
+        }
+
+        // post actions only apply to `userChannelSelectDialog` actions
+        const actions = prompt.actions.filter<UserChannelSelectDialogAction>(
+            (action: PromptAction): action is UserChannelSelectDialogAction =>
+                action.type === 'userChannelSelectDialog'
+        );
+
+        if (!actions.length) {
+            return;
+        }
+
+        // currently only expecting 1 configured `userChannelSelectDialog` action
+        this.onRequestPostActionPrompt(prompt, actions[0]);
     }
 
     private render() {
@@ -169,31 +261,12 @@ export class PromptManager {
                     ref={r => (this.ui = r)}
                     prompts={this.activePrompts}
                     subscriptionState={this.subscriptionState}
-                    promptManagerState={this.state as PromptManagerState}
+                    promptManagerState={this.state}
                     onPromptAccepted={this.onPromptAccepted}
                     onPromptDeclined={this.onPromptDeclined}
+                    onPostActionConfirm={this.onPostActionConfirm}
                     currentlyRequestingPrompt={this.currentlyRequestingPrompt}
-                />
-            </PlatformConfigContext.Provider>,
-            this.uiRoot
-        );
-    }
-
-    private renderChannelPrompt(action: UserChannelSelectDialogAction) {
-        if (!this.subscriptionState) {
-            return;
-        }
-
-        render(
-            <PlatformConfigContext.Provider value={this.platformConfig}>
-                <Ui
-                    ref={r => (this.ui = r)}
-                    prompts={this.activePrompts}
-                    subscriptionState={this.subscriptionState}
-                    promptManagerState={this.state as PromptManagerState}
-                    onPromptAccepted={this.onPromptAccepted}
-                    onPromptDeclined={this.onPromptDeclined}
-                    currentlyRequestingPrompt={this.currentlyRequestingPrompt}
+                    currentPostAction={this.currentPostAction}
                 />
             </PlatformConfigContext.Provider>,
             this.uiRoot
@@ -229,10 +302,16 @@ export class PromptManager {
             return true;
         }
 
-        const channelsToSub = prompt.actions?.map(a => a.channelUuid) ?? [];
+        const channelsToSub =
+            prompt.actions
+                ?.filter(
+                    (action: PromptAction): action is ChannelSubAction =>
+                        action.type === 'subscribeToChannel'
+                )
+                .map(a => a.channelUuid) ?? [];
         const needsToSub =
             this.channels.filter(
-                c => channelsToSub.indexOf(c.uuid) > -1 && !c.subscribed
+                c => channelsToSub.includes(c.uuid) && !c.subscribed
             ).length > 0;
 
         if (needsToSub) {
@@ -372,10 +451,14 @@ export class PromptManager {
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
+                this.currentPostAction = undefined;
                 this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.evaluateTriggers();
+                this.render();
+                break;
+            case 'postaction':
                 this.render();
                 break;
         }
