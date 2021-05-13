@@ -1,7 +1,15 @@
-import { h } from 'preact';
-import { Channel } from '../../core/channels';
+import { Component, h } from 'preact';
+import { ChannelListItem } from '../../core';
 interface ChannelListProps {
-    channels: Channel[];
+    channelList: ChannelListItem[];
+    onChannelSelectionChanged: (channelList: ChannelListItem[]) => void;
 }
-export declare function ChannelsList(props: ChannelListProps): h.JSX.Element | null;
+interface ChannelListState {
+    channels: ChannelListItem[];
+}
+export declare class ChannelsList extends Component<ChannelListProps, ChannelListState> {
+    constructor(props: ChannelListProps);
+    onChannelCheckChange(channelUuid: string, checked: boolean): void;
+    render(): h.JSX.Element | null;
+}
 export {};

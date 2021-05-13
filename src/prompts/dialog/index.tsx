@@ -3,7 +3,9 @@ import { PromptUiProps } from '../ui';
 import {
     AlertPromptConfig,
     BannerPromptConfig,
-    PromptTypeName
+    PromptTypeName,
+    getChannelDialogChannels,
+    ChannelListItem
 } from '../../core';
 import { UIContext, UIContextState } from '../ui-context';
 import { ChannelsList } from './channels-list';
@@ -16,16 +18,36 @@ const styles = {
     }
 };
 
+export interface DialogState {
+    selectedChannelUuids: string[];
+}
+
 export class Dialog extends Component<
     PromptUiProps<AlertPromptConfig | BannerPromptConfig>,
-    never
+    DialogState
 > {
+    constructor(props: PromptUiProps<AlertPromptConfig | BannerPromptConfig>) {
+        super(props);
+
+        this.state = {
+            selectedChannelUuids: []
+        };
+    }
+
     onRequestNativePrompt = () => {
         this.props.onPromptAccepted(this.props.config);
     };
 
     onRequestCancel = () => {
         this.props.onPromptDeclined(this.props.config);
+    };
+
+    onSelectedChannelChanged = (channelList: ChannelListItem[]) => {
+        this.setState({
+            selectedChannelUuids: channelList
+                .filter(c => c.checked)
+                .map(c => c.channel.uuid)
+        });
     };
 
     renderAlert = (uiContext?: UIContextState) => {
@@ -87,7 +109,15 @@ export class Dialog extends Component<
                     <div className={`kumulos-${config.type}-body`}>
                         {body}
                         {this.props.action && (
-                            <ChannelsList channels={uiContext.channelList} />
+                            <ChannelsList
+                                channelList={getChannelDialogChannels(
+                                    uiContext.channelList,
+                                    this.props.action.channels
+                                )}
+                                onChannelSelectionChanged={
+                                    this.onSelectedChannelChanged
+                                }
+                            />
                         )}
                     </div>
                 </div>

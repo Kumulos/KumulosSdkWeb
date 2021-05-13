@@ -1,24 +1,74 @@
 import { Component, h } from 'preact';
 import { Channel } from '../../core/channels';
+import { ChannelListItem } from '../../core';
 
 interface ChannelListProps {
-    channels: Channel[];
+    channelList: ChannelListItem[];
+    onChannelSelectionChanged: (channelList: ChannelListItem[]) => void;
 }
 
-export function ChannelsList(props: ChannelListProps) {
-    if (!props.channels.length) {
-        return null;
+interface ChannelListState {
+    channels: ChannelListItem[];
+}
+
+export class ChannelsList extends Component<
+    ChannelListProps,
+    ChannelListState
+> {
+    constructor(props: ChannelListProps) {
+        super(props);
+
+        this.state = {
+            channels: [...this.props.channelList]
+        };
     }
 
-    return (
-        <div class="kumulos-channel-list-container">
-            {props.channels.map(c => (
-                <label key={c.uuid} className="kumulos-checkbox-container">
-                    {c.name}
-                    <input type="checkbox" readOnly checked={!!c.subscribed} />
-                    <span className="kumulos-checkbox"></span>
-                </label>
-            ))}
-        </div>
-    );
+    onChannelCheckChange(channelUuid: string, checked: boolean) {
+        const item = this.state.channels.find(
+            c => c.channel.uuid === channelUuid
+        );
+        item!.checked = checked;
+
+        this.setState(
+            {
+                channels: [...this.state.channels]
+            },
+            () => this.props.onChannelSelectionChanged(this.state.channels)
+        );
+    }
+
+    render() {
+        const { channels } = this.state;
+
+        if (!channels.length) {
+            return null;
+        }
+
+        return (
+            <div class="kumulos-channel-list-container">
+                {channels.map(item => (
+                    <label
+                        key={item.channel.uuid}
+                        className="kumulos-checkbox-container"
+                    >
+                        {item.channel.name}
+                        <input
+                            type="checkbox"
+                            readOnly
+                            checked={item.checked}
+                            onClick={(
+                                e: h.JSX.TargetedEvent<HTMLInputElement>
+                            ) => {
+                                this.onChannelCheckChange(
+                                    item.channel.uuid,
+                                    e.currentTarget.checked
+                                );
+                            }}
+                        />
+                        <span className="kumulos-checkbox"></span>
+                    </label>
+                ))}
+            </div>
+        );
+    }
 }

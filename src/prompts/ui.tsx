@@ -249,8 +249,6 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     render() {
-        console.log('ui render');
-
         return createPortal(
             <Fragment>
                 {this.maybeRenderPromptBackgroundMask()}
@@ -308,8 +306,6 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
-        console.info('render prompt', this.props.promptManagerState, prompt);
-
         switch (prompt.type) {
             case 'bell':
                 return (
@@ -323,12 +319,20 @@ export default class Ui extends Component<UiProps, UiState> {
                 );
             case 'alert':
             case 'banner':
-                const postAction =
-                    prompt.type === PromptTypeName.ALERT &&
-                    this.props.currentPostAction?.type ===
-                        'userChannelSelectInline'
-                        ? this.props.currentPostAction
-                        : undefined;
+                let action: UserChannelSelectInlineAction | undefined;
+
+                if (prompt.type === PromptTypeName.ALERT) {
+                    action = prompt.actions?.find<
+                        UserChannelSelectInlineAction
+                    >(
+                        (
+                            action: PromptAction
+                        ): action is UserChannelSelectInlineAction =>
+                            action.type === 'userChannelSelectInline'
+                    );
+                }
+
+                console.log(action);
 
                 return (
                     <Dialog
@@ -337,7 +341,7 @@ export default class Ui extends Component<UiProps, UiState> {
                         promptManagerState={this.props.promptManagerState}
                         onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
-                        action={postAction}
+                        action={action}
                     />
                 );
             default:
@@ -351,13 +355,6 @@ export default class Ui extends Component<UiProps, UiState> {
             currentPostAction,
             currentlyRequestingPrompt
         } = this.props;
-
-        console.info(
-            'render post action',
-            promptManagerState,
-            currentPostAction,
-            currentlyRequestingPrompt
-        );
 
         if ('postaction' !== promptManagerState) {
             return null;

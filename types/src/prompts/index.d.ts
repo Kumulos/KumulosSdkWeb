@@ -31,6 +31,7 @@ export declare class PromptManager {
     private handlePromptActions;
     private handleChannelSubActions;
     private handleChannelPostActions;
+    private handleUserChannelSelection;
     private render;
     private evaluateTriggers;
     promptActionNeedsTaken(prompt: PromptConfig): boolean;

@@ -154,6 +154,8 @@ export class PromptManager {
 
         await this.handlePromptActions(prompt);
 
+        await this.handleUserChannelSelection(prompt, selectedChannelUuids);
+
         if (this.subscriptionState === 'subscribed') {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
@@ -163,6 +165,8 @@ export class PromptManager {
         prompt: PromptConfig,
         selectedChannelUuids?: string[]
     ) => {
+        await this.handleUserChannelSelection(prompt, selectedChannelUuids);
+
         this.setState('ready');
         this.hideAndSuppressPrompts(prompt);
     };
@@ -247,6 +251,20 @@ export class PromptManager {
 
         // currently only expecting 1 configured `userChannelSelectDialog` action
         this.onRequestPostActionPrompt(prompt, actions[0]);
+    }
+
+    private async handleUserChannelSelection(
+        prompt: PromptConfig,
+        selectedChannelUuids?: string[]
+    ) {
+        if (undefined === selectedChannelUuids) {
+            return;
+        }
+
+        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
+
+        await channelSubMgr.clearSubscriptions();
+        await channelSubMgr.subscribe(selectedChannelUuids);
     }
 
     private render() {
@@ -448,6 +466,9 @@ export class PromptManager {
                     this.context
                 );
                 await this.loadPrompts();
+                this.channels = await this.kumulosClient
+                    .getChannelSubscriptionManager()
+                    .listChannels();
                 this.setState('ready');
                 break;
             case 'requesting':

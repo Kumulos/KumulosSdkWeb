@@ -1,5 +1,6 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
+import { Channel } from './channels';
 
 const SDK_VERSION = '1.7.0';
 const SDK_TYPE = 10;
@@ -499,4 +500,30 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
     return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
         .then(() => set('detailsHash', hash))
         .then(() => void 0);
+}
+
+export interface ChannelListItem {
+    channel: Channel;
+    checked: boolean;
+}
+
+export function getChannelDialogChannels(
+    allChannels: Channel[],
+    selectionConfig: MultiChannelSelectionConfig
+) {
+    console.log(allChannels, selectionConfig);
+
+    return allChannels
+        .filter(
+            c =>
+                selectionConfig.presentedUuids === 'all' ||
+                selectionConfig.presentedUuids.includes(c.uuid)
+        )
+        .map<ChannelListItem>(c => ({
+            channel: { ...c },
+            checked:
+                c.subscribed.valueOf() ||
+                selectionConfig.checkedUuids === 'all' ||
+                selectionConfig.checkedUuids.includes(c.uuid)
+        }));
 }

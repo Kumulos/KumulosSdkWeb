@@ -1,5 +1,9 @@
 import { Component, h } from 'preact';
-import { UserChannelSelectDialogAction } from '../../core';
+import {
+    UserChannelSelectDialogAction,
+    getChannelDialogChannels,
+    ChannelListItem
+} from '../../core';
 import { UIContext, UIContextState } from '../ui-context';
 import { ChannelsList } from './channels-list';
 
@@ -16,9 +20,32 @@ export interface ChannelsDialogProps {
     onConfirm: (selectedChannelUuids: string[]) => void;
 }
 
-export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
+export interface ChannelDialogState {
+    selectedChannelUuids: string[];
+}
+
+export class ChannelsDialog extends Component<
+    ChannelsDialogProps,
+    ChannelDialogState
+> {
+    constructor(props: ChannelsDialogProps) {
+        super(props);
+
+        this.state = {
+            selectedChannelUuids: []
+        };
+    }
+
     onConfirm = () => {
-        this.props.onConfirm([]);
+        this.props.onConfirm(this.state.selectedChannelUuids);
+    };
+
+    onSelectedChannelChanged = (channelList: ChannelListItem[]) => {
+        this.setState({
+            selectedChannelUuids: channelList
+                .filter(c => c.checked)
+                .map(c => c.channel.uuid)
+        });
     };
 
     renderDialog = (uiContext?: UIContextState) => {
@@ -64,7 +91,15 @@ export class ChannelsDialog extends Component<ChannelsDialogProps, never> {
                         <h1>{heading}</h1>
                     </div>
                     <div className="kumulos-channel-dialog-body">
-                        <ChannelsList channels={uiContext.channelList} />
+                        <ChannelsList
+                            channelList={getChannelDialogChannels(
+                                uiContext.channelList,
+                                this.props.action.channels
+                            )}
+                            onChannelSelectionChanged={
+                                this.onSelectedChannelChanged
+                            }
+                        />
                     </div>
                 </div>
 

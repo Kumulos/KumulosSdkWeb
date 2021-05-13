@@ -1,3 +1,4 @@
+import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
@@ -258,4 +259,9 @@ export declare type KumulosEvent = {
 export declare type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response>;
 export declare function trackInstallDetails(ctx: Context): Promise<void>;
+export interface ChannelListItem {
+    channel: Channel;
+    checked: boolean;
+}
+export declare function getChannelDialogChannels(allChannels: Channel[], selectionConfig: MultiChannelSelectionConfig): ChannelListItem[];
 export {};
