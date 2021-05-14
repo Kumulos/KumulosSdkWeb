@@ -479,7 +479,6 @@ export class PromptManager {
                     this.context
                 );
                 await this.evaluateTriggers();
-                console.log('state - ready');
                 this.render();
                 break;
             case 'postaction':
