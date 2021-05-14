@@ -511,8 +511,6 @@ export function getChannelDialogChannels(
     allChannels: Channel[],
     selectionConfig: MultiChannelSelectionConfig
 ) {
-    console.log(allChannels, selectionConfig);
-
     return allChannels
         .filter(
             c =>

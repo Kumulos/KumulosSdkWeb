@@ -35,7 +35,10 @@ export class Dialog extends Component<
     }
 
     onRequestNativePrompt = () => {
-        this.props.onPromptAccepted(this.props.config);
+        this.props.onPromptAccepted(
+            this.props.config,
+            this.state.selectedChannelUuids
+        );
     };
 
     onRequestCancel = () => {

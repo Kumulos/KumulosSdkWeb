@@ -32,11 +32,11 @@ export interface PromptUiProps<T extends PromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
-    onPromptDeclined: (
+    onPromptAccepted: (
         prompt: PromptConfig,
         selectedChannelUuids?: string[]
     ) => void;
+    onPromptDeclined: (prompt: PromptConfig) => void;
     action?: UserChannelSelectInlineAction;
 }
 
@@ -331,8 +331,6 @@ export default class Ui extends Component<UiProps, UiState> {
                             action.type === 'userChannelSelectInline'
                     );
                 }
-
-                console.log(action);
 
                 return (
                     <Dialog

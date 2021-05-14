@@ -10,8 +10,8 @@ export interface PromptUiProps<T extends PromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
-    onPromptDeclined: (prompt: PromptConfig, selectedChannelUuids?: string[]) => void;
+    onPromptAccepted: (prompt: PromptConfig, selectedChannelUuids?: string[]) => void;
+    onPromptDeclined: (prompt: PromptConfig) => void;
     action?: UserChannelSelectInlineAction;
 }
 interface TooltipProps {

@@ -154,7 +154,7 @@ export class PromptManager {
 
         await this.handlePromptActions(prompt);
 
-        await this.handleUserChannelSelection(prompt, selectedChannelUuids);
+        await this.handleUserChannelSelection(selectedChannelUuids);
 
         if (this.subscriptionState === 'subscribed') {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
@@ -165,7 +165,7 @@ export class PromptManager {
         prompt: PromptConfig,
         selectedChannelUuids?: string[]
     ) => {
-        await this.handleUserChannelSelection(prompt, selectedChannelUuids);
+        await this.handleUserChannelSelection(selectedChannelUuids);
 
         this.setState('ready');
         this.hideAndSuppressPrompts(prompt);
@@ -253,10 +253,7 @@ export class PromptManager {
         this.onRequestPostActionPrompt(prompt, actions[0]);
     }
 
-    private async handleUserChannelSelection(
-        prompt: PromptConfig,
-        selectedChannelUuids?: string[]
-    ) {
+    private async handleUserChannelSelection(selectedChannelUuids?: string[]) {
         if (undefined === selectedChannelUuids) {
             return;
         }
