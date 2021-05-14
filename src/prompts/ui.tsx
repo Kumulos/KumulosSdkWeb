@@ -367,16 +367,34 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
+        let backgroundMask = null;
+
+        if (
+            (currentlyRequestingPrompt.type === PromptTypeName.ALERT ||
+                currentlyRequestingPrompt.type === PromptTypeName.BANNER) &&
+            undefined !== currentlyRequestingPrompt.backgroundMask
+        ) {
+            const maskConfig = currentlyRequestingPrompt.backgroundMask;
+            backgroundMask = (
+                <BackgroundMask
+                    style={{ backgroundColor: maskConfig.colors.bg }}
+                />
+            );
+        }
+
         return (
-            <ChannelsDialog
-                action={currentPostAction}
-                onConfirm={channelSelections => {
-                    this.props.onPostActionConfirm(
-                        currentlyRequestingPrompt,
-                        channelSelections
-                    );
-                }}
-            />
+            <Fragment>
+                {backgroundMask}
+                <ChannelsDialog
+                    action={currentPostAction}
+                    onConfirm={channelSelections => {
+                        this.props.onPostActionConfirm(
+                            currentlyRequestingPrompt,
+                            channelSelections
+                        );
+                    }}
+                />
+            </Fragment>
         );
     }
 }

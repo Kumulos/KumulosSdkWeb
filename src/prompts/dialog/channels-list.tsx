@@ -20,6 +20,8 @@ export class ChannelsList extends Component<
         this.state = {
             channels: [...this.props.channelList]
         };
+
+        this.props.onChannelSelectionChanged(this.state.channels);
     }
 
     onChannelCheckChange(channelUuid: string, checked: boolean) {

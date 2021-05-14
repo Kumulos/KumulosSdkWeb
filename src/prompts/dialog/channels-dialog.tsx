@@ -52,7 +52,7 @@ export class ChannelsDialog extends Component<
         }
 
         const { action } = this.props;
-        const classes = `kumulos-channel-dialog-container kumulos-prompt-position-${action.dialogConfig.position}`;
+        const classes = `kumulos-prompt kumulos-channel-dialog-container kumulos-prompt-position-${action.dialogConfig.position}`;
 
         const { heading, confirmAction } = action.dialogConfig.labels;
         const {
