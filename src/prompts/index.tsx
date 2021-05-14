@@ -31,8 +31,7 @@ export type PromptManagerState =
     | 'loading'
     | 'ready'
     | 'requesting'
-    | 'postaction'
-    | 'cleanup';
+    | 'postaction';
 
 const REMINDER_TIME_UNIT_TO_MILLIS = {
     [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,

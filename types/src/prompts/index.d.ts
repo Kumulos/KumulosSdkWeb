@@ -1,7 +1,7 @@
 import { Context, PromptConfig } from '../core';
 import { Channel } from '../core/channels';
 import Kumulos from '..';
-export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction' | 'cleanup';
+export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
