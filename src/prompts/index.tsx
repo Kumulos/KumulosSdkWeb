@@ -80,14 +80,6 @@ export class PromptManager {
         });
     }
 
-    public getChannels() {
-        return this.channels;
-    }
-
-    public getState(): PromptManagerState | undefined {
-        return this.state;
-    }
-
     private onEventTracked = (e: SdkEvent) => {
         console.info('Prompt trigger saw event', e);
 

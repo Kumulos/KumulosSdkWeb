@@ -1,5 +1,4 @@
 import { Context, PromptConfig } from '../core';
-import { Channel } from '../core/channels';
 import Kumulos from '..';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
 export declare class PromptManager {
@@ -18,8 +17,6 @@ export declare class PromptManager {
     private platformConfig?;
     private currentPostAction?;
     constructor(client: Kumulos, ctx: Context);
-    getChannels(): Channel[];
-    getState(): PromptManagerState | undefined;
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;
