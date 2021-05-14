@@ -30,8 +30,14 @@
 }
 
 .kumulos-checkbox-container:hover input ~ .kumulos-checkbox {
-    background-color: #eee;
+    border-color: #aaa;
     display: block;
+}
+
+.kumulos-checkbox-container:hover input ~ .kumulos-checkbox:after {
+    display: block;
+    border-color: #aaa;
+    box-shadow: none;
 }
 
 .kumulos-checkbox:after {
@@ -40,15 +46,21 @@
     display: none;
 }
 
+.kumulos-checkbox-container input:checked ~ .kumulos-checkbox {
+    border-color: #aaa;
+}
+
 .kumulos-checkbox-container input:checked ~ .kumulos-checkbox:after {
     display: block;
+    border-color: #222;
+    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
 .kumulos-checkbox-container .kumulos-checkbox:after {
     left: 10px;
-    top: -5px;
-    width: 5px;
-    height: 15px;
+    top: -7px;
+    width: 8px;
+    height: 20px;
     border: solid #000;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
