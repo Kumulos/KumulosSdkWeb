@@ -17,11 +17,11 @@ const styles = {
 
 export interface ChannelsDialogProps {
     action: UserChannelSelectDialogAction;
-    onConfirm: (selectedChannelUuids: string[]) => void;
+    onConfirm: (channelSelections: ChannelListItem[]) => void;
 }
 
 export interface ChannelDialogState {
-    selectedChannelUuids: string[];
+    channelSelections: ChannelListItem[];
 }
 
 export class ChannelsDialog extends Component<
@@ -32,19 +32,17 @@ export class ChannelsDialog extends Component<
         super(props);
 
         this.state = {
-            selectedChannelUuids: []
+            channelSelections: []
         };
     }
 
     onConfirm = () => {
-        this.props.onConfirm(this.state.selectedChannelUuids);
+        this.props.onConfirm(this.state.channelSelections);
     };
 
     onSelectedChannelChanged = (channelList: ChannelListItem[]) => {
         this.setState({
-            selectedChannelUuids: channelList
-                .filter(c => c.checked)
-                .map(c => c.channel.uuid)
+            channelSelections: [...channelList]
         });
     };
 

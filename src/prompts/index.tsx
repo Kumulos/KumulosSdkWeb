@@ -9,7 +9,8 @@ import {
     UiActionType,
     ChannelSubAction,
     PromptAction,
-    UserChannelSelectDialogAction
+    UserChannelSelectDialogAction,
+    ChannelListItem
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -144,7 +145,7 @@ export class PromptManager {
 
     private onPromptAccepted = async (
         prompt: PromptConfig,
-        selectedChannelUuids?: string[]
+        channelSelections?: ChannelListItem[]
     ) => {
         if (this.subscriptionState === 'unsubscribed') {
             await this.onRequestNativePrompt(prompt);
@@ -154,7 +155,7 @@ export class PromptManager {
 
         await this.handlePromptActions(prompt);
 
-        await this.handleUserChannelSelection(selectedChannelUuids);
+        await this.handleUserChannelSelection(channelSelections);
 
         if (this.subscriptionState === 'subscribed') {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
@@ -163,9 +164,9 @@ export class PromptManager {
 
     private onPostActionConfirm = async (
         prompt: PromptConfig,
-        selectedChannelUuids?: string[]
+        channelSelections?: ChannelListItem[]
     ) => {
-        await this.handleUserChannelSelection(selectedChannelUuids);
+        await this.handleUserChannelSelection(channelSelections);
 
         this.setState('ready');
         this.hideAndSuppressPrompts(prompt);
@@ -253,15 +254,24 @@ export class PromptManager {
         this.onRequestPostActionPrompt(prompt, actions[0]);
     }
 
-    private async handleUserChannelSelection(selectedChannelUuids?: string[]) {
-        if (undefined === selectedChannelUuids) {
+    private async handleUserChannelSelection(
+        channelSelections?: ChannelListItem[]
+    ) {
+        if (undefined === channelSelections) {
             return;
         }
 
         const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
 
-        await channelSubMgr.clearSubscriptions();
-        await channelSubMgr.subscribe(selectedChannelUuids);
+        const unsubscribes = channelSelections
+            .filter(cs => !cs.checked)
+            .map(cs => cs.channel.uuid);
+        await channelSubMgr.unsubscribe(unsubscribes);
+
+        const subscribes = channelSelections
+            .filter(cs => cs.checked)
+            .map(cs => cs.channel.uuid);
+        await channelSubMgr.subscribe(subscribes);
     }
 
     private render() {

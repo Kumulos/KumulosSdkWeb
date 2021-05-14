@@ -8,7 +8,8 @@ import {
     AlertPromptConfig,
     BannerPromptConfig,
     PromptAction,
-    UserChannelSelectInlineAction
+    UserChannelSelectInlineAction,
+    ChannelListItem
 } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
@@ -34,7 +35,7 @@ export interface PromptUiProps<T extends PromptConfig> {
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
         prompt: PromptConfig,
-        selectedChannelUuids?: string[]
+        channelSelections?: ChannelListItem[]
     ) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
     action?: UserChannelSelectInlineAction;
@@ -206,12 +207,12 @@ interface UiProps {
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
         prompt: PromptConfig,
-        selectedChannelUuids?: string[]
+        channelSelections?: ChannelListItem[]
     ) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
     onPostActionConfirm: (
         prompt: PromptConfig,
-        selectedChannelUuids?: string[]
+        channelSelections?: ChannelListItem[]
     ) => void;
     currentlyRequestingPrompt?: PromptConfig;
     currentPostAction?: PromptAction;
@@ -369,10 +370,10 @@ export default class Ui extends Component<UiProps, UiState> {
         return (
             <ChannelsDialog
                 action={currentPostAction}
-                onConfirm={selectedChannelUuids => {
+                onConfirm={channelSelections => {
                     this.props.onPostActionConfirm(
                         currentlyRequestingPrompt,
-                        selectedChannelUuids
+                        channelSelections
                     );
                 }}
             />

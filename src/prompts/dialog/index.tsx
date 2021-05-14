@@ -19,7 +19,7 @@ const styles = {
 };
 
 export interface DialogState {
-    selectedChannelUuids: string[];
+    channelSelections: ChannelListItem[];
 }
 
 export class Dialog extends Component<
@@ -30,14 +30,14 @@ export class Dialog extends Component<
         super(props);
 
         this.state = {
-            selectedChannelUuids: []
+            channelSelections: []
         };
     }
 
     onRequestNativePrompt = () => {
         this.props.onPromptAccepted(
             this.props.config,
-            this.state.selectedChannelUuids
+            this.state.channelSelections
         );
     };
 
@@ -47,9 +47,7 @@ export class Dialog extends Component<
 
     onSelectedChannelChanged = (channelList: ChannelListItem[]) => {
         this.setState({
-            selectedChannelUuids: channelList
-                .filter(c => c.checked)
-                .map(c => c.channel.uuid)
+            channelSelections: [...channelList]
         });
     };
 

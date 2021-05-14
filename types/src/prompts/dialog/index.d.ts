@@ -3,7 +3,7 @@ import { PromptUiProps } from '../ui';
 import { AlertPromptConfig, BannerPromptConfig, ChannelListItem } from '../../core';
 import { UIContextState } from '../ui-context';
 export interface DialogState {
-    selectedChannelUuids: string[];
+    channelSelections: ChannelListItem[];
 }
 export declare class Dialog extends Component<PromptUiProps<AlertPromptConfig | BannerPromptConfig>, DialogState> {
     constructor(props: PromptUiProps<AlertPromptConfig | BannerPromptConfig>);

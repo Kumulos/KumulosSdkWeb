@@ -1,6 +1,6 @@
 import './prompts.scss';
 import { Component, h } from 'preact';
-import { PromptConfig, PromptAction, UserChannelSelectInlineAction } from '../core';
+import { PromptConfig, PromptAction, UserChannelSelectInlineAction, ChannelListItem } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 export declare const DEFAULT_SUBSCRIBE_LABEL = "Subscribe for notifications";
@@ -10,7 +10,7 @@ export interface PromptUiProps<T extends PromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig, selectedChannelUuids?: string[]) => void;
+    onPromptAccepted: (prompt: PromptConfig, channelSelections?: ChannelListItem[]) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
     action?: UserChannelSelectInlineAction;
 }
@@ -24,9 +24,9 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig, selectedChannelUuids?: string[]) => void;
+    onPromptAccepted: (prompt: PromptConfig, channelSelections?: ChannelListItem[]) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
-    onPostActionConfirm: (prompt: PromptConfig, selectedChannelUuids?: string[]) => void;
+    onPostActionConfirm: (prompt: PromptConfig, channelSelections?: ChannelListItem[]) => void;
     currentlyRequestingPrompt?: PromptConfig;
     currentPostAction?: PromptAction;
 }

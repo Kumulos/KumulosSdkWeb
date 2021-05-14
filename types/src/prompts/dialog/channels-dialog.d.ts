@@ -3,10 +3,10 @@ import { UserChannelSelectDialogAction, ChannelListItem } from '../../core';
 import { UIContextState } from '../ui-context';
 export interface ChannelsDialogProps {
     action: UserChannelSelectDialogAction;
-    onConfirm: (selectedChannelUuids: string[]) => void;
+    onConfirm: (channelSelections: ChannelListItem[]) => void;
 }
 export interface ChannelDialogState {
-    selectedChannelUuids: string[];
+    channelSelections: ChannelListItem[];
 }
 export declare class ChannelsDialog extends Component<ChannelsDialogProps, ChannelDialogState> {
     constructor(props: ChannelsDialogProps);
