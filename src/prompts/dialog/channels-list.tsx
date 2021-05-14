@@ -1,5 +1,4 @@
 import { Component, h } from 'preact';
-import { Channel } from '../../core/channels';
 import { ChannelListItem } from '../../core';
 
 interface ChannelListProps {
