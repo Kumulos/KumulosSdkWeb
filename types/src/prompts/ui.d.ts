@@ -1,6 +1,6 @@
 import './prompts.scss';
 import { Component, h } from 'preact';
-import { PromptConfig } from '../core';
+import { PromptConfig, PromptAction, UserChannelSelectInlineAction, ChannelListItem } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 export declare const DEFAULT_SUBSCRIBE_LABEL = "Subscribe for notifications";
@@ -10,8 +10,9 @@ export interface PromptUiProps<T extends PromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig, channelSelections?: ChannelListItem[]) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    action?: UserChannelSelectInlineAction;
 }
 interface TooltipProps {
     position: 'left' | 'right';
@@ -23,9 +24,11 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
+    onPromptAccepted: (prompt: PromptConfig, channelSelections?: ChannelListItem[]) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    onPostActionConfirm: (prompt: PromptConfig, channelSelections?: ChannelListItem[]) => void;
     currentlyRequestingPrompt?: PromptConfig;
+    currentPostAction?: PromptAction;
 }
 interface UiState {
     toastQueue: string[];
@@ -37,5 +40,6 @@ export default class Ui extends Component<UiProps, UiState> {
     render(): import("preact").VNode<any>;
     maybeRenderPromptBackgroundMask(): h.JSX.Element | null;
     renderPrompt(prompt: PromptConfig): h.JSX.Element | null;
+    renderPostAction(): h.JSX.Element | null;
 }
 export {};

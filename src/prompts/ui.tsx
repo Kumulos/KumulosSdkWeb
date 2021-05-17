@@ -6,7 +6,10 @@ import {
     PromptConfig,
     PromptTypeName,
     AlertPromptConfig,
-    BannerPromptConfig
+    BannerPromptConfig,
+    PromptAction,
+    UserChannelSelectInlineAction,
+    ChannelListItem
 } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
@@ -14,6 +17,7 @@ import { createPortal } from 'preact/compat';
 import { getBrowserName } from '../core/utils';
 import { Bell } from './bell';
 import { Dialog } from './dialog';
+import { ChannelsDialog } from './dialog/channels-dialog';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -29,8 +33,12 @@ export interface PromptUiProps<T extends PromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
+    onPromptAccepted: (
+        prompt: PromptConfig,
+        channelSelections?: ChannelListItem[]
+    ) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    action?: UserChannelSelectInlineAction;
 }
 
 interface TooltipProps {
@@ -197,9 +205,17 @@ interface UiProps {
     prompts: PromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
-    onPromptAccepted: (prompt: PromptConfig) => void;
+    onPromptAccepted: (
+        prompt: PromptConfig,
+        channelSelections?: ChannelListItem[]
+    ) => void;
     onPromptDeclined: (prompt: PromptConfig) => void;
+    onPostActionConfirm: (
+        prompt: PromptConfig,
+        channelSelections?: ChannelListItem[]
+    ) => void;
     currentlyRequestingPrompt?: PromptConfig;
+    currentPostAction?: PromptAction;
 }
 
 interface UiState {
@@ -239,6 +255,9 @@ export default class Ui extends Component<UiProps, UiState> {
                 {this.maybeRenderPromptBackgroundMask()}
 
                 {this.props.prompts.map(this.renderPrompt, this)}
+
+                {this.renderPostAction()}
+
                 {!isMobile() && (
                     <Overlay
                         promptState={this.props.promptManagerState}
@@ -284,6 +303,10 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
+        if ('postaction' === this.props.promptManagerState) {
+            return null;
+        }
+
         switch (prompt.type) {
             case 'bell':
                 return (
@@ -297,6 +320,19 @@ export default class Ui extends Component<UiProps, UiState> {
                 );
             case 'alert':
             case 'banner':
+                let action: UserChannelSelectInlineAction | undefined;
+
+                if (prompt.type === PromptTypeName.ALERT) {
+                    action = prompt.actions?.find<
+                        UserChannelSelectInlineAction
+                    >(
+                        (
+                            action: PromptAction
+                        ): action is UserChannelSelectInlineAction =>
+                            action.type === 'userChannelSelectInline'
+                    );
+                }
+
                 return (
                     <Dialog
                         config={prompt}
@@ -304,10 +340,61 @@ export default class Ui extends Component<UiProps, UiState> {
                         promptManagerState={this.props.promptManagerState}
                         onPromptAccepted={this.props.onPromptAccepted}
                         onPromptDeclined={this.props.onPromptDeclined}
+                        action={action}
                     />
                 );
             default:
                 return null;
         }
+    }
+
+    renderPostAction() {
+        const {
+            promptManagerState,
+            currentPostAction,
+            currentlyRequestingPrompt
+        } = this.props;
+
+        if ('postaction' !== promptManagerState) {
+            return null;
+        }
+
+        if (!currentlyRequestingPrompt) {
+            return null;
+        }
+
+        if ('userChannelSelectDialog' !== currentPostAction?.type) {
+            return null;
+        }
+
+        let backgroundMask = null;
+
+        if (
+            (currentlyRequestingPrompt.type === PromptTypeName.ALERT ||
+                currentlyRequestingPrompt.type === PromptTypeName.BANNER) &&
+            undefined !== currentlyRequestingPrompt.backgroundMask
+        ) {
+            const maskConfig = currentlyRequestingPrompt.backgroundMask;
+            backgroundMask = (
+                <BackgroundMask
+                    style={{ backgroundColor: maskConfig.colors.bg }}
+                />
+            );
+        }
+
+        return (
+            <Fragment>
+                {backgroundMask}
+                <ChannelsDialog
+                    action={currentPostAction}
+                    onConfirm={channelSelections => {
+                        this.props.onPostActionConfirm(
+                            currentlyRequestingPrompt,
+                            channelSelections
+                        );
+                    }}
+                />
+            </Fragment>
+        );
     }
 }

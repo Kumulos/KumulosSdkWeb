@@ -1,7 +1,8 @@
 import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
+import { Channel } from './channels';
 
-const SDK_VERSION = '1.7.0';
+const SDK_VERSION = '1.7.1';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -34,7 +35,8 @@ export enum EventType {
 export enum PromptTypeName {
     BELL = 'bell',
     ALERT = 'alert',
-    BANNER = 'banner'
+    BANNER = 'banner',
+    CHANNEL = 'channel'
 }
 
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
@@ -62,7 +64,41 @@ interface PromptOverlayConfig {
     };
 }
 
-interface ChannelSubAction {
+export interface ChannelDialogLabelsConfig {
+    heading: string;
+    confirmAction: string;
+}
+
+export interface ChannelDialogColorsConfig {
+    bg: string;
+    fg: string;
+    confirmActionBg: string;
+    confirmActionFg: string;
+}
+
+export interface ChannelDialogConfig {
+    labels: ChannelDialogLabelsConfig;
+    colors: ChannelDialogColorsConfig;
+    position: PromptPosition;
+}
+
+export interface MultiChannelSelectionConfig {
+    presentedUuids: string[] | 'all';
+    checkedUuids: string[] | 'none' | 'all';
+}
+
+export interface UserChannelSelectInlineAction {
+    type: 'userChannelSelectInline';
+    channels: MultiChannelSelectionConfig;
+}
+
+export interface UserChannelSelectDialogAction {
+    type: 'userChannelSelectDialog';
+    channels: MultiChannelSelectionConfig;
+    dialogConfig: ChannelDialogConfig;
+}
+
+export interface ChannelSubAction {
     type: 'subscribeToChannel';
     channelUuid: string;
 }
@@ -81,7 +117,10 @@ interface RemindPromptAction {
     delay: PromptReminderDelayConfig;
 }
 
-type PromptAction = ChannelSubAction;
+export type PromptAction =
+    | ChannelSubAction
+    | UserChannelSelectInlineAction
+    | UserChannelSelectDialogAction;
 
 export enum ReminderTimeUnit {
     HOURS = 'hours',
@@ -211,6 +250,7 @@ export type PromptConfig =
     | BellPromptConfig
     | AlertPromptConfig
     | BannerPromptConfig;
+
 export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {
@@ -460,4 +500,28 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
     return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
         .then(() => set('detailsHash', hash))
         .then(() => void 0);
+}
+
+export interface ChannelListItem {
+    channel: Channel;
+    checked: boolean;
+}
+
+export function getChannelDialogChannels(
+    allChannels: Channel[],
+    selectionConfig: MultiChannelSelectionConfig
+) {
+    return allChannels
+        .filter(
+            c =>
+                selectionConfig.presentedUuids === 'all' ||
+                selectionConfig.presentedUuids.includes(c.uuid)
+        )
+        .map<ChannelListItem>(c => ({
+            channel: { ...c },
+            checked:
+                c.subscribed.valueOf() ||
+                selectionConfig.checkedUuids === 'all' ||
+                selectionConfig.checkedUuids.includes(c.uuid)
+        }));
 }

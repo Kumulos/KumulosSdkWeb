@@ -1,3 +1,4 @@
+import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
@@ -21,7 +22,8 @@ export declare enum EventType {
 export declare enum PromptTypeName {
     BELL = "bell",
     ALERT = "alert",
-    BANNER = "banner"
+    BANNER = "banner",
+    CHANNEL = "channel"
 }
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
@@ -47,7 +49,35 @@ interface PromptOverlayConfig {
         text: string;
     };
 }
-interface ChannelSubAction {
+export interface ChannelDialogLabelsConfig {
+    heading: string;
+    confirmAction: string;
+}
+export interface ChannelDialogColorsConfig {
+    bg: string;
+    fg: string;
+    confirmActionBg: string;
+    confirmActionFg: string;
+}
+export interface ChannelDialogConfig {
+    labels: ChannelDialogLabelsConfig;
+    colors: ChannelDialogColorsConfig;
+    position: PromptPosition;
+}
+export interface MultiChannelSelectionConfig {
+    presentedUuids: string[] | 'all';
+    checkedUuids: string[] | 'none' | 'all';
+}
+export interface UserChannelSelectInlineAction {
+    type: 'userChannelSelectInline';
+    channels: MultiChannelSelectionConfig;
+}
+export interface UserChannelSelectDialogAction {
+    type: 'userChannelSelectDialog';
+    channels: MultiChannelSelectionConfig;
+    dialogConfig: ChannelDialogConfig;
+}
+export interface ChannelSubAction {
     type: 'subscribeToChannel';
     channelUuid: string;
 }
@@ -62,7 +92,7 @@ interface RemindPromptAction {
     type: UiActionType.REMIND;
     delay: PromptReminderDelayConfig;
 }
-declare type PromptAction = ChannelSubAction;
+export declare type PromptAction = ChannelSubAction | UserChannelSelectInlineAction | UserChannelSelectDialogAction;
 export declare enum ReminderTimeUnit {
     HOURS = "hours",
     DAYS = "days"
@@ -229,4 +259,9 @@ export declare type KumulosEvent = {
 export declare type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response>;
 export declare function trackInstallDetails(ctx: Context): Promise<void>;
+export interface ChannelListItem {
+    channel: Channel;
+    checked: boolean;
+}
+export declare function getChannelDialogChannels(allChannels: Channel[], selectionConfig: MultiChannelSelectionConfig): ChannelListItem[];
 export {};

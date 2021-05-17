@@ -2,11 +2,13 @@ import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
 import {
     AlertPromptConfig,
-    PlatformConfig,
     BannerPromptConfig,
-    PromptTypeName
+    PromptTypeName,
+    getChannelDialogChannels,
+    ChannelListItem
 } from '../../core';
-import { PlatformConfigContext } from '../ui-context';
+import { UIContext, UIContextState } from '../ui-context';
+import { ChannelsList } from './channels-list';
 
 const styles = {
     iconStyle: {
@@ -16,19 +18,44 @@ const styles = {
     }
 };
 
+export interface DialogState {
+    channelSelections: ChannelListItem[];
+}
+
 export class Dialog extends Component<
     PromptUiProps<AlertPromptConfig | BannerPromptConfig>,
-    never
+    DialogState
 > {
+    constructor(props: PromptUiProps<AlertPromptConfig | BannerPromptConfig>) {
+        super(props);
+
+        this.state = {
+            channelSelections: []
+        };
+    }
+
     onRequestNativePrompt = () => {
-        this.props.onPromptAccepted(this.props.config);
+        this.props.onPromptAccepted(
+            this.props.config,
+            this.state.channelSelections
+        );
     };
 
     onRequestCancel = () => {
         this.props.onPromptDeclined(this.props.config);
     };
 
-    renderAlert = (platformConfig?: PlatformConfig) => {
+    onSelectedChannelChanged = (channelList: ChannelListItem[]) => {
+        this.setState({
+            channelSelections: [...channelList]
+        });
+    };
+
+    renderAlert = (uiContext?: UIContextState) => {
+        if (undefined === uiContext) {
+            return null;
+        }
+
         const config = this.props.config;
         const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-${config.type}-container kumulos-prompt-position-${config.position}`;
 
@@ -66,7 +93,7 @@ export class Dialog extends Component<
 
         const iconStyle = {
             ...styles.iconStyle,
-            backgroundImage: `url(${platformConfig?.iconUrl})`
+            backgroundImage: `url(${uiContext.platformConfig.iconUrl})`
         };
 
         return (
@@ -80,7 +107,20 @@ export class Dialog extends Component<
                     <div className={`kumulos-${config.type}-header`}>
                         <h1>{heading}</h1>
                     </div>
-                    <div className={`kumulos-${config.type}-body`}>{body}</div>
+                    <div className={`kumulos-${config.type}-body`}>
+                        {body}
+                        {this.props.action && (
+                            <ChannelsList
+                                channelList={getChannelDialogChannels(
+                                    uiContext.channelList,
+                                    this.props.action.channels
+                                )}
+                                onChannelSelectionChanged={
+                                    this.onSelectedChannelChanged
+                                }
+                            />
+                        )}
+                    </div>
                 </div>
 
                 <div className={`kumulos-${config.type}-actions`}>
@@ -106,10 +146,6 @@ export class Dialog extends Component<
     };
 
     render() {
-        return (
-            <PlatformConfigContext.Consumer>
-                {this.renderAlert}
-            </PlatformConfigContext.Consumer>
-        );
+        return <UIContext.Consumer>{this.renderAlert}</UIContext.Consumer>;
     }
 }

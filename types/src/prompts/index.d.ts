@@ -1,6 +1,6 @@
 import { Context, PromptConfig } from '../core';
 import Kumulos from '..';
-export declare type PromptManagerState = 'loading' | 'ready' | 'requesting';
+export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
@@ -15,14 +15,20 @@ export declare class PromptManager {
     private channels;
     private ui?;
     private platformConfig?;
+    private currentPostAction?;
     constructor(client: Kumulos, ctx: Context);
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;
+    private onRequestPostActionPrompt;
     private onPromptAccepted;
+    private onPostActionConfirm;
     private onPromptDeclined;
     private hideAndSuppressPrompts;
     private handlePromptActions;
+    private handleChannelSubActions;
+    private handleChannelPostActions;
+    private handleUserChannelSelection;
     private render;
     private evaluateTriggers;
     promptActionNeedsTaken(prompt: PromptConfig): boolean;

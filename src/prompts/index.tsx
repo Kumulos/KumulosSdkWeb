@@ -6,13 +6,17 @@ import {
     PromptUiActions,
     ReminderTimeUnit,
     PlatformConfig,
-    UiActionType
+    UiActionType,
+    ChannelSubAction,
+    PromptAction,
+    UserChannelSelectDialogAction,
+    ChannelListItem
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
 } from '../core/push';
-import { h, render } from 'preact';
+import { h, render, createContext } from 'preact';
 
 import { Channel } from '../core/channels';
 import Kumulos from '..';
@@ -20,10 +24,14 @@ import Ui from './ui';
 import { triggerMatched } from './triggers';
 import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
-import { PlatformConfigContext } from './ui-context';
+import { UIContext } from './ui-context';
 import { loadConfig } from '../core/config';
 
-export type PromptManagerState = 'loading' | 'ready' | 'requesting';
+export type PromptManagerState =
+    | 'loading'
+    | 'ready'
+    | 'requesting'
+    | 'postaction';
 
 const REMINDER_TIME_UNIT_TO_MILLIS = {
     [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
@@ -33,6 +41,8 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 // loading -> ready
 // ready -> requesting
 // requesting -> ready
+// ready -> postaction
+// postaction -> ready
 
 export class PromptManager {
     private readonly kumulosClient: Kumulos;
@@ -49,6 +59,7 @@ export class PromptManager {
     private channels: Channel[];
     private ui?: Ui;
     private platformConfig?: PlatformConfig;
+    private currentPostAction?: PromptAction;
 
     constructor(client: Kumulos, ctx: Context) {
         this.prompts = {};
@@ -105,17 +116,50 @@ export class PromptManager {
         this.setState('ready');
     };
 
-    private onPromptAccepted = async (prompt: PromptConfig) => {
+    private onRequestPostActionPrompt = async (
+        prompt: PromptConfig,
+        action: PromptAction
+    ) => {
+        if ('postaction' === this.state) {
+            return;
+        }
+
+        if ('userChannelSelectDialog' !== action.type) {
+            return;
+        }
+
+        this.currentlyRequestingPrompt = prompt;
+        this.currentPostAction = action;
+
+        this.setState('postaction');
+    };
+
+    private onPromptAccepted = async (
+        prompt: PromptConfig,
+        channelSelections?: ChannelListItem[]
+    ) => {
         if (this.subscriptionState === 'unsubscribed') {
             await this.onRequestNativePrompt(prompt);
         }
 
+        this.hideAndSuppressPrompts(prompt);
+
         await this.handlePromptActions(prompt);
+
+        await this.handleUserChannelSelection(channelSelections);
 
         if (this.subscriptionState === 'subscribed') {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing);
         }
+    };
 
+    private onPostActionConfirm = async (
+        prompt: PromptConfig,
+        channelSelections?: ChannelListItem[]
+    ) => {
+        await this.handleUserChannelSelection(channelSelections);
+
+        this.setState('ready');
         this.hideAndSuppressPrompts(prompt);
     };
 
@@ -141,26 +185,84 @@ export class PromptManager {
 
         console.info('Will handle actions: ', prompt.actions);
 
-        const channelsToSub = prompt.actions
-            .map(a => a.channelUuid)
-            .filter(uuid =>
-                this.channels.find(
-                    c => c.uuid === uuid && c.subscribed === false
-                )
-            );
+        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
+        this.channels = await channelSubMgr.listChannels();
 
-        if (!channelsToSub.length) {
-            console.info('No channels to subscribe to found, aborting');
+        await this.handleChannelSubActions(prompt);
+        await this.handleChannelPostActions(prompt);
+    }
+
+    private async handleChannelSubActions(prompt: PromptConfig): Promise<void> {
+        if (undefined === prompt.actions) {
             return;
         }
 
+        const actions = prompt.actions.filter<ChannelSubAction>(
+            (action: PromptAction): action is ChannelSubAction =>
+                action.type === 'subscribeToChannel'
+        );
+
+        const uuidsToSubscribe = actions
+            .filter(action => {
+                const channeltoSub = this.channels.find(
+                    c => c.uuid === action.channelUuid && c.subscribed === false
+                );
+
+                if (undefined === channeltoSub) {
+                    console.info(
+                        `Unable to subscribe to channel '${action.channelUuid}' as it does not exist`
+                    );
+                    return false;
+                }
+
+                return true;
+            })
+            .map(action => action.channelUuid);
+
         await this.kumulosClient
             .getChannelSubscriptionManager()
-            .subscribe(channelsToSub);
+            .subscribe(uuidsToSubscribe);
+    }
 
-        this.channels = await this.kumulosClient
-            .getChannelSubscriptionManager()
-            .listChannels();
+    private async handleChannelPostActions(
+        prompt: PromptConfig
+    ): Promise<void> {
+        if (undefined === prompt.actions) {
+            return;
+        }
+
+        // post actions only apply to `userChannelSelectDialog` actions
+        const actions = prompt.actions.filter<UserChannelSelectDialogAction>(
+            (action: PromptAction): action is UserChannelSelectDialogAction =>
+                action.type === 'userChannelSelectDialog'
+        );
+
+        if (!actions.length) {
+            return;
+        }
+
+        // currently only expecting 1 configured `userChannelSelectDialog` action
+        this.onRequestPostActionPrompt(prompt, actions[0]);
+    }
+
+    private async handleUserChannelSelection(
+        channelSelections?: ChannelListItem[]
+    ) {
+        if (undefined === channelSelections) {
+            return;
+        }
+
+        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
+
+        const unsubscribes = channelSelections
+            .filter(cs => !cs.checked)
+            .map(cs => cs.channel.uuid);
+        await channelSubMgr.unsubscribe(unsubscribes);
+
+        const subscribes = channelSelections
+            .filter(cs => cs.checked)
+            .map(cs => cs.channel.uuid);
+        await channelSubMgr.subscribe(subscribes);
     }
 
     private render() {
@@ -169,17 +271,24 @@ export class PromptManager {
         }
 
         render(
-            <PlatformConfigContext.Provider value={this.platformConfig}>
+            <UIContext.Provider
+                value={{
+                    platformConfig: this.platformConfig,
+                    channelList: this.channels
+                }}
+            >
                 <Ui
                     ref={r => (this.ui = r)}
                     prompts={this.activePrompts}
                     subscriptionState={this.subscriptionState}
-                    promptManagerState={this.state as PromptManagerState}
+                    promptManagerState={this.state}
                     onPromptAccepted={this.onPromptAccepted}
                     onPromptDeclined={this.onPromptDeclined}
+                    onPostActionConfirm={this.onPostActionConfirm}
                     currentlyRequestingPrompt={this.currentlyRequestingPrompt}
+                    currentPostAction={this.currentPostAction}
                 />
-            </PlatformConfigContext.Provider>,
+            </UIContext.Provider>,
             this.uiRoot
         );
     }
@@ -213,10 +322,16 @@ export class PromptManager {
             return true;
         }
 
-        const channelsToSub = prompt.actions?.map(a => a.channelUuid) ?? [];
+        const channelsToSub =
+            prompt.actions
+                ?.filter(
+                    (action: PromptAction): action is ChannelSubAction =>
+                        action.type === 'subscribeToChannel'
+                )
+                .map(a => a.channelUuid) ?? [];
         const needsToSub =
             this.channels.filter(
-                c => channelsToSub.indexOf(c.uuid) > -1 && !c.subscribed
+                c => channelsToSub.includes(c.uuid) && !c.subscribed
             ).length > 0;
 
         if (needsToSub) {
@@ -349,6 +464,9 @@ export class PromptManager {
                     this.context
                 );
                 await this.loadPrompts();
+                this.channels = await this.kumulosClient
+                    .getChannelSubscriptionManager()
+                    .listChannels();
                 this.setState('ready');
                 break;
             case 'requesting':
@@ -356,10 +474,14 @@ export class PromptManager {
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
+                this.currentPostAction = undefined;
                 this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.evaluateTriggers();
+                this.render();
+                break;
+            case 'postaction':
                 this.render();
                 break;
         }
