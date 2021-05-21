@@ -1,3 +1,4 @@
+.kumulos-ddlbanner-container,
 .kumulos-banner-container {
     display: flex;
     flex-direction: row;
@@ -34,20 +35,23 @@
     }
 }
 
-.kumulos-banner-icon {
+.kumulos-banner-icon,
+.kumulos-ddlbanner-icon {
     width: 50px;
     height: 50px;
     margin-top: 5px;
     margin-right: 20px;
 }
 
-.kumulos-banner-content {
+.kumulos-banner-content,
+.kumulos-ddlbanner-content {
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
-.kumulos-banner-header {
+.kumulos-banner-header,
+.kumulos-ddlbanner-header {
     display: flex;
     font-size: $defaultHeaderFontSize;
 
@@ -58,7 +62,8 @@
     }
 }
 
-.kumulos-banner-body {
+.kumulos-banner-body,
+.kumulos-ddlbanner-body {
     display: flex;
     flex-grow: 2;
     align-items: flex-start;
@@ -67,7 +72,8 @@
     margin-top: 10px;
 }
 
-.kumulos-banner-actions {
+.kumulos-banner-actions,
+.kumulos-ddlbanner-actions {
     display: flex;
     align-self: center;
     justify-self: flex-end;
@@ -81,4 +87,10 @@
         width: auto;
         margin-top: 0;
     }
+}
+
+.kumulos-ddlbanner-close {
+}
+
+.kumulos-ddlbanner-rating {
 }
