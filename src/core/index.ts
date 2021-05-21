@@ -260,13 +260,25 @@ export interface PlatformConfig {
     safariPushId: string | null;
 }
 
+export enum SDKFeature {
+    Push = 'push',
+    DDL = 'ddl'
+}
+
 export interface Configuration {
     apiKey: string;
     secretKey: string;
-    vapidPublicKey: string;
+
+    // TODO: remove this note, make vapidPublicKey optional and enforce check only when
+    //   a) no features specified (e.g. backward compat)
+    //   b) or if 'push' feature specified (proposed but would keep config interface consistent)
+    vapidPublicKey?: string;
+
     serviceWorkerPath?: string;
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
+
+    features?: SDKFeature[];
 }
 
 export type PromptReminder =
@@ -282,7 +294,7 @@ type SdkEventHandler = (event: SdkEvent) => void;
 export class Context {
     readonly apiKey: string;
     readonly secretKey: string;
-    readonly vapidPublicKey: string;
+    readonly vapidPublicKey?: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
     readonly pushPrompts: { [key: string]: PromptConfig } | 'auto';
@@ -333,6 +345,16 @@ export function assertConfigValid(config: any) {
         throw 'Config must be an object';
     }
 
+    const features = Array.isArray(config.features)
+        ? config.features
+        : undefined;
+
+    if (!features || features.includes(SDKFeature.Push)) {
+        return assertPushConfigValid(config);
+    }
+}
+
+function assertPushConfigValid(config: any) {
     const requiredStringProps = ['apiKey', 'secretKey', 'vapidPublicKey'];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
