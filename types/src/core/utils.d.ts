@@ -16,3 +16,4 @@ export declare function defer<T>(): {
 export declare function parseQueryString(qs?: string, excludedQueryKeys?: string[]): {
     [key: string]: string;
 } | undefined;
+export declare function onDOMReady(fn: () => void): void;

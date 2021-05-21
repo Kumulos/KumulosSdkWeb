@@ -183,3 +183,11 @@ export function parseQueryString(
 
     return query;
 }
+
+export function onDOMReady(fn: () => void) {
+    if (document.readyState !== 'loading') {
+        fn();
+    } else {
+        document.addEventListener('DOMContentLoaded', fn);
+    }
+}

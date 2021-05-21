@@ -26,6 +26,7 @@ import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
 import { UIContext } from './ui-context';
 import { loadConfig } from '../core/config';
+import { onDOMReady } from '../core/utils';
 import RootFrame from '../core/root-frame';
 
 export type PromptManagerState =
@@ -74,7 +75,7 @@ export class PromptManager {
 
         ctx.subscribe('eventTracked', this.onEventTracked);
 
-        document.addEventListener('DOMContentLoaded', () => {
+        onDOMReady(() => {
             this.setState('loading');
         });
     }
