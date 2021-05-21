@@ -26,6 +26,7 @@ import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
 import { UIContext } from './ui-context';
 import { loadConfig } from '../core/config';
+import RootFrame from '../core/root-frame';
 
 export type PromptManagerState =
     | 'loading'
@@ -47,7 +48,7 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 export class PromptManager {
     private readonly kumulosClient: Kumulos;
     private readonly context: Context;
-    private readonly uiRoot: HTMLDivElement;
+    private readonly rootFrame: RootFrame;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
@@ -61,21 +62,19 @@ export class PromptManager {
     private platformConfig?: PlatformConfig;
     private currentPostAction?: PromptAction;
 
-    constructor(client: Kumulos, ctx: Context) {
+    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.prompts = {};
         this.eventQueue = [];
         this.activePrompts = [];
         this.channels = [];
 
-        this.uiRoot = document.createElement('div');
-        this.uiRoot.id = 'kumulos-ui-root';
+        this.rootFrame = rootFrame;
         this.kumulosClient = client;
         this.context = ctx;
 
         ctx.subscribe('eventTracked', this.onEventTracked);
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.body.appendChild(this.uiRoot);
             this.setState('loading');
         });
     }
@@ -289,7 +288,7 @@ export class PromptManager {
                     currentPostAction={this.currentPostAction}
                 />
             </UIContext.Provider>,
-            this.uiRoot
+            this.rootFrame.element
         );
     }
 

@@ -299,6 +299,7 @@ export class Context {
     readonly serviceWorkerPath: string;
     readonly pushPrompts: { [key: string]: PromptConfig } | 'auto';
     readonly autoResubscribe: boolean;
+    readonly features?: SDKFeature[];
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
 
@@ -310,6 +311,7 @@ export class Context {
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
         this.pushPrompts = config.pushPrompts ?? 'auto';
         this.autoResubscribe = config.autoResubscribe ?? true;
+        this.features = config.features;
 
         this.subscribers = {};
     }
@@ -337,6 +339,16 @@ export class Context {
                 data
             });
         }
+    }
+
+    hasFeature(feature: SDKFeature) {
+        if (!this.features) {
+            // TODO: backwards compat, (for consistency) as push side of things
+            // prob wont query this as it stands currently
+            return feature === SDKFeature.Push ? true : false;
+        }
+
+        return this.features.includes(feature);
     }
 }
 

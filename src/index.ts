@@ -10,7 +10,8 @@ import {
     getInstallId,
     getUserId,
     trackEvent,
-    trackInstallDetails
+    trackInstallDetails,
+    SDKFeature
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
@@ -35,7 +36,7 @@ interface KumulosConfig extends Configuration {
 export default class Kumulos {
     private readonly config: KumulosConfig;
     private readonly context: Context;
-    private readonly serviceWorkerReg: Promise<ServiceWorkerRegistration>;
+    private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
     private readonly promptManager: PromptManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
@@ -49,20 +50,24 @@ export default class Kumulos {
         trackInstallDetails(this.context);
         trackOpenFromQuery(this.context);
 
-        this.serviceWorkerReg = registerServiceWorker(
-            this.context.serviceWorkerPath
-        );
-
-        this.promptManager = new PromptManager(this, this.context);
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.addEventListener(
-                'message',
-                this.onWorkerMessage
+        if (this.context.hasFeature(SDKFeature.Push)) {
+            this.serviceWorkerReg = registerServiceWorker(
+                this.context.serviceWorkerPath
             );
         }
 
-        this.maybeFireOpenedHandler();
+        this.promptManager = new PromptManager(this, this.context);
+
+        if (this.context.hasFeature(SDKFeature.Push)) {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.addEventListener(
+                    'message',
+                    this.onWorkerMessage
+                );
+            }
+
+            this.maybeFireOpenedHandler();
+        }
     }
 
     getInstallId(): Promise<InstallId> {
