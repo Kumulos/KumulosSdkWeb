@@ -27,6 +27,7 @@ import getPushOpsManager, {
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
 import { registerServiceWorker } from './core/utils';
+import RootFrame from './core/root-frame';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -39,6 +40,7 @@ export default class Kumulos {
     private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
     private readonly promptManager: PromptManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
+    private readonly rootFrame: RootFrame;
 
     constructor(config: KumulosConfig) {
         assertConfigValid(config);
@@ -56,7 +58,12 @@ export default class Kumulos {
             );
         }
 
-        this.promptManager = new PromptManager(this, this.context);
+        this.rootFrame = new RootFrame();
+        this.promptManager = new PromptManager(
+            this,
+            this.context,
+            this.rootFrame
+        );
 
         if (this.context.hasFeature(SDKFeature.Push)) {
             if ('serviceWorker' in navigator) {

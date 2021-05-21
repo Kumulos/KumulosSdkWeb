@@ -1,3 +1,5 @@
+import { onDOMReady } from './utils';
+
 export default class RootFrame {
     public readonly element: HTMLDivElement;
 
@@ -5,8 +7,6 @@ export default class RootFrame {
         this.element = document.createElement('div');
         this.element.id = 'kumulos-ui-root';
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.body.appendChild(this.element);
-        });
+        onDOMReady(() => document.body.appendChild(this.element));
     }
 }

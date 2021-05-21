@@ -75,9 +75,7 @@ export class PromptManager {
 
         ctx.subscribe('eventTracked', this.onEventTracked);
 
-        onDOMReady(() => {
-            this.setState('loading');
-        });
+        onDOMReady(() => this.setState('loading'));
     }
 
     private onEventTracked = (e: SdkEvent) => {
