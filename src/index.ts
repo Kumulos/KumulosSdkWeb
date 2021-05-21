@@ -28,6 +28,7 @@ import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
 import { registerServiceWorker } from './core/utils';
 import RootFrame from './core/root-frame';
+import DDLManager from './core/ddl/manager';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -38,7 +39,8 @@ export default class Kumulos {
     private readonly config: KumulosConfig;
     private readonly context: Context;
     private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
-    private readonly promptManager: PromptManager;
+    private readonly promptManager?: PromptManager;
+    private readonly ddlManager?: DDLManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
     private readonly rootFrame: RootFrame;
 
@@ -50,22 +52,22 @@ export default class Kumulos {
 
         persistConfig(config);
         trackInstallDetails(this.context);
-        trackOpenFromQuery(this.context);
 
-        if (this.context.hasFeature(SDKFeature.Push)) {
+        this.rootFrame = new RootFrame();
+
+        if (this.context.hasFeature(SDKFeature.PUSH)) {
+            trackOpenFromQuery(this.context);
+
             this.serviceWorkerReg = registerServiceWorker(
                 this.context.serviceWorkerPath
             );
-        }
 
-        this.rootFrame = new RootFrame();
-        this.promptManager = new PromptManager(
-            this,
-            this.context,
-            this.rootFrame
-        );
+            this.promptManager = new PromptManager(
+                this,
+                this.context,
+                this.rootFrame
+            );
 
-        if (this.context.hasFeature(SDKFeature.Push)) {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.addEventListener(
                     'message',
@@ -74,6 +76,14 @@ export default class Kumulos {
             }
 
             this.maybeFireOpenedHandler();
+        }
+
+        if (this.context.hasFeature(SDKFeature.DDL)) {
+            this.ddlManager = new DDLManager(
+                this,
+                this.context,
+                this.rootFrame
+            );
         }
     }
 

@@ -261,7 +261,7 @@ export interface PlatformConfig {
 }
 
 export enum SDKFeature {
-    Push = 'push',
+    PUSH = 'push',
     DDL = 'ddl'
 }
 
@@ -345,7 +345,7 @@ export class Context {
         if (!this.features) {
             // TODO: backwards compat, (for consistency) as push side of things
             // prob wont query this as it stands currently
-            return feature === SDKFeature.Push ? true : false;
+            return feature === SDKFeature.PUSH ? true : false;
         }
 
         return this.features.includes(feature);
@@ -361,7 +361,7 @@ export function assertConfigValid(config: any) {
         ? config.features
         : undefined;
 
-    if (!features || features.includes(SDKFeature.Push)) {
+    if (!features || features.includes(SDKFeature.PUSH)) {
         return assertPushConfigValid(config);
     }
 }
