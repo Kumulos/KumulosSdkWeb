@@ -1,5 +1,5 @@
 import { Component, h } from 'preact';
-import { DDLConfig } from '../../core/ddl/config';
+import { DDLConfig } from '../../ddl/config';
 
 const styles = {
     iconStyle: {

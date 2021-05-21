@@ -1,6 +1,6 @@
-import Kumulos from '../../index';
-import { Context } from '../index';
-import RootFrame from '../root-frame';
+import Kumulos from '../index';
+import { Context } from '../core/index';
+import RootFrame from '../core/root-frame';
 
 export default class DDLManager {
     private readonly kumulosClient: Kumulos;

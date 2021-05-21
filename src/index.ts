@@ -28,7 +28,7 @@ import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
 import { registerServiceWorker } from './core/utils';
 import RootFrame from './core/root-frame';
-import DDLManager from './core/ddl/manager';
+import DDLManager from './ddl/manager';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
