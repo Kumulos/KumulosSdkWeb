@@ -1,3 +1,5 @@
+import '../styles.scss';
+
 import { onDOMReady } from './utils';
 
 export default class RootFrame {

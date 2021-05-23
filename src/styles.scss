@@ -1,0 +1,18 @@
+@import './prompts/styles/variables';
+@import './prompts/styles/anims';
+@import './prompts/styles/tooltip';
+@import './prompts/styles/toast';
+@import './prompts/styles/prompts';
+@import './prompts/styles/buttons';
+@import './prompts/styles/checkbox';
+
+@import './prompts/bell/bell.scss';
+@import './prompts/dialog/banner.scss';
+@import './prompts/dialog/dialog.scss';
+
+@import './prompts/background-mask.scss';
+@import './prompts/overlay.scss';
+
+body {
+    padding: 1em 11px 12px 13px;
+}
