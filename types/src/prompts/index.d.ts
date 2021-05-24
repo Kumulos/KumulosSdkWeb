@@ -5,7 +5,7 @@ export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'p
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
-    private readonly rootFrame;
+    private readonly rootContainer;
     private state?;
     private subscriptionState?;
     private eventQueue;

@@ -1,7 +1,7 @@
 import { h, render } from 'preact';
 import Kumulos from '../index';
 import { Context, PromptPosition } from '../core/index';
-import RootFrame from '../core/root-frame';
+import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import Ui from './ui';
 import { DDLConfig } from './config';
 import { isMobile, onDOMReady } from '../core/utils';
@@ -15,14 +15,14 @@ export enum DDLManagerState {
 export default class DDLManager {
     private readonly kumulosClient: Kumulos;
     private readonly context: Context;
-    private readonly rootFrame: RootFrame;
+    private readonly rootContainer: RootFrameContainer;
     private containerEl?: HTMLDivElement;
 
     private state?: DDLManagerState;
     private config?: DDLConfig[];
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
-        this.rootFrame = rootFrame;
+        this.rootContainer = rootFrame.createContainer('ddl');
         this.kumulosClient = client;
         this.context = ctx;
 
@@ -84,7 +84,7 @@ export default class DDLManager {
                 onBannerConfirm={this.onBannerConfirm}
                 onBannerCancelled={this.onBannerCancelled}
             />,
-            this.rootFrame.element
+            this.rootContainer.element
         );
     }
 

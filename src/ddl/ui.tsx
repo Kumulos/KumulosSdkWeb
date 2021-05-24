@@ -2,6 +2,7 @@ import { Component, h } from 'preact';
 
 import { DDLConfig } from './config';
 import { DDLBanner } from './ddl-banner';
+import { createPortal } from 'preact/compat';
 
 interface UiProps {
     config: DDLConfig;
@@ -47,13 +48,14 @@ export default class Ui extends Component<UiProps, never> {
     }
 
     render() {
-        return (
+        return createPortal(
             <DDLBanner
                 config={this.props.config}
                 onConfirm={this.onBannerConfirm}
                 onCancel={this.onBannerCancelled}
                 dimensions={this.onDimensions}
-            />
+            />,
+            document.body
         );
     }
 }

@@ -8,7 +8,7 @@ export declare enum DDLManagerState {
 export default class DDLManager {
     private readonly kumulosClient;
     private readonly context;
-    private readonly rootFrame;
+    private readonly rootContainer;
     private containerEl?;
     private state?;
     private config?;

@@ -1,4 +1,4 @@
-import { Component, h } from 'preact';
+import { Component } from 'preact';
 import { DDLConfig } from './config';
 interface UiProps {
     config: DDLConfig;
@@ -12,6 +12,6 @@ export default class Ui extends Component<UiProps, never> {
     onBannerConfirm: (config: DDLConfig) => void;
     onBannerCancelled: (config: DDLConfig) => void;
     resetBodyStyles(): void;
-    render(): h.JSX.Element;
+    render(): import("preact").VNode<any>;
 }
 export {};
