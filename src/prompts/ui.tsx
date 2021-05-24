@@ -1,5 +1,3 @@
-import './prompts.scss';
-
 import { Component, Fragment, h, JSX } from 'preact';
 
 import {
@@ -14,7 +12,7 @@ import {
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
-import { getBrowserName } from '../core/utils';
+import { getBrowserName, isMobile } from '../core/utils';
 import { Bell } from './bell';
 import { Dialog } from './dialog';
 import { ChannelsDialog } from './dialog/channels-dialog';
@@ -23,10 +21,6 @@ export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
 export function inversePosition(pos: string): 'left' | 'right' {
     return pos.indexOf('left') > -1 ? 'right' : 'left';
-}
-
-export function isMobile(): boolean {
-    return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
 }
 
 export interface PromptUiProps<T extends PromptConfig> {

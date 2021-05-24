@@ -26,7 +26,7 @@ import getPushOpsManager, {
 
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
-import { registerServiceWorker } from './core/utils';
+import { registerServiceWorker, isMobile } from './core/utils';
 import RootFrame from './core/root-frame';
 import DDLManager from './ddl/manager';
 
@@ -79,6 +79,13 @@ export default class Kumulos {
         }
 
         if (this.context.hasFeature(SDKFeature.DDL)) {
+            if (!isMobile()) {
+                console.info(
+                    'DDLManager: DDL feature support only available on mobile devices, aborting.'
+                );
+                return;
+            }
+
             this.ddlManager = new DDLManager(
                 this,
                 this.context,

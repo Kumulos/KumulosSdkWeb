@@ -1,5 +1,6 @@
-import { Component, h } from 'preact';
-import { DDLConfig } from '../../ddl/config';
+import { Component, h, createRef, RefObject } from 'preact';
+import { DDLConfig } from './config';
+import DeeplinkButton from './deeplink-button';
 
 const styles = {
     iconStyle: {
@@ -11,10 +12,33 @@ const styles = {
 
 export interface DDLBannerProps {
     config: DDLConfig;
+    onConfirm: (config: DDLConfig) => void;
+    onCancel: (config: DDLConfig) => void;
+    dimensions: (width: number, height: number) => void;
 }
 
 export class DDLBanner extends Component<DDLBannerProps, never> {
-    onTap = () => {};
+    private containerRef: RefObject<HTMLDivElement>;
+
+    constructor(props: DDLBannerProps) {
+        super(props);
+
+        this.containerRef = createRef<HTMLDivElement>();
+    }
+
+    componentDidMount() {
+        if (!this.containerRef.current) {
+            return;
+        }
+
+        const { clientWidth, clientHeight } = this.containerRef.current;
+
+        this.props.dimensions(clientWidth, clientHeight);
+    }
+
+    onConfirm = () => {
+        this.props.onConfirm(this.props.config);
+    };
 
     render() {
         const { config } = this.props;
@@ -29,7 +53,7 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
             color: fg
         };
 
-        const actionStyle = {
+        const actionStyle: h.JSX.CSSProperties = {
             backgroundColor: actionBg,
             color: actionFg
         };
@@ -40,8 +64,14 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
         };
 
         return (
-            <div style={containerStyle} class={classes}>
-                <div style={iconStyle} class="kumulos-ddlbanner-close"></div>
+            <div style={containerStyle} class={classes} ref={this.containerRef}>
+                <div
+                    style={iconStyle}
+                    class="kumulos-ddlbanner-close"
+                    onClick={() => this.props.onCancel(config)}
+                >
+                    x
+                </div>
                 <div style={iconStyle} class="kumulos-ddlbanner-icon"></div>
 
                 <div class="kumulos-ddlbanner-content">
@@ -49,18 +79,17 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
                         <h1>{heading}</h1>
                     </div>
                     <div class="kumulos-ddlbanner-body">{body}</div>
-                    <div class="kumulos-ddlbanner-rating">rating here</div>
+                    <div class="kumulos-ddlbanner-rating">*****</div>
                 </div>
 
                 <div class="kumulos-ddlbanner-actions">
-                    <button
-                        type="button"
+                    <DeeplinkButton
                         style={actionStyle}
                         class="kumulos-action-button kumulos-action-button-confirm"
-                        onClick={this.onTap}
-                    >
-                        {action}
-                    </button>
+                        text={action}
+                        linkUrl={config.canonicalLinkUrl}
+                        onClick={this.onConfirm}
+                    />
                 </div>
             </div>
         );

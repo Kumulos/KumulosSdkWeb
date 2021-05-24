@@ -1,4 +1,4 @@
-import { Context } from '.';
+import { Context, SDKFeature } from '.';
 
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
@@ -190,4 +190,16 @@ export function onDOMReady(fn: () => void) {
     } else {
         document.addEventListener('DOMContentLoaded', fn);
     }
+}
+
+export function isMobile(): boolean {
+    return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
+}
+
+export function configHasDDLFeature(config: any) {
+    return (
+        config &&
+        Array.isArray(config.features) &&
+        config.features.includes(SDKFeature.DDL)
+    );
 }

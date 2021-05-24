@@ -1,11 +1,9 @@
-import './prompts.scss';
 import { Component, h } from 'preact';
 import { PromptConfig, PromptAction, UserChannelSelectInlineAction, ChannelListItem } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 export declare const DEFAULT_SUBSCRIBE_LABEL = "Subscribe for notifications";
 export declare function inversePosition(pos: string): 'left' | 'right';
-export declare function isMobile(): boolean;
 export interface PromptUiProps<T extends PromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;

@@ -14,18 +14,19 @@
 
     font-family: $defaultFont;
 
-    animation: kumulos-anim-fade-in 0.2s ease-in;
     backface-visibility: hidden;
 
     box-shadow: 0 0 3px 1px $shadow-color;
 
     &.kumulos-prompt-position-top {
         top: 0;
+        animation: kumulos-slide-down 0.4s ease;
     }
 
     &.kumulos-prompt-position-bottom {
         bottom: 0;
         top: unset;
+        animation: kumulos-slide-up 0.4s ease;
     }
 }
 
@@ -54,11 +55,12 @@
 .kumulos-ddlbanner-header {
     display: flex;
     font-size: $defaultBannerHeaderFontSizeMobile;
+    line-height: $defaultBannerBodyLineHeightMobile;
 
     h1 {
         font-size: inherit;
         font-weight: bold;
-        margin: 0;
+        margin: 0 0 3px 0;
     }
 }
 
@@ -75,6 +77,7 @@
     flex-grow: 2;
     align-items: flex-start;
     font-size: $defaultBannerBodyFontSizeMobile;
+    line-height: $defaultBannerBodyLineHeightMobile;
     overflow: hidden;
     margin-top: 10px;
 }
@@ -113,8 +116,17 @@
 }
 
 .kumulos-ddlbanner-close {
-    width: 30px;
+    width: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .kumulos-ddlbanner-rating {
+    display: flex;
+    height: 20px;
+    font-size: 38px;
+    color: rgba(128, 128, 0, 0.8);
 }

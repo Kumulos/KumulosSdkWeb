@@ -1,10 +1,11 @@
 import { Context, PromptConfig } from '../core';
 import Kumulos from '..';
+import RootFrame from '../core/root-frame';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
-    private readonly uiRoot;
+    private readonly rootFrame;
     private state?;
     private subscriptionState?;
     private eventQueue;
@@ -16,7 +17,7 @@ export declare class PromptManager {
     private ui?;
     private platformConfig?;
     private currentPostAction?;
-    constructor(client: Kumulos, ctx: Context);
+    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame);
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;

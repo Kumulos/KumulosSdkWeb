@@ -212,13 +212,18 @@ export interface PlatformConfig {
     prompts: PromptConfigs;
     safariPushId: string | null;
 }
+export declare enum SDKFeature {
+    PUSH = "push",
+    DDL = "ddl"
+}
 export interface Configuration {
     apiKey: string;
     secretKey: string;
-    vapidPublicKey: string;
+    vapidPublicKey?: string;
     serviceWorkerPath?: string;
     pushPrompts?: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
+    features?: SDKFeature[];
 }
 export declare type PromptReminder = {
     declinedOn: number;
@@ -232,17 +237,19 @@ declare type SdkEventHandler = (event: SdkEvent) => void;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;
-    readonly vapidPublicKey: string;
+    readonly vapidPublicKey?: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
     readonly pushPrompts: {
         [key: string]: PromptConfig;
     } | 'auto';
     readonly autoResubscribe: boolean;
+    readonly features?: SDKFeature[];
     private readonly subscribers;
     constructor(config: Configuration);
     subscribe(event: SdkEventType, handler: SdkEventHandler): void;
     broadcast(event: SdkEventType, data: any): void;
+    hasFeature(feature: SDKFeature): boolean;
 }
 export declare function assertConfigValid(config: any): void;
 export declare function getInstallId(): Promise<InstallId>;
