@@ -17,6 +17,6 @@ export interface DDLConfig {
     colors: DDLColorConfig;
     position: 'top' | 'bottom';
     imageUrl: string;
+    storeUrl: string;
     canonicalLinkUrl: string;
-    data: any;
 }

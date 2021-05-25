@@ -16,10 +16,11 @@ export async function fetchDDLConfig(ctx: Context): Promise<DDLConfig[]> {
                 actionBg: 'rgba(0,0,0,1)',
                 actionFg: 'rgba(255,255,255,1)'
             },
-            position: PromptPosition.TOP,
-            canonicalLinkUrl: 'http://my.domain.lnk.click/myslug',
-            imageUrl: '',
-            data: {}
+            position: PromptPosition.BOTTOM,
+            storeUrl:
+                'https://play.google.com/store/apps/details?id=com.kumulos.companion',
+            canonicalLinkUrl: 'https://reactnative.lnk.click/deep-1',
+            imageUrl: ''
         }
     ]);
 }

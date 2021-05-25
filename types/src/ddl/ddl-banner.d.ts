@@ -1,5 +1,6 @@
 import { Component, h } from 'preact';
 import { DDLConfig } from './config';
+import { UIContextState } from './ui-context';
 export interface DDLBannerProps {
     config: DDLConfig;
     onConfirm: (config: DDLConfig) => void;
@@ -11,5 +12,7 @@ export declare class DDLBanner extends Component<DDLBannerProps, never> {
     constructor(props: DDLBannerProps);
     componentDidMount(): void;
     onConfirm: () => void;
+    onCancel: () => void;
+    renderBanner: (uiContext?: UIContextState | undefined) => h.JSX.Element;
     render(): h.JSX.Element;
 }

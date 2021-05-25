@@ -1,11 +1,13 @@
 import { h, render } from 'preact';
 import Kumulos from '../index';
-import { Context, PromptPosition } from '../core/index';
+import { Context, PromptPosition, PlatformConfig } from '../core/index';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import Ui from './ui';
 import { DDLConfig } from './config';
 import { isMobile, onDOMReady } from '../core/utils';
 import { fetchDDLConfig } from './api';
+import { UIContext } from './ui-context';
+import { loadConfig } from '../core/config';
 
 export enum DDLManagerState {
     LOADING = 'loading',
@@ -18,7 +20,8 @@ export default class DDLManager {
     private readonly rootContainer: RootFrameContainer;
     private containerEl?: HTMLDivElement;
 
-    private state?: DDLManagerState;
+    private state!: DDLManagerState;
+    private platformConfig!: PlatformConfig;
     private config?: DDLConfig[];
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
@@ -42,12 +45,19 @@ export default class DDLManager {
     }
 
     private onBannerConfirm = (config: DDLConfig) => {
-        console.log('redirect', config);
+        this.clearPrompt(config);
+
+        window.location.href = config.storeUrl;
     };
 
     private onBannerCancelled = (config: DDLConfig) => {
-        console.log('cancel', config);
+        this.clearPrompt(config);
     };
+
+    private clearPrompt(config: DDLConfig) {
+        this.config = this.config?.filter(c => c.uuid !== config.uuid);
+        this.setState(DDLManagerState.READY);
+    }
 
     private setState(state: DDLManagerState) {
         console.info('Setting DDL manager state:' + state);
@@ -66,29 +76,32 @@ export default class DDLManager {
                 // using a single (first) config for now
 
                 const config = this.config?.shift();
-                if (!config) {
-                    console.error('DDLManager: failed to render ui, no config');
-                    break;
-                }
 
-                setTimeout(() => this.render(config), 2000);
+                if (config) {
+                    setTimeout(() => this.render(config), 2000);
+                } else {
+                    this.render();
+                }
 
                 break;
         }
     }
 
-    private render(config: DDLConfig) {
+    private render(config?: DDLConfig) {
         render(
-            <Ui
-                config={config}
-                onBannerConfirm={this.onBannerConfirm}
-                onBannerCancelled={this.onBannerCancelled}
-            />,
+            <UIContext.Provider value={{ platformConfig: this.platformConfig }}>
+                <Ui
+                    config={config}
+                    onBannerConfirm={this.onBannerConfirm}
+                    onBannerCancelled={this.onBannerCancelled}
+                />
+            </UIContext.Provider>,
             this.rootContainer.element
         );
     }
 
     private async loadDDLConfig() {
+        this.platformConfig = await loadConfig(this.context);
         this.config = await fetchDDLConfig(this.context);
     }
 }

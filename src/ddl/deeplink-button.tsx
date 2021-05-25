@@ -6,12 +6,12 @@ interface DeeplinkButtonProps {
     class: string;
     text: string;
     linkUrl: string;
-    onClick: () => void;
+    onAction: () => void;
 }
 
 export default class DeeplinkButton extends Component<
     DeeplinkButtonProps,
-    { ready: boolean }
+    never
 > {
     private readonly btnRef: RefObject<HTMLButtonElement>;
     private clipboard?: Clipboard;
@@ -19,21 +19,20 @@ export default class DeeplinkButton extends Component<
     constructor(props: DeeplinkButtonProps) {
         super(props);
 
-        this.state = { ready: false };
         this.btnRef = createRef<HTMLButtonElement>();
     }
 
-    componentDidMount() {
+    onTouchEnd = () => {
         this.clipboard = new Clipboard(this.btnRef.current!);
-        this.clipboard.on('success', (e: ClipboardEvent) => {
-            this.setState({ ready: true });
-        });
+        this.clipboard.on('success', e => this.props.onAction());
+    };
+
+    componentWillUnmount() {
+        this.clipboard?.destroy();
     }
 
-    onClick = () => this.state.ready && this.props.onClick();
-
     render() {
-        const { style, class: cssClass, onClick, text, linkUrl } = this.props;
+        const { style, class: cssClass, text, linkUrl } = this.props;
 
         return (
             <button
@@ -41,7 +40,7 @@ export default class DeeplinkButton extends Component<
                 type="button"
                 style={style}
                 class={cssClass}
-                onClick={this.onClick}
+                onTouchEnd={this.onTouchEnd}
                 data-clipboard-text={linkUrl}
             >
                 {text}

@@ -1,17 +1,18 @@
 import { Component } from 'preact';
 import { DDLConfig } from './config';
 interface UiProps {
-    config: DDLConfig;
+    config?: DDLConfig;
     onBannerConfirm: (config: DDLConfig) => void;
     onBannerCancelled: (config: DDLConfig) => void;
 }
 export default class Ui extends Component<UiProps, never> {
-    private siteMarginTop?;
+    private siteMargin?;
     private siteTransition?;
     onDimensions: (_bannerWidth: number, bannerHeight: number) => void;
     onBannerConfirm: (config: DDLConfig) => void;
     onBannerCancelled: (config: DDLConfig) => void;
     resetBodyStyles(): void;
-    render(): import("preact").VNode<any>;
+    renderBanner(): void;
+    render(): import("preact").VNode<any> | null;
 }
 export {};

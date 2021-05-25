@@ -3,28 +3,43 @@ import { Component, h } from 'preact';
 import { DDLConfig } from './config';
 import { DDLBanner } from './ddl-banner';
 import { createPortal } from 'preact/compat';
+import { UIContext } from './ui-context';
+import { PromptPosition } from '../core';
 
 interface UiProps {
-    config: DDLConfig;
+    config?: DDLConfig;
     onBannerConfirm: (config: DDLConfig) => void;
     onBannerCancelled: (config: DDLConfig) => void;
 }
 
 export default class Ui extends Component<UiProps, never> {
-    private siteMarginTop?: number;
+    private siteMargin?: number;
     private siteTransition?: string;
 
     onDimensions = (_bannerWidth: number, bannerHeight: number) => {
+        const { config } = this.props;
         const bodyStyle = window.getComputedStyle(document.body, null);
-        this.siteMarginTop = parseFloat(
-            bodyStyle.getPropertyValue('margin-top')
+        this.siteMargin = parseFloat(
+            bodyStyle.getPropertyValue(
+                config?.position === PromptPosition.TOP
+                    ? 'margin-top'
+                    : 'margin-bottom'
+            )
         );
         this.siteTransition = bodyStyle.getPropertyValue('transition');
 
-        const offset = bannerHeight + this.siteMarginTop;
+        if (config?.position === PromptPosition.BOTTOM) {
+            bannerHeight += 20;
+        }
+
+        const offset = bannerHeight + this.siteMargin;
 
         document.body.style.transition = 'all 0.375s ease 0s';
-        document.body.style.marginTop = `${offset}px`;
+        document.body.style[
+            config?.position === PromptPosition.TOP
+                ? 'marginTop'
+                : 'marginBottom'
+        ] = `${offset}px`;
     };
 
     onBannerConfirm = (config: DDLConfig) => {
@@ -38,16 +53,23 @@ export default class Ui extends Component<UiProps, never> {
     };
 
     resetBodyStyles() {
-        if (this.siteTransition) {
-            document.body.style.transition = this.siteTransition;
-        }
+        const { config } = this.props;
+        document.body.style.transition = this.siteTransition ?? '';
 
-        if (this.siteMarginTop) {
-            document.body.style.marginTop = `${this.siteMarginTop}px`;
-        }
+        document.body.style[
+            config?.position === PromptPosition.TOP
+                ? 'marginTop'
+                : 'marginBottom'
+        ] = this.siteMargin ? `${this.siteMargin}px` : '';
     }
 
+    renderBanner() {}
+
     render() {
+        if (!this.props.config) {
+            return null;
+        }
+
         return createPortal(
             <DDLBanner
                 config={this.props.config}

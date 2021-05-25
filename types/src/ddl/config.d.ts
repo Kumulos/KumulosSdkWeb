@@ -10,10 +10,11 @@ export interface DDLLabelConfig {
     action: string;
 }
 export interface DDLConfig {
+    uuid: string;
     labels: DDLLabelConfig;
     colors: DDLColorConfig;
     position: 'top' | 'bottom';
     imageUrl: string;
+    storeUrl: string;
     canonicalLinkUrl: string;
-    data: any;
 }

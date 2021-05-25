@@ -4,16 +4,14 @@ interface DeeplinkButtonProps {
     class: string;
     text: string;
     linkUrl: string;
-    onClick: () => void;
+    onAction: () => void;
 }
-export default class DeeplinkButton extends Component<DeeplinkButtonProps, {
-    ready: boolean;
-}> {
+export default class DeeplinkButton extends Component<DeeplinkButtonProps, never> {
     private readonly btnRef;
     private clipboard?;
     constructor(props: DeeplinkButtonProps);
-    componentDidMount(): void;
-    onClick: () => false | void;
+    onTouchEnd: () => void;
+    componentWillUnmount(): void;
     render(): h.JSX.Element;
 }
 export {};
