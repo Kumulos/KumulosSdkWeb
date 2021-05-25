@@ -1,5 +1,5 @@
 import { Component, h, createRef, RefObject } from 'preact';
-import { DDLConfig } from './config';
+import { PromptConfig, SDKFeature } from '../core';
 import DeeplinkButton from './deeplink-button';
 import { UIContext, UIContextState } from './ui-context';
 
@@ -12,9 +12,9 @@ const styles = {
 };
 
 export interface DDLBannerProps {
-    config: DDLConfig;
-    onConfirm: (config: DDLConfig) => void;
-    onCancel: (config: DDLConfig) => void;
+    config: PromptConfig;
+    onConfirm: (config: PromptConfig) => void;
+    onCancel: (config: PromptConfig) => void;
     dimensions: (width: number, height: number) => void;
 }
 
@@ -47,9 +47,14 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
 
     renderBanner = (uiContext?: UIContextState) => {
         const { config } = this.props;
+
+        if (config.feature !== SDKFeature.DDL) {
+            return null;
+        }
+
         const { canonicalLinkUrl, position, labels, colors } = config;
-        const { heading, body, action } = labels;
-        const { bg, fg, actionBg, actionFg } = colors;
+        const { heading, body, acceptAction } = labels.banner;
+        const { bg, fg, acceptActionBg, acceptActionFg } = colors.banner;
 
         const classes = `kumulos-prompt kumulos-ddlbanner-container kumulos-prompt-position-${position}`;
 
@@ -59,8 +64,8 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
         };
 
         const actionStyle: h.JSX.CSSProperties = {
-            backgroundColor: actionBg,
-            color: actionFg
+            backgroundColor: acceptActionBg,
+            color: acceptActionFg
         };
 
         const iconStyle = {
@@ -99,7 +104,7 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
                     <DeeplinkButton
                         style={actionStyle}
                         class="kumulos-action-button kumulos-action-button-confirm"
-                        text={action}
+                        text={acceptAction}
                         linkUrl={canonicalLinkUrl}
                         onAction={this.onConfirm}
                     />

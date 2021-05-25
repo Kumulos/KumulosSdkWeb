@@ -10,7 +10,10 @@ import {
     ChannelSubAction,
     PromptAction,
     UserChannelSelectDialogAction,
-    ChannelListItem
+    ChannelListItem,
+    PromptTypeName,
+    SDKFeature,
+    PushPromptConfig
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -93,7 +96,7 @@ export class PromptManager {
         this.evaluateTriggers();
     };
 
-    private activateDeferredPrompt = (prompt: PromptConfig) => {
+    private activateDeferredPrompt = (prompt: PushPromptConfig) => {
         this.activatePrompt(prompt);
         this.render();
     };
@@ -147,7 +150,8 @@ export class PromptManager {
         await this.handleUserChannelSelection(channelSelections);
 
         if (this.subscriptionState === 'subscribed') {
-            this.ui?.showToast(prompt.labels?.thanksForSubscribing);
+            //if (prompt.feature === SDKFeature.PUSH) {
+            this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
         }
     };
 

@@ -1,12 +1,12 @@
 import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
-import { AlertPromptConfig, BannerPromptConfig, ChannelListItem } from '../../core';
+import { AlertPromptConfig, PushBannerPromptConfig, ChannelListItem } from '../../core';
 import { UIContextState } from '../ui-context';
 export interface DialogState {
     channelSelections: ChannelListItem[];
 }
-export declare class Dialog extends Component<PromptUiProps<AlertPromptConfig | BannerPromptConfig>, DialogState> {
-    constructor(props: PromptUiProps<AlertPromptConfig | BannerPromptConfig>);
+export declare class Dialog extends Component<PromptUiProps<AlertPromptConfig | PushBannerPromptConfig>, DialogState> {
+    constructor(props: PromptUiProps<AlertPromptConfig | PushBannerPromptConfig>);
     onRequestNativePrompt: () => void;
     onRequestCancel: () => void;
     onSelectedChannelChanged: (channelList: ChannelListItem[]) => void;

@@ -4,10 +4,11 @@ import {
     PromptConfig,
     PromptTypeName,
     AlertPromptConfig,
-    BannerPromptConfig,
+    PushBannerPromptConfig,
     PromptAction,
     UserChannelSelectInlineAction,
-    ChannelListItem
+    ChannelListItem,
+    SDKFeature
 } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
@@ -279,7 +280,7 @@ export default class Ui extends Component<UiProps, UiState> {
                 (p.type === PromptTypeName.ALERT ||
                     p.type === PromptTypeName.BANNER) &&
                 !!p.backgroundMask
-        )[0] as AlertPromptConfig | BannerPromptConfig;
+        )[0] as AlertPromptConfig | PushBannerPromptConfig;
 
         if (!firstPromptWithMask) {
             return null;
@@ -298,6 +299,10 @@ export default class Ui extends Component<UiProps, UiState> {
         }
 
         if ('postaction' === this.props.promptManagerState) {
+            return null;
+        }
+
+        if (prompt.feature !== SDKFeature.PUSH) {
             return null;
         }
 

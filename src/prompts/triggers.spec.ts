@@ -2,7 +2,8 @@ import {
     KumulosEvent,
     PromptConfig,
     PromptPosition,
-    PromptTypeName
+    PromptTypeName,
+    SDKFeature
 } from '../core';
 
 import { triggerMatched } from './triggers';
@@ -32,6 +33,7 @@ function newPageViewPrompt(pathFilter: string): PromptConfig {
     return {
         position: PromptPosition.BOTTOM_LEFT,
         type: PromptTypeName.BELL,
+        feature: SDKFeature.PUSH,
         uuid: 'prompt-1',
         trigger: {
             event: 'pageViewed',

@@ -1,9 +1,15 @@
 import { h, render } from 'preact';
 import Kumulos from '../index';
-import { Context, PromptPosition, PlatformConfig } from '../core/index';
+import {
+    Context,
+    PromptPosition,
+    PlatformConfig,
+    PromptConfig,
+    SDKFeature
+} from '../core/index';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import Ui from './ui';
-import { DDLConfig } from './config';
+import { DDLBannerPromptConfig } from '../core';
 import { isMobile, onDOMReady } from '../core/utils';
 import { fetchDDLConfig } from './api';
 import { UIContext } from './ui-context';
@@ -22,7 +28,7 @@ export default class DDLManager {
 
     private state!: DDLManagerState;
     private platformConfig!: PlatformConfig;
-    private config?: DDLConfig[];
+    private config?: DDLBannerPromptConfig[];
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.rootContainer = rootFrame.createContainer('ddl');
@@ -44,17 +50,21 @@ export default class DDLManager {
         document.body.prepend(this.containerEl);
     }
 
-    private onBannerConfirm = (config: DDLConfig) => {
+    private onBannerConfirm = (config: PromptConfig) => {
+        if (config.feature !== SDKFeature.DDL) {
+            return;
+        }
+
         this.clearPrompt(config);
 
         window.location.href = config.storeUrl;
     };
 
-    private onBannerCancelled = (config: DDLConfig) => {
+    private onBannerCancelled = (config: PromptConfig) => {
         this.clearPrompt(config);
     };
 
-    private clearPrompt(config: DDLConfig) {
+    private clearPrompt(config: PromptConfig) {
         this.config = this.config?.filter(c => c.uuid !== config.uuid);
         this.setState(DDLManagerState.READY);
     }
@@ -87,7 +97,7 @@ export default class DDLManager {
         }
     }
 
-    private render(config?: DDLConfig) {
+    private render(config?: DDLBannerPromptConfig) {
         render(
             <UIContext.Provider value={{ platformConfig: this.platformConfig }}>
                 <Ui

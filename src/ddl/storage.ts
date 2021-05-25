@@ -1,10 +1,14 @@
 import { set, get } from '../core/storage';
-import { DDLConfig } from './config';
+import { DDLBannerPromptConfig } from '../core';
 
-export function persistDDLConfig(config: DDLConfig): Promise<DDLConfig> {
-    return set<DDLConfig>('ddlconfig', config);
+export function persistDDLConfig(
+    config: DDLBannerPromptConfig
+): Promise<DDLBannerPromptConfig> {
+    return set<DDLBannerPromptConfig>('ddlconfig', config);
 }
 
-export function getDDLConfig(config: DDLConfig): Promise<DDLConfig> {
-    return get<DDLConfig>('ddlconfig');
+export function getDDLConfig(
+    config: DDLBannerPromptConfig
+): Promise<DDLBannerPromptConfig> {
+    return get<DDLBannerPromptConfig>('ddlconfig');
 }

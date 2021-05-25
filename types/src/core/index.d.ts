@@ -127,6 +127,7 @@ export declare enum PromptPosition {
 interface BasePromptConfig {
     uuid: string;
     type: PromptTypeName;
+    feature: SDKFeature;
     trigger: PromptTrigger;
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
@@ -146,6 +147,7 @@ export interface BellColorConfig {
 }
 export interface BellPromptConfig extends BasePromptConfig {
     type: PromptTypeName.BELL;
+    feature: SDKFeature.PUSH;
     labels?: BellLabelConfig;
     colors?: BellColorConfig;
     position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
@@ -171,6 +173,7 @@ export interface AlertColorConfig {
 }
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
+    feature: SDKFeature.PUSH;
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
     position: PromptPosition.TOP | PromptPosition.CENTER;
@@ -202,7 +205,17 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
     backgroundMask?: BackgroundMaskConfig;
 }
-export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
+export interface PushBannerPromptConfig extends BannerPromptConfig {
+    feature: SDKFeature.PUSH;
+}
+export interface DDLBannerPromptConfig extends BannerPromptConfig {
+    feature: SDKFeature.DDL;
+    imageUrl: string;
+    storeUrl: string;
+    canonicalLinkUrl: string;
+}
+export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | PushBannerPromptConfig | DDLBannerPromptConfig;
+export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | PushBannerPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };
