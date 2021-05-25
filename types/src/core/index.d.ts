@@ -215,7 +215,6 @@ export interface DDLBannerPromptConfig extends BannerPromptConfig {
     canonicalLinkUrl: string;
 }
 export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | PushBannerPromptConfig | DDLBannerPromptConfig;
-export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | PushBannerPromptConfig;
 export declare type PromptConfigs = {
     [key: string]: PromptConfig;
 };

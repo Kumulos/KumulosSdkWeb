@@ -10,10 +10,7 @@ import {
     ChannelSubAction,
     PromptAction,
     UserChannelSelectDialogAction,
-    ChannelListItem,
-    PromptTypeName,
-    SDKFeature,
-    PushPromptConfig
+    ChannelListItem
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -96,7 +93,7 @@ export class PromptManager {
         this.evaluateTriggers();
     };
 
-    private activateDeferredPrompt = (prompt: PushPromptConfig) => {
+    private activateDeferredPrompt = (prompt: PromptConfig) => {
         this.activatePrompt(prompt);
         this.render();
     };

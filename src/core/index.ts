@@ -266,11 +266,6 @@ export type PromptConfig =
     | PushBannerPromptConfig
     | DDLBannerPromptConfig;
 
-export type PushPromptConfig =
-    | BellPromptConfig
-    | AlertPromptConfig
-    | PushBannerPromptConfig;
-
 export type PromptConfigs = { [key: string]: PromptConfig };
 
 export interface PlatformConfig {
