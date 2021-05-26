@@ -2,15 +2,12 @@ import { h, render } from 'preact';
 import Kumulos from '../index';
 import {
     Context,
-    PromptPosition,
     PlatformConfig,
     PromptConfig,
     SDKFeature
 } from '../core/index';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import Ui from './ui';
-import { DDLBannerPromptConfig } from '../core';
-import { isMobile, onDOMReady } from '../core/utils';
 import { fetchDDLConfig } from './api';
 import { UIContext } from './ui-context';
 import { loadConfig } from '../core/config';
@@ -28,7 +25,7 @@ export default class DDLManager {
 
     private state!: DDLManagerState;
     private platformConfig!: PlatformConfig;
-    private config?: DDLBannerPromptConfig[];
+    private config?: PromptConfig[];
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.rootContainer = rootFrame.createContainer('ddl');
@@ -37,10 +34,8 @@ export default class DDLManager {
 
         console.info('DDLManager: initialising');
 
-        onDOMReady(() => {
-            this.createInjectionContainer();
-            this.setState(DDLManagerState.LOADING);
-        });
+        this.createInjectionContainer();
+        this.setState(DDLManagerState.LOADING);
     }
 
     private createInjectionContainer() {
@@ -97,7 +92,7 @@ export default class DDLManager {
         }
     }
 
-    private render(config?: DDLBannerPromptConfig) {
+    private render(config?: PromptConfig) {
         render(
             <UIContext.Provider value={{ platformConfig: this.platformConfig }}>
                 <Ui
