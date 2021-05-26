@@ -1,0 +1,26 @@
+.kumulos-banner-compact {
+    & .kumulos-banner-body {
+        margin-top: 0;
+    }
+
+    & .kumulos-banner-actions {
+        width: auto;
+        margin-top: 0;
+    }
+
+    & .kumulos-banner-close {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    & .kumulos-banner-rating {
+        display: flex;
+        height: 20px;
+        font-size: 38px;
+        color: rgba(128, 128, 0, 0.8);
+    }
+}

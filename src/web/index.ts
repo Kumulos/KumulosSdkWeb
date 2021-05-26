@@ -1,7 +1,11 @@
 import { EventType } from '../core';
 import Kumulos from '../index';
 import { getPageViewedProps } from './utils';
-import { isBrowserSupported, configHasDDLFeature } from '../core/utils';
+import {
+    isBrowserSupported,
+    configHasDDLFeature,
+    onDOMReady
+} from '../core/utils';
 
 type CmdFn = (k: Kumulos) => void;
 type Cmd = string | CmdFn;
@@ -67,4 +71,4 @@ function main() {
     (window.Kumulos as any) = executor;
 }
 
-main();
+onDOMReady(main);

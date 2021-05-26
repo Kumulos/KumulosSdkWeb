@@ -4,10 +4,14 @@ import DeeplinkButton from './deeplink-button';
 import { UIContext, UIContextState } from './ui-context';
 
 const styles = {
-    iconStyle: {
+    bannerIconStyle: {
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
         backgroundSize: 'cover'
+    },
+    closeIconStyle: {
+        width: 12,
+        height: 12
     }
 };
 
@@ -56,7 +60,7 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
         const { heading, body, acceptAction } = labels.banner;
         const { bg, fg, acceptActionBg, acceptActionFg } = colors.banner;
 
-        const classes = `kumulos-prompt kumulos-ddlbanner-container kumulos-prompt-position-${position}`;
+        const classes = `kumulos-prompt kumulos-banner-container kumulos-banner-compact kumulos-prompt-position-${position}`;
 
         const containerStyle = {
             backgroundColor: bg,
@@ -68,18 +72,18 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
             color: acceptActionFg
         };
 
-        const iconStyle = {
-            ...styles.iconStyle,
+        const bannerIconStyle = {
+            ...styles.bannerIconStyle,
             backgroundImage: `url(${uiContext?.platformConfig.iconUrl})`
         };
 
         return (
             <div style={containerStyle} class={classes} ref={this.containerRef}>
-                <div class="kumulos-ddlbanner-close" onTouchEnd={this.onCancel}>
+                <div class="kumulos-banner-close" onTouchEnd={this.onCancel}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 121.31 122.876"
-                        style={{ width: 12, height: 12 }}
+                        style={styles.closeIconStyle}
                     >
                         <g>
                             <path
@@ -90,17 +94,17 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
                         </g>
                     </svg>
                 </div>
-                <div style={iconStyle} class="kumulos-ddlbanner-icon"></div>
+                <div style={bannerIconStyle} class="kumulos-banner-icon"></div>
 
-                <div class="kumulos-ddlbanner-content">
-                    <div class="kumulos-ddlbanner-header">
+                <div class="kumulos-banner-content">
+                    <div class="kumulos-banner-header">
                         <h1>{heading}</h1>
                     </div>
-                    <div class="kumulos-ddlbanner-body">{body}</div>
-                    <div class="kumulos-ddlbanner-rating">*****</div>
+                    <div class="kumulos-banner-body">{body}</div>
+                    <div class="kumulos-banner-rating">*****</div>
                 </div>
 
-                <div class="kumulos-ddlbanner-actions">
+                <div class="kumulos-banner-actions">
                     <DeeplinkButton
                         style={actionStyle}
                         class="kumulos-action-button kumulos-action-button-confirm"

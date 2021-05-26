@@ -1,4 +1,3 @@
-.kumulos-ddlbanner-container,
 .kumulos-banner-container {
     display: flex;
     flex-direction: row;
@@ -36,21 +35,19 @@
     }
 }
 
-.kumulos-banner-icon,
-.kumulos-ddlbanner-icon {
-    width: 60px;
+.kumulos-banner-icon {
+    width: 65px;
+    height: 65px;
     margin-right: 10px;
 }
 
-.kumulos-banner-content,
-.kumulos-ddlbanner-content {
+.kumulos-banner-content {
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
-.kumulos-banner-header,
-.kumulos-ddlbanner-header {
+.kumulos-banner-header {
     display: flex;
     font-size: $defaultBannerHeaderFontSizeMobile;
     line-height: $defaultBannerBodyLineHeightMobile;
@@ -63,14 +60,12 @@
 }
 
 @media only screen and (min-device-width: 480px) {
-    .kumulos-banner-header,
-    .kumulos-ddlbanner-header {
+    .kumulos-banner-header {
         font-size: $defaultHeaderFontSize;
     }
 }
 
-.kumulos-banner-body,
-.kumulos-ddlbanner-body {
+.kumulos-banner-body {
     display: flex;
     flex-grow: 2;
     align-items: flex-start;
@@ -80,19 +75,13 @@
     margin-top: 10px;
 }
 
-.kumulos-ddlbanner-body {
-    margin-top: 0;
-}
-
 @media only screen and (min-device-width: 480px) {
-    .kumulos-banner-body,
-    .kumulos-ddlbanner-body {
+    .kumulos-banner-body {
         font-size: $defaultBodySize;
     }
 }
 
-.kumulos-banner-actions,
-.kumulos-ddlbanner-actions {
+.kumulos-banner-actions {
     display: flex;
     align-self: center;
     justify-self: flex-end;
@@ -101,30 +90,9 @@
     margin-top: 10px;
 }
 
-.kumulos-ddlbanner-actions {
-    width: auto;
-    margin-top: 0;
-}
-
 @media only screen and (min-device-width: 480px) {
     .kumulos-banner-actions {
         width: auto;
         margin-top: 0;
     }
-}
-
-.kumulos-ddlbanner-close {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 10px;
-}
-
-.kumulos-ddlbanner-rating {
-    display: flex;
-    height: 20px;
-    font-size: 38px;
-    color: rgba(128, 128, 0, 0.8);
 }
