@@ -23,7 +23,7 @@ export declare enum PromptTypeName {
     BELL = "bell",
     ALERT = "alert",
     BANNER = "banner",
-    CHANNEL = "channel"
+    BANNER_DL = "banner_dl"
 }
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
@@ -127,18 +127,34 @@ export declare enum PromptPosition {
 interface BasePromptConfig {
     uuid: string;
     type: PromptTypeName;
-    feature: SDKFeature;
     trigger: PromptTrigger;
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
 }
-interface BellLabelConfig {
+interface TooltipConfig {
     tooltip: {
         subscribe: string;
     };
+}
+declare type DialogLabelConfig<T extends PromptTypeName> = Record<T, {
+    heading: string;
+    body: string;
+    declineAction: string;
+    acceptAction: string;
+}>;
+declare type DialogColorConfig<T extends PromptTypeName> = Record<T, {
+    fg: string;
+    bg: string;
+    declineActionFg: string;
+    declineActionBg: string;
+    acceptActionFg: string;
+    acceptActionBg: string;
+}>;
+interface ToastMessage {
     thanksForSubscribing: string;
 }
+declare type BellLabelConfig = ToastMessage & TooltipConfig;
 export interface BellColorConfig {
     bell: {
         fg: string;
@@ -147,57 +163,21 @@ export interface BellColorConfig {
 }
 export interface BellPromptConfig extends BasePromptConfig {
     type: PromptTypeName.BELL;
-    feature: SDKFeature.PUSH;
     labels?: BellLabelConfig;
     colors?: BellColorConfig;
     position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
-interface AlertLabelConfig {
-    thanksForSubscribing: string;
-    alert: {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    };
-}
-export interface AlertColorConfig {
-    alert: {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    };
-}
+declare type AlertLabelConfig = DialogLabelConfig<PromptTypeName.ALERT> & ToastMessage;
+declare type AlertColorConfig = DialogColorConfig<PromptTypeName.ALERT>;
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
-    feature: SDKFeature.PUSH;
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
     position: PromptPosition.TOP | PromptPosition.CENTER;
     backgroundMask?: BackgroundMaskConfig;
 }
-interface BannerLabelConfig {
-    thanksForSubscribing: string;
-    banner: {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    };
-}
-export interface BannerColorConfig {
-    banner: {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    };
-}
+declare type BannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER> & ToastMessage;
+declare type BannerColorConfig = DialogColorConfig<PromptTypeName.BANNER>;
 export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.BANNER;
     labels: BannerLabelConfig;
@@ -205,18 +185,21 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
     backgroundMask?: BackgroundMaskConfig;
 }
-export interface PushBannerPromptConfig extends BannerPromptConfig {
-    feature: SDKFeature.PUSH;
-}
-export interface DDLBannerPromptConfig extends BannerPromptConfig {
-    feature: SDKFeature.DDL;
+declare type DDLBannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER_DL>;
+declare type DDLBannerColorConfig = DialogColorConfig<PromptTypeName.BANNER_DL>;
+export interface DDLBannerPromptConfig extends BasePromptConfig, PromptUiActions {
+    type: PromptTypeName.BANNER_DL;
+    labels: DDLBannerLabelConfig;
+    colors: DDLBannerColorConfig;
     imageUrl: string;
     storeUrl: string;
     canonicalLinkUrl: string;
 }
-export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | PushBannerPromptConfig | DDLBannerPromptConfig;
+export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
+export declare type DDLPromptConfig = DDLBannerPromptConfig;
+export declare type PromptConfig = PushPromptConfig | DDLPromptConfig;
 export declare type PromptConfigs = {
-    [key: string]: PromptConfig;
+    [key: string]: PushPromptConfig;
 };
 export interface PlatformConfig {
     publicKey: string;
@@ -233,7 +216,7 @@ export interface Configuration {
     secretKey: string;
     vapidPublicKey?: string;
     serviceWorkerPath?: string;
-    pushPrompts?: PromptConfigs | 'auto';
+    pushPrompts: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
     features?: SDKFeature[];
 }
@@ -252,9 +235,7 @@ export declare class Context {
     readonly vapidPublicKey?: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: {
-        [key: string]: PromptConfig;
-    } | 'auto';
+    readonly pushPrompts: PromptConfigs | 'auto';
     readonly autoResubscribe: boolean;
     readonly features?: SDKFeature[];
     private readonly subscribers;

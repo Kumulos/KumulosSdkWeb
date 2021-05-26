@@ -1,5 +1,5 @@
 import { Component, h, createRef, RefObject } from 'preact';
-import { PromptConfig, SDKFeature } from '../core';
+import { SDKFeature, DDLBannerPromptConfig } from '../core';
 import DeeplinkButton from './deeplink-button';
 import { UIContext, UIContextState } from './ui-context';
 
@@ -16,9 +16,9 @@ const styles = {
 };
 
 export interface DDLBannerProps {
-    config: PromptConfig;
-    onConfirm: (config: PromptConfig) => void;
-    onCancel: (config: PromptConfig) => void;
+    config: DDLBannerPromptConfig;
+    onConfirm: (config: DDLBannerPromptConfig) => void;
+    onCancel: (config: DDLBannerPromptConfig) => void;
     dimensions: (width: number, height: number) => void;
 }
 
@@ -52,13 +52,9 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
     renderBanner = (uiContext?: UIContextState) => {
         const { config } = this.props;
 
-        if (config.feature !== SDKFeature.DDL) {
-            return null;
-        }
-
         const { canonicalLinkUrl, position, labels, colors } = config;
-        const { heading, body, acceptAction } = labels.banner;
-        const { bg, fg, acceptActionBg, acceptActionFg } = colors.banner;
+        const { heading, body, acceptAction } = labels.banner_dl;
+        const { bg, fg, acceptActionBg, acceptActionFg } = colors.banner_dl;
 
         const classes = `kumulos-prompt kumulos-banner-container kumulos-banner-compact kumulos-prompt-position-${position}`;
 

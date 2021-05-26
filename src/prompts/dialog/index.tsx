@@ -2,7 +2,7 @@ import { Component, h } from 'preact';
 import { PromptUiProps } from '../ui';
 import {
     AlertPromptConfig,
-    PushBannerPromptConfig,
+    BannerPromptConfig,
     PromptTypeName,
     getChannelDialogChannels,
     ChannelListItem
@@ -23,12 +23,10 @@ export interface DialogState {
 }
 
 export class Dialog extends Component<
-    PromptUiProps<AlertPromptConfig | PushBannerPromptConfig>,
+    PromptUiProps<AlertPromptConfig | BannerPromptConfig>,
     DialogState
 > {
-    constructor(
-        props: PromptUiProps<AlertPromptConfig | PushBannerPromptConfig>
-    ) {
+    constructor(props: PromptUiProps<AlertPromptConfig | BannerPromptConfig>) {
         super(props);
 
         this.state = {

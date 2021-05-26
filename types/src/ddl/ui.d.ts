@@ -1,16 +1,16 @@
 import { Component } from 'preact';
-import { PromptConfig } from '../core';
+import { DDLPromptConfig } from '../core';
 interface UiProps {
-    config?: PromptConfig;
-    onBannerConfirm: (config: PromptConfig) => void;
-    onBannerCancelled: (config: PromptConfig) => void;
+    config?: DDLPromptConfig;
+    onBannerConfirm: (config: DDLPromptConfig) => void;
+    onBannerCancelled: (config: DDLPromptConfig) => void;
 }
 export default class Ui extends Component<UiProps, never> {
     private siteMargin?;
     private siteTransition?;
     onDimensions: (_bannerWidth: number, bannerHeight: number) => void;
-    onBannerConfirm: (config: PromptConfig) => void;
-    onBannerCancelled: (config: PromptConfig) => void;
+    onBannerConfirm: (config: DDLPromptConfig) => void;
+    onBannerCancelled: (config: DDLPromptConfig) => void;
     resetBodyStyles(): void;
     renderBanner(): void;
     render(): import("preact").VNode<any> | null;

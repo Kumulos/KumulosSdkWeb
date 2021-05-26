@@ -4,20 +4,17 @@ import {
     SDKFeature,
     PromptTypeName,
     ReminderTimeUnit,
-    UiActionType
+    UiActionType,
+    DDLPromptConfig
 } from '../core';
 import { DDLBannerPromptConfig } from '../core';
 
-export async function fetchDDLConfig(
-    ctx: Context
-): Promise<DDLBannerPromptConfig[]> {
-    const config: DDLBannerPromptConfig = {
+export async function fetchDDLConfig(ctx: Context): Promise<DDLPromptConfig[]> {
+    const config: DDLPromptConfig = {
         uuid: 'link1',
-        type: PromptTypeName.BANNER,
-        feature: SDKFeature.DDL,
+        type: PromptTypeName.BANNER_DL,
         labels: {
-            thanksForSubscribing: '',
-            banner: {
+            banner_dl: {
                 heading: 'Creek Cycles App',
                 body: '20% off all purchases with code 20Appy',
                 declineAction: '',
@@ -25,7 +22,7 @@ export async function fetchDDLConfig(
             }
         },
         colors: {
-            banner: {
+            banner_dl: {
                 bg: 'rgba(255,255,0,1)',
                 fg: 'rgba(0,0,0,1)',
                 declineActionFg: '',
@@ -34,7 +31,7 @@ export async function fetchDDLConfig(
                 acceptActionBg: 'rgba(0,0,0,1)'
             }
         },
-        position: PromptPosition.BOTTOM,
+        position: PromptPosition.TOP,
         storeUrl:
             'https://play.google.com/store/apps/details?id=com.kumulos.companion',
         canonicalLinkUrl: 'https://reactnative.lnk.click/deep-1',

@@ -1,14 +1,13 @@
 import { Component, Fragment, h, JSX } from 'preact';
 
 import {
-    PromptConfig,
+    PushPromptConfig,
     PromptTypeName,
     AlertPromptConfig,
-    PushBannerPromptConfig,
+    BannerPromptConfig,
     PromptAction,
     UserChannelSelectInlineAction,
-    ChannelListItem,
-    SDKFeature
+    ChannelListItem
 } from '../core';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
@@ -24,15 +23,15 @@ export function inversePosition(pos: string): 'left' | 'right' {
     return pos.indexOf('left') > -1 ? 'right' : 'left';
 }
 
-export interface PromptUiProps<T extends PromptConfig> {
+export interface PromptUiProps<T extends PushPromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
-    onPromptDeclined: (prompt: PromptConfig) => void;
+    onPromptDeclined: (prompt: PushPromptConfig) => void;
     action?: UserChannelSelectInlineAction;
 }
 
@@ -54,7 +53,7 @@ export class Tooltip extends Component<TooltipProps, never> {
 
 interface OverlayProps {
     promptState: PromptManagerState;
-    prompt?: PromptConfig;
+    prompt?: PushPromptConfig;
     subscriptionState: PushSubscriptionState;
 }
 
@@ -197,19 +196,19 @@ class BackgroundMask extends Component<
 }
 
 interface UiProps {
-    prompts: PromptConfig[];
+    prompts: PushPromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
-    onPromptDeclined: (prompt: PromptConfig) => void;
+    onPromptDeclined: (prompt: PushPromptConfig) => void;
     onPostActionConfirm: (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
-    currentlyRequestingPrompt?: PromptConfig;
+    currentlyRequestingPrompt?: PushPromptConfig;
     currentPostAction?: PromptAction;
 }
 
@@ -280,7 +279,7 @@ export default class Ui extends Component<UiProps, UiState> {
                 (p.type === PromptTypeName.ALERT ||
                     p.type === PromptTypeName.BANNER) &&
                 !!p.backgroundMask
-        )[0] as AlertPromptConfig | PushBannerPromptConfig;
+        )[0] as AlertPromptConfig | BannerPromptConfig;
 
         if (!firstPromptWithMask) {
             return null;
@@ -293,7 +292,7 @@ export default class Ui extends Component<UiProps, UiState> {
         return <BackgroundMask style={style} />;
     }
 
-    renderPrompt(prompt: PromptConfig) {
+    renderPrompt(prompt: PushPromptConfig) {
         if ('requesting' === this.props.promptManagerState) {
             return null;
         }
@@ -302,9 +301,9 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
-        if (prompt.feature !== SDKFeature.PUSH) {
-            return null;
-        }
+        // if (prompt.feature !== SDKFeature.PUSH) {
+        //     return null;
+        // }
 
         switch (prompt.type) {
             case 'bell':

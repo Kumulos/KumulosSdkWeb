@@ -3,8 +3,8 @@ import Kumulos from '../index';
 import {
     Context,
     PlatformConfig,
-    PromptConfig,
-    SDKFeature
+    DDLPromptConfig,
+    DDLBannerPromptConfig
 } from '../core/index';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import Ui from './ui';
@@ -25,7 +25,7 @@ export default class DDLManager {
 
     private state!: DDLManagerState;
     private platformConfig!: PlatformConfig;
-    private config?: PromptConfig[];
+    private config?: DDLBannerPromptConfig[];
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.rootContainer = rootFrame.createContainer('ddl');
@@ -45,21 +45,17 @@ export default class DDLManager {
         document.body.prepend(this.containerEl);
     }
 
-    private onBannerConfirm = (config: PromptConfig) => {
-        if (config.feature !== SDKFeature.DDL) {
-            return;
-        }
-
+    private onBannerConfirm = (config: DDLPromptConfig) => {
         this.clearPrompt(config);
 
         window.location.href = config.storeUrl;
     };
 
-    private onBannerCancelled = (config: PromptConfig) => {
+    private onBannerCancelled = (config: DDLPromptConfig) => {
         this.clearPrompt(config);
     };
 
-    private clearPrompt(config: PromptConfig) {
+    private clearPrompt(config: DDLPromptConfig) {
         this.config = this.config?.filter(c => c.uuid !== config.uuid);
         this.setState(DDLManagerState.READY);
     }
@@ -92,7 +88,7 @@ export default class DDLManager {
         }
     }
 
-    private render(config?: PromptConfig) {
+    private render(config?: DDLPromptConfig) {
         render(
             <UIContext.Provider value={{ platformConfig: this.platformConfig }}>
                 <Ui

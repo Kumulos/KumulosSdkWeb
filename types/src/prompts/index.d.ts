@@ -1,4 +1,4 @@
-import { Context, PromptConfig } from '../core';
+import { Context, PushPromptConfig } from '../core';
 import Kumulos from '..';
 import RootFrame from '../core/root-frame';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
@@ -32,7 +32,7 @@ export declare class PromptManager {
     private handleUserChannelSelection;
     private render;
     private evaluateTriggers;
-    promptActionNeedsTaken(prompt: PromptConfig): boolean;
+    promptActionNeedsTaken(prompt: PushPromptConfig): boolean;
     private maybePersistReminder;
     private hidePrompt;
     private isPromptSuppressed;

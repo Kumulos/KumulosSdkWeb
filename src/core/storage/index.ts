@@ -1,4 +1,4 @@
-import { Configuration, Context, PromptReminder, PromptConfig } from '../index';
+import { Configuration, Context, PromptReminder } from '../index';
 import {
     Store,
     del as idbDel,

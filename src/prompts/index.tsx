@@ -1,7 +1,6 @@
 import {
     Context,
     EventPayload,
-    PromptConfig,
     SdkEvent,
     PromptUiActions,
     ReminderTimeUnit,
@@ -10,7 +9,9 @@ import {
     ChannelSubAction,
     PromptAction,
     UserChannelSelectDialogAction,
-    ChannelListItem
+    ChannelListItem,
+    PushPromptConfig,
+    PromptConfigs
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -53,9 +54,9 @@ export class PromptManager {
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
     private eventQueue: EventPayload;
-    private prompts: { [x: string]: PromptConfig };
-    private activePrompts: PromptConfig[];
-    private currentlyRequestingPrompt?: PromptConfig;
+    private prompts: PromptConfigs;
+    private activePrompts: PushPromptConfig[];
+    private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
     private channels: Channel[];
     private ui?: Ui;
@@ -92,12 +93,12 @@ export class PromptManager {
         this.evaluateTriggers();
     };
 
-    private activateDeferredPrompt = (prompt: PromptConfig) => {
+    private activateDeferredPrompt = (prompt: PushPromptConfig) => {
         this.activatePrompt(prompt);
         this.render();
     };
 
-    private onRequestNativePrompt = async (prompt: PromptConfig) => {
+    private onRequestNativePrompt = async (prompt: PushPromptConfig) => {
         if ('requesting' === this.state) {
             return;
         }
@@ -114,7 +115,7 @@ export class PromptManager {
     };
 
     private onRequestPostActionPrompt = async (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         action: PromptAction
     ) => {
         if ('postaction' === this.state) {
@@ -132,7 +133,7 @@ export class PromptManager {
     };
 
     private onPromptAccepted = async (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => {
         if (this.subscriptionState === 'unsubscribed') {
@@ -146,13 +147,12 @@ export class PromptManager {
         await this.handleUserChannelSelection(channelSelections);
 
         if (this.subscriptionState === 'subscribed') {
-            //if (prompt.feature === SDKFeature.PUSH) {
             this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
         }
     };
 
     private onPostActionConfirm = async (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => {
         await this.handleUserChannelSelection(channelSelections);
@@ -161,12 +161,12 @@ export class PromptManager {
         this.hideAndSuppressPrompts(prompt);
     };
 
-    private onPromptDeclined = (prompt: PromptConfig) => {
+    private onPromptDeclined = (prompt: PushPromptConfig) => {
         this.maybePersistReminder(prompt);
         this.hidePrompt(prompt);
     };
 
-    private hideAndSuppressPrompts(prompt: PromptConfig) {
+    private hideAndSuppressPrompts(prompt: PushPromptConfig) {
         const { subscriptionState } = this;
 
         this.hidePrompt(prompt);
@@ -176,7 +176,7 @@ export class PromptManager {
         }
     }
 
-    private async handlePromptActions(prompt: PromptConfig) {
+    private async handlePromptActions(prompt: PushPromptConfig) {
         if (!prompt.actions) {
             return;
         }
@@ -190,7 +190,9 @@ export class PromptManager {
         await this.handleChannelPostActions(prompt);
     }
 
-    private async handleChannelSubActions(prompt: PromptConfig): Promise<void> {
+    private async handleChannelSubActions(
+        prompt: PushPromptConfig
+    ): Promise<void> {
         if (undefined === prompt.actions) {
             return;
         }
@@ -223,7 +225,7 @@ export class PromptManager {
     }
 
     private async handleChannelPostActions(
-        prompt: PromptConfig
+        prompt: PushPromptConfig
     ): Promise<void> {
         if (undefined === prompt.actions) {
             return;
@@ -315,7 +317,7 @@ export class PromptManager {
         this.eventQueue = [];
     }
 
-    promptActionNeedsTaken(prompt: PromptConfig): boolean {
+    promptActionNeedsTaken(prompt: PushPromptConfig): boolean {
         if (this.subscriptionState === 'unsubscribed') {
             return true;
         }
@@ -339,7 +341,7 @@ export class PromptManager {
         return false;
     }
 
-    private maybePersistReminder(prompt: PromptConfig) {
+    private maybePersistReminder(prompt: PushPromptConfig) {
         const { uiActions } = prompt as PromptUiActions;
 
         if (!uiActions) {
@@ -362,14 +364,16 @@ export class PromptManager {
         }
     }
 
-    private hidePrompt(prompt: PromptConfig) {
+    private hidePrompt(prompt: PushPromptConfig) {
         const idx = this.activePrompts.indexOf(prompt);
         this.activePrompts.splice(idx, 1);
 
         this.render();
     }
 
-    private async isPromptSuppressed(prompt: PromptConfig): Promise<boolean> {
+    private async isPromptSuppressed(
+        prompt: PushPromptConfig
+    ): Promise<boolean> {
         const reminder = await getPromptReminder(prompt.uuid);
 
         if (!reminder) {
@@ -403,7 +407,7 @@ export class PromptManager {
         );
     }
 
-    private deferPromptActivation(prompt: PromptConfig) {
+    private deferPromptActivation(prompt: PushPromptConfig) {
         if (!prompt.trigger.afterSeconds || prompt.trigger.afterSeconds < 0) {
             return;
         }
@@ -419,7 +423,7 @@ export class PromptManager {
         );
     }
 
-    private activatePrompt(prompt: PromptConfig) {
+    private activatePrompt(prompt: PushPromptConfig) {
         // TODO is identity ok for comparison here... might need to use ID
         if (this.activePrompts.indexOf(prompt) > -1) {
             return;
@@ -428,7 +432,7 @@ export class PromptManager {
         this.activePrompts.push(prompt);
     }
 
-    private activatePrompts(prompts: PromptConfig[]) {
+    private activatePrompts(prompts: PushPromptConfig[]) {
         console.info('Will activate prompts: ', prompts);
 
         for (let i = 0; i < prompts.length; ++i) {

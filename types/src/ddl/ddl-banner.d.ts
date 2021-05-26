@@ -1,10 +1,10 @@
 import { Component, h } from 'preact';
-import { PromptConfig } from '../core';
+import { DDLBannerPromptConfig } from '../core';
 import { UIContextState } from './ui-context';
 export interface DDLBannerProps {
-    config: PromptConfig;
-    onConfirm: (config: PromptConfig) => void;
-    onCancel: (config: PromptConfig) => void;
+    config: DDLBannerPromptConfig;
+    onConfirm: (config: DDLBannerPromptConfig) => void;
+    onCancel: (config: DDLBannerPromptConfig) => void;
     dimensions: (width: number, height: number) => void;
 }
 export declare class DDLBanner extends Component<DDLBannerProps, never> {
@@ -13,6 +13,6 @@ export declare class DDLBanner extends Component<DDLBannerProps, never> {
     componentDidMount(): void;
     onConfirm: () => void;
     onCancel: () => void;
-    renderBanner: (uiContext?: UIContextState | undefined) => h.JSX.Element | null;
+    renderBanner: (uiContext?: UIContextState | undefined) => h.JSX.Element;
     render(): h.JSX.Element;
 }

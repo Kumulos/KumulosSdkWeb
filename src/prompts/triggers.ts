@@ -1,4 +1,4 @@
-import { FilterValue, KumulosEvent, PromptConfig, PropFilter } from '../core';
+import { FilterValue, KumulosEvent, PropFilter, PromptConfig } from '../core';
 
 import { escapeRegExp } from '../core/utils';
 
