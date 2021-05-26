@@ -11,7 +11,7 @@ import {
     UserChannelSelectDialogAction,
     ChannelListItem,
     PushPromptConfig,
-    PromptConfigs
+    PushPromptConfigs
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -54,7 +54,7 @@ export class PromptManager {
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
     private eventQueue: EventPayload;
-    private prompts: PromptConfigs;
+    private prompts: PushPromptConfigs;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;

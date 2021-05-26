@@ -53,8 +53,8 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
         const { config } = this.props;
 
         const { canonicalLinkUrl, position, labels, colors } = config;
-        const { heading, body, acceptAction } = labels.banner_dl;
-        const { bg, fg, acceptActionBg, acceptActionFg } = colors.banner_dl;
+        const { heading, body, acceptAction } = labels.bannerdl;
+        const { bg, fg, acceptActionBg, acceptActionFg } = colors.bannerdl;
 
         const classes = `kumulos-prompt kumulos-banner-container kumulos-banner-compact kumulos-prompt-position-${position}`;
 

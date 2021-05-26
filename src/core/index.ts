@@ -36,7 +36,7 @@ export enum PromptTypeName {
     BELL = 'bell',
     ALERT = 'alert',
     BANNER = 'banner',
-    BANNER_DL = 'banner_dl'
+    BANNER_DL = 'bannerdl'
 }
 
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
@@ -269,12 +269,12 @@ export type DDLPromptConfig = DDLBannerPromptConfig;
 
 export type PromptConfig = PushPromptConfig | DDLPromptConfig;
 
-export type PromptConfigs = { [key: string]: PushPromptConfig };
+export type PushPromptConfigs = Record<string, PushPromptConfig>;
 
 export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
-    prompts: PromptConfigs;
+    prompts: PushPromptConfigs;
     safariPushId: string | null;
 }
 
@@ -293,7 +293,7 @@ export interface Configuration {
     vapidPublicKey?: string;
 
     serviceWorkerPath?: string;
-    pushPrompts: PromptConfigs | 'auto';
+    pushPrompts: PushPromptConfigs | 'auto';
     autoResubscribe?: boolean;
 
     features?: SDKFeature[];
@@ -315,7 +315,7 @@ export class Context {
     readonly vapidPublicKey?: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: PromptConfigs | 'auto';
+    readonly pushPrompts: PushPromptConfigs | 'auto';
     readonly autoResubscribe: boolean;
     readonly features?: SDKFeature[];
 

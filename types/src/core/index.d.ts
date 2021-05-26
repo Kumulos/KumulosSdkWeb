@@ -23,7 +23,7 @@ export declare enum PromptTypeName {
     BELL = "bell",
     ALERT = "alert",
     BANNER = "banner",
-    BANNER_DL = "banner_dl"
+    BANNER_DL = "bannerdl"
 }
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
@@ -198,13 +198,11 @@ export interface DDLBannerPromptConfig extends BasePromptConfig, PromptUiActions
 export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
 export declare type DDLPromptConfig = DDLBannerPromptConfig;
 export declare type PromptConfig = PushPromptConfig | DDLPromptConfig;
-export declare type PromptConfigs = {
-    [key: string]: PushPromptConfig;
-};
+export declare type PushPromptConfigs = Record<string, PushPromptConfig>;
 export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
-    prompts: PromptConfigs;
+    prompts: PushPromptConfigs;
     safariPushId: string | null;
 }
 export declare enum SDKFeature {
@@ -216,7 +214,7 @@ export interface Configuration {
     secretKey: string;
     vapidPublicKey?: string;
     serviceWorkerPath?: string;
-    pushPrompts: PromptConfigs | 'auto';
+    pushPrompts: PushPromptConfigs | 'auto';
     autoResubscribe?: boolean;
     features?: SDKFeature[];
 }
@@ -235,7 +233,7 @@ export declare class Context {
     readonly vapidPublicKey?: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: PromptConfigs | 'auto';
+    readonly pushPrompts: PushPromptConfigs | 'auto';
     readonly autoResubscribe: boolean;
     readonly features?: SDKFeature[];
     private readonly subscribers;

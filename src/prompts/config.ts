@@ -1,9 +1,11 @@
-import { Context, PromptConfigs } from '../core';
+import { Context, PushPromptConfigs } from '../core';
 
 import { loadConfig } from '../core/config';
 
-export async function loadPromptConfigs(ctx: Context): Promise<PromptConfigs> {
-    let prompts = {} as PromptConfigs;
+export async function loadPromptConfigs(
+    ctx: Context
+): Promise<PushPromptConfigs> {
+    let prompts = {} as PushPromptConfigs;
 
     try {
         const platformConfig = await loadConfig(ctx);

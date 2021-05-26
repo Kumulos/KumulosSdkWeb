@@ -14,7 +14,7 @@ export async function fetchDDLConfig(ctx: Context): Promise<DDLPromptConfig[]> {
         uuid: 'link1',
         type: PromptTypeName.BANNER_DL,
         labels: {
-            banner_dl: {
+            bannerdl: {
                 heading: 'Creek Cycles App',
                 body: '20% off all purchases with code 20Appy',
                 declineAction: '',
@@ -22,7 +22,7 @@ export async function fetchDDLConfig(ctx: Context): Promise<DDLPromptConfig[]> {
             }
         },
         colors: {
-            banner_dl: {
+            bannerdl: {
                 bg: 'rgba(255,255,0,1)',
                 fg: 'rgba(0,0,0,1)',
                 declineActionFg: '',
