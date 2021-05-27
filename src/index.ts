@@ -81,7 +81,7 @@ export default class Kumulos {
         if (this.context.hasFeature(SDKFeature.DDL)) {
             if (!isMobile()) {
                 console.info(
-                    'DDLManager: DDL feature support only available on mobile devices, aborting.'
+                    'DDLManager: DDL feature support only available on mobile devices.'
                 );
                 return;
             }

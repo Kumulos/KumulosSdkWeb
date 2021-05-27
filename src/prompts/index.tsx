@@ -11,35 +11,30 @@ import {
     UserChannelSelectDialogAction,
     ChannelListItem,
     PushPromptConfig,
-    PushPromptConfigs
+    PushPromptConfigs,
+    PromptConfig
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
 } from '../core/push';
-import { h, render, createContext } from 'preact';
+import { h, render } from 'preact';
 
 import { Channel } from '../core/channels';
 import Kumulos from '..';
 import Ui from './ui';
 import { triggerMatched } from './triggers';
-import { persistPromptReminder, getPromptReminder } from '../core/storage';
-import { PromptReminderDelayConfig } from '../core';
 import { UIContext } from './ui-context';
 import { loadPlatformConfig } from '../core/config';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import { maybePersistReminder, isPromptSuppressed } from './prompt-reminder';
+import { deferPromptActivation } from '../core/utils';
 
 export type PromptManagerState =
     | 'loading'
     | 'ready'
     | 'requesting'
     | 'postaction';
-
-const REMINDER_TIME_UNIT_TO_MILLIS = {
-    [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
-    [ReminderTimeUnit.DAYS]: 1000 * 60 * 60 * 24
-};
 
 // loading -> ready
 // ready -> requesting
@@ -50,7 +45,7 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 export class PromptManager {
     private readonly kumulosClient: Kumulos;
     private readonly context: Context;
-    private readonly rootContainer: RootFrameContainer;
+    private readonly pushContainer: RootFrameContainer;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
@@ -70,7 +65,7 @@ export class PromptManager {
         this.activePrompts = [];
         this.channels = [];
 
-        this.rootContainer = rootFrame.createContainer('push');
+        this.pushContainer = rootFrame.createContainer('push');
         this.kumulosClient = client;
         this.context = ctx;
 
@@ -94,8 +89,8 @@ export class PromptManager {
         this.evaluateTriggers();
     };
 
-    private activateDeferredPrompt = (prompt: PushPromptConfig) => {
-        this.activatePrompt(prompt);
+    private activateDeferredPrompt = (prompt: PromptConfig) => {
+        this.activatePrompt(prompt as PushPromptConfig);
         this.render();
     };
 
@@ -290,7 +285,7 @@ export class PromptManager {
                     currentPostAction={this.currentPostAction}
                 />
             </UIContext.Provider>,
-            this.rootContainer.element
+            this.pushContainer.element
         );
     }
 
@@ -349,22 +344,6 @@ export class PromptManager {
         this.render();
     }
 
-    private deferPromptActivation(prompt: PushPromptConfig) {
-        if (!prompt.trigger.afterSeconds || prompt.trigger.afterSeconds < 0) {
-            return;
-        }
-
-        console.info(
-            'Deferring prompt activation by ' + prompt.trigger.afterSeconds
-        );
-
-        setTimeout(
-            this.activateDeferredPrompt,
-            prompt.trigger.afterSeconds * 1000,
-            prompt
-        );
-    }
-
     private activatePrompt(prompt: PushPromptConfig) {
         // TODO is identity ok for comparison here... might need to use ID
         if (this.activePrompts.indexOf(prompt) > -1) {
@@ -380,8 +359,7 @@ export class PromptManager {
         for (let i = 0; i < prompts.length; ++i) {
             const prompt = prompts[i];
 
-            if (prompt.trigger.afterSeconds !== undefined) {
-                this.deferPromptActivation(prompt);
+            if (deferPromptActivation(prompt, this.activateDeferredPrompt)) {
                 continue;
             }
 

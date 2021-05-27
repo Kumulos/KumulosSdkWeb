@@ -1,4 +1,4 @@
-import { Context } from '.';
+import { Context, PromptConfig } from '.';
 export declare function uuidv4(): string;
 export declare function getBrowserName(): string;
 export declare function isBrowserSupported(): boolean;
@@ -19,3 +19,4 @@ export declare function parseQueryString(qs?: string, excludedQueryKeys?: string
 export declare function onDOMReady(fn: () => void): void;
 export declare function isMobile(): boolean;
 export declare function configHasDDLFeature(config: any): any;
+export declare function deferPromptActivation(prompt: PromptConfig, activateFn: (prompt: PromptConfig) => void): boolean;

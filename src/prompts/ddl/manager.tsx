@@ -1,28 +1,23 @@
 import { h, render } from 'preact';
-import Kumulos from '../../index';
-import { Context, DDLPromptConfig } from '../../core/index';
+import { Context, DDLPromptConfig, PromptConfig } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
 import { loadDDLConfig } from '../../core/config';
-import { persistDDLConfig } from '../../core/storage';
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
+import { deferPromptActivation } from '../../core/utils';
 
 export enum DDLManagerState {
     LOADING = 'loading',
-    READY = 'ready',
-    HANDLED = 'handled'
+    READY = 'ready'
 }
 
 export default class DDLManager {
     private readonly context: Context;
-    private readonly rootContainer: RootFrameContainer;
-
-    private state!: DDLManagerState;
+    private readonly ddlContainer: RootFrameContainer;
     private config?: DDLPromptConfig[];
-    private prompt?: DDLPromptConfig;
 
     constructor(ctx: Context, rootFrame: RootFrame) {
-        this.rootContainer = rootFrame.createContainer('ddl');
+        this.ddlContainer = rootFrame.createContainer('ddl');
         this.context = ctx;
 
         console.info('DDLManager: initialising');
@@ -30,72 +25,66 @@ export default class DDLManager {
         this.setState(DDLManagerState.LOADING);
     }
 
-    private onBannerConfirm = (config: DDLPromptConfig) => {
-        this.setState(DDLManagerState.HANDLED);
+    private onBannerConfirm = (prompt: DDLPromptConfig) => {
+        this.hidePrompt(prompt);
 
-        window.location.href = config.storeUrl;
+        window.location.href = prompt.storeUrl;
     };
 
-    private onBannerCancelled = (config: DDLPromptConfig) => {
-        maybePersistReminder(config);
-        this.setState(DDLManagerState.HANDLED);
+    private onBannerCancelled = (prompt: DDLPromptConfig) => {
+        maybePersistReminder(prompt);
+        this.hidePrompt(prompt);
     };
+
+    private hidePrompt(prompt: DDLPromptConfig) {
+        this.config = this.config?.filter(c => c.uuid !== prompt.uuid);
+        this.setState(DDLManagerState.READY);
+    }
 
     private setState(state: DDLManagerState) {
         console.info('Setting DDL manager state:' + state);
-        this.state = state;
         this.onEnter(state);
     }
 
     private async onEnter(state: DDLManagerState) {
         switch (state) {
             case DDLManagerState.LOADING:
-                await this.loadDDLConfig();
+                this.config = await loadDDLConfig(this.context);
                 this.setState(DDLManagerState.READY);
                 break;
             case DDLManagerState.READY:
-                // TODO - new state for managing multiples as precondition state for 'READY'
-                // using a single (first) config for now
+                const prompt = this.config?.shift();
 
-                this.prompt = this.config?.shift();
-
-                if (this.prompt && !isPromptSuppressed(this.prompt)) {
-                    setTimeout(() => this.render(), 2000);
-                } else {
-                    this.render();
+                if (!prompt) {
+                    this.renderEmpty();
+                    break;
                 }
 
-                break;
-            case DDLManagerState.HANDLED:
-                this.config = this.config?.filter(
-                    c => c.uuid !== this.prompt?.uuid
-                );
-
-                if (this.config) {
-                    persistDDLConfig(this.config);
+                const isSuppressed = await isPromptSuppressed(prompt);
+                if (isSuppressed) {
+                    break;
                 }
 
-                this.setState(DDLManagerState.READY);
+                if (!deferPromptActivation(prompt, this.render)) {
+                    this.render(prompt);
+                }
 
                 break;
         }
     }
 
-    private render() {
+    private render = (prompt: PromptConfig) => {
         render(
             <Ui
-                config={this.prompt}
+                config={prompt as DDLPromptConfig}
                 onBannerConfirm={this.onBannerConfirm}
                 onBannerCancelled={this.onBannerCancelled}
             />,
-            this.rootContainer.element
+            this.ddlContainer.element
         );
-    }
+    };
 
-    private async loadDDLConfig() {
-        this.config = await loadDDLConfig(this.context);
-        if (this.config) {
-            persistDDLConfig(this.config);
-        }
+    private renderEmpty() {
+        render(null, this.ddlContainer.element);
     }
 }

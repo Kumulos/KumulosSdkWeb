@@ -6,7 +6,7 @@ import { createPortal } from 'preact/compat';
 import { PromptPosition } from '../../core';
 
 interface UiProps {
-    config?: DDLPromptConfig;
+    config: DDLPromptConfig;
     onBannerConfirm: (config: DDLPromptConfig) => void;
     onBannerCancelled: (config: DDLPromptConfig) => void;
 }

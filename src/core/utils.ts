@@ -1,4 +1,4 @@
-import { Context, SDKFeature } from '.';
+import { Context, SDKFeature, PromptConfig } from '.';
 
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
@@ -202,4 +202,24 @@ export function configHasDDLFeature(config: any) {
         Array.isArray(config.features) &&
         config.features.includes(SDKFeature.DDL)
     );
+}
+
+export function deferPromptActivation(
+    prompt: PromptConfig,
+    activateFn: (prompt: PromptConfig) => void
+) {
+    if (
+        prompt.trigger.afterSeconds === undefined ||
+        prompt.trigger.afterSeconds < 0
+    ) {
+        return false;
+    }
+
+    console.info(
+        'Deferring prompt activation by ' + prompt.trigger.afterSeconds
+    );
+
+    setTimeout(activateFn, prompt.trigger.afterSeconds * 1000, prompt);
+
+    return true;
 }
