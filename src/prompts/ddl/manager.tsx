@@ -1,10 +1,10 @@
 import { h, render } from 'preact';
-import Kumulos from '../index';
-import { Context, DDLPromptConfig } from '../core/index';
-import RootFrame, { RootFrameContainer } from '../core/root-frame';
+import Kumulos from '../../index';
+import { Context, DDLPromptConfig } from '../../core/index';
+import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
-import { loadDDLConfig } from '../core/config';
-import { persistDDLConfig } from '../core/storage';
+import { loadDDLConfig } from '../../core/config';
+import { persistDDLConfig } from '../../core/storage';
 
 export enum DDLManagerState {
     LOADING = 'loading',

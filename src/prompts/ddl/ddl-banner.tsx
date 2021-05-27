@@ -1,5 +1,5 @@
 import { Component, h, createRef, RefObject } from 'preact';
-import { DDLBannerPromptConfig } from '../core';
+import { DDLBannerPromptConfig } from '../../core';
 import DeeplinkButton from './deeplink-button';
 
 const styles = {

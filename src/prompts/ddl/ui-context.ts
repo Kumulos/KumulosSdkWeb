@@ -1,5 +1,5 @@
 import { createContext } from 'preact';
-import { PlatformConfig } from '../core';
+import { PlatformConfig } from '../../core';
 
 export interface UIContextState {
     platformConfig: PlatformConfig;

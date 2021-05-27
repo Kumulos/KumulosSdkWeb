@@ -1,9 +1,9 @@
 import { Component, h } from 'preact';
 
-import { DDLPromptConfig } from '../core';
+import { DDLPromptConfig } from '../../core';
 import { DDLBanner } from './ddl-banner';
 import { createPortal } from 'preact/compat';
-import { PromptPosition } from '../core';
+import { PromptPosition } from '../../core';
 
 interface UiProps {
     config?: DDLPromptConfig;
