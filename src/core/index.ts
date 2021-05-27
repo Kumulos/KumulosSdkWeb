@@ -270,12 +270,12 @@ export type DDLPromptConfig = DDLBannerPromptConfig;
 
 export type PromptConfig = PushPromptConfig | DDLPromptConfig;
 
-export type PushPromptConfigs = Record<string, PushPromptConfig>;
+export type PromptConfigs = Record<string, PromptConfig>;
 
 export interface PlatformConfig {
     publicKey?: string;
     iconUrl?: string;
-    prompts?: PushPromptConfigs;
+    prompts?: PromptConfigs;
     safariPushId?: string | null;
 }
 
@@ -294,7 +294,7 @@ export interface Configuration {
     vapidPublicKey?: string;
 
     serviceWorkerPath?: string;
-    pushPrompts: PushPromptConfigs | 'auto';
+    pushPrompts: PromptConfigs | 'auto';
     autoResubscribe?: boolean;
 
     features?: SDKFeature[];
@@ -316,7 +316,7 @@ export class Context {
     readonly vapidPublicKey?: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: PushPromptConfigs | 'auto';
+    readonly pushPrompts: PromptConfigs | 'auto';
     readonly autoResubscribe: boolean;
     readonly features?: SDKFeature[];
 
@@ -575,4 +575,16 @@ export function getChannelDialogChannels(
                 selectionConfig.checkedUuids === 'all' ||
                 selectionConfig.checkedUuids.includes(c.uuid)
         }));
+}
+
+export interface PromptManager {
+    registerForPromptRender(cb: (prompts: PromptConfig[]) => void): void;
+
+    registerForPromptLoad(cb: (prompts: PromptConfigs) => void): void;
+
+    onPromptConfirm(config: PromptConfig): void;
+
+    onPromptCancelled(config: PromptConfig): void;
+
+    load(): void;
 }

@@ -11,7 +11,9 @@ import {
     UserChannelSelectDialogAction,
     ChannelListItem,
     PushPromptConfig,
-    PromptConfigs
+    PromptConfigs,
+    PromptManager,
+    PromptConfig
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
@@ -46,59 +48,57 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 // ready -> postaction
 // postaction -> ready
 
-export class PromptManager {
+export class PushPromptManager implements PromptManager {
     private readonly kumulosClient: Kumulos;
     private readonly context: Context;
-    private readonly rootContainer: RootFrameContainer;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
-    private eventQueue: EventPayload;
     private prompts: PromptConfigs;
-    private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
     private channels: Channel[];
-    private ui?: Ui;
     private platformConfig?: PlatformConfig;
-    private currentPostAction?: PromptAction;
+
+    private renderPromptCallback?: (prompts: PromptConfig[]) => void;
+    private promptLoadCallback?: (prompts: PromptConfigs) => void;
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
-        this.prompts = {};
-        this.eventQueue = [];
-        this.activePrompts = [];
         this.channels = [];
 
-        this.rootContainer = rootFrame.createContainer('push');
         this.kumulosClient = client;
         this.context = ctx;
+    }
 
-        ctx.subscribe('eventTracked', this.onEventTracked);
+    registerForPromptRender(cb: (prompts: PromptConfig[]) => void) {
+        this.renderPromptCallback = cb;
+    }
 
+    registerForPromptLoad(cb: (prompts: PromptConfigs) => void) {
+        this.promptLoadCallback = cb;
+    }
+
+    async onPromptConfirm(prompt: PromptConfig) {
+        if (this.subscriptionState === 'unsubscribed') {
+            await this.onRequestNativePrompt(prompt);
+        }
+
+        await this.handlePromptActions(prompt);
+
+        await this.handleUserChannelSelection(channelSelections);
+
+        if (this.subscriptionState === 'subscribed') {
+            this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
+        }
+    }
+
+    onPromptCancelled(config: PromptConfig) {}
+
+    load() {
         this.setState('loading');
     }
 
-    private onEventTracked = (e: SdkEvent) => {
-        console.info('Prompt trigger saw event', e);
-
-        const events = e.data as EventPayload;
-
-        this.eventQueue.push(...events);
-
-        if (this.state !== 'ready') {
-            console.info('Not ready, waiting on queue');
-            return;
-        }
-
-        this.evaluateTriggers();
-    };
-
-    private activateDeferredPrompt = (prompt: PushPromptConfig) => {
-        this.activatePrompt(prompt);
-        this.render();
-    };
-
-    private onRequestNativePrompt = async (prompt: PushPromptConfig) => {
+    private onRequestNativePrompt = async (prompt: PromptConfig) => {
         if ('requesting' === this.state) {
             return;
         }
@@ -135,48 +135,9 @@ export class PromptManager {
     private onPromptAccepted = async (
         prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
-    ) => {
-        if (this.subscriptionState === 'unsubscribed') {
-            await this.onRequestNativePrompt(prompt);
-        }
+    ) => {};
 
-        this.hideAndSuppressPrompts(prompt);
-
-        await this.handlePromptActions(prompt);
-
-        await this.handleUserChannelSelection(channelSelections);
-
-        if (this.subscriptionState === 'subscribed') {
-            this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
-        }
-    };
-
-    private onPostActionConfirm = async (
-        prompt: PushPromptConfig,
-        channelSelections?: ChannelListItem[]
-    ) => {
-        await this.handleUserChannelSelection(channelSelections);
-
-        this.setState('ready');
-        this.hideAndSuppressPrompts(prompt);
-    };
-
-    private onPromptDeclined = (prompt: PushPromptConfig) => {
-        this.maybePersistReminder(prompt);
-        this.hidePrompt(prompt);
-    };
-
-    private hideAndSuppressPrompts(prompt: PushPromptConfig) {
-        const { subscriptionState } = this;
-
-        this.hidePrompt(prompt);
-
-        if (subscriptionState !== 'unsubscribed') {
-            this.activePrompts.forEach(p => this.hidePrompt(p));
-        }
-    }
-
-    private async handlePromptActions(prompt: PushPromptConfig) {
+    private async handlePromptActions(prompt: PromptConfig) {
         if (!prompt.actions) {
             return;
         }
@@ -190,9 +151,7 @@ export class PromptManager {
         await this.handleChannelPostActions(prompt);
     }
 
-    private async handleChannelSubActions(
-        prompt: PushPromptConfig
-    ): Promise<void> {
+    private async handleChannelSubActions(prompt: PromptConfig): Promise<void> {
         if (undefined === prompt.actions) {
             return;
         }
@@ -225,7 +184,7 @@ export class PromptManager {
     }
 
     private async handleChannelPostActions(
-        prompt: PushPromptConfig
+        prompt: PromptConfig
     ): Promise<void> {
         if (undefined === prompt.actions) {
             return;
@@ -265,58 +224,6 @@ export class PromptManager {
         await channelSubMgr.subscribe(subscribes);
     }
 
-    private render() {
-        if (!this.subscriptionState || !this.state || !this.platformConfig) {
-            return;
-        }
-
-        render(
-            <UIContext.Provider
-                value={{
-                    platformConfig: this.platformConfig,
-                    channelList: this.channels
-                }}
-            >
-                <Ui
-                    ref={r => (this.ui = r)}
-                    prompts={this.activePrompts}
-                    subscriptionState={this.subscriptionState}
-                    promptManagerState={this.state}
-                    onPromptAccepted={this.onPromptAccepted}
-                    onPromptDeclined={this.onPromptDeclined}
-                    onPostActionConfirm={this.onPostActionConfirm}
-                    currentlyRequestingPrompt={this.currentlyRequestingPrompt}
-                    currentPostAction={this.currentPostAction}
-                />
-            </UIContext.Provider>,
-            this.rootContainer.element
-        );
-    }
-
-    private async evaluateTriggers() {
-        console.info('Evaluating prompt triggers');
-
-        const matchedPrompts = [];
-        for (let id in this.prompts) {
-            const prompt = this.prompts[id];
-            for (let i = 0; i < this.eventQueue.length; ++i) {
-                const event = this.eventQueue[i];
-                const promptSuppressed = await this.isPromptSuppressed(prompt);
-
-                if (
-                    !promptSuppressed &&
-                    triggerMatched(prompt, event) &&
-                    this.promptActionNeedsTaken(prompt)
-                ) {
-                    matchedPrompts.push(prompt);
-                }
-            }
-        }
-
-        this.activatePrompts(matchedPrompts);
-        this.eventQueue = [];
-    }
-
     promptActionNeedsTaken(prompt: PushPromptConfig): boolean {
         if (this.subscriptionState === 'unsubscribed') {
             return true;
@@ -341,114 +248,6 @@ export class PromptManager {
         return false;
     }
 
-    private maybePersistReminder(prompt: PushPromptConfig) {
-        const { uiActions } = prompt as PromptUiActions;
-
-        if (!uiActions) {
-            return;
-        }
-
-        const { type } = uiActions.decline;
-
-        switch (type) {
-            case UiActionType.REMIND:
-                return persistPromptReminder(prompt.uuid, {
-                    declinedOn: Date.now()
-                });
-            case UiActionType.DECLINE:
-                return persistPromptReminder(prompt.uuid, 'suppressed');
-            default:
-                return console.warn(
-                    `Unsupported decline action type ${type} supported for prompt ${prompt.uuid}, fall back to always show this prompt when declined`
-                );
-        }
-    }
-
-    private hidePrompt(prompt: PushPromptConfig) {
-        const idx = this.activePrompts.indexOf(prompt);
-        this.activePrompts.splice(idx, 1);
-
-        this.render();
-    }
-
-    private async isPromptSuppressed(
-        prompt: PushPromptConfig
-    ): Promise<boolean> {
-        const reminder = await getPromptReminder(prompt.uuid);
-
-        if (!reminder) {
-            return false;
-        }
-
-        if ('suppressed' === reminder) {
-            return true;
-        }
-
-        const { uiActions } = prompt as PromptUiActions;
-
-        if (uiActions.decline.type !== UiActionType.REMIND) {
-            return false;
-        }
-
-        return !this.hasPromptReminderElapsed(
-            reminder.declinedOn,
-            uiActions.decline.delay
-        );
-    }
-
-    private hasPromptReminderElapsed(
-        declinedOnMillis: number,
-        delayConfig: PromptReminderDelayConfig
-    ): boolean {
-        return (
-            Date.now() - declinedOnMillis >
-            REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] *
-                delayConfig.duration
-        );
-    }
-
-    private deferPromptActivation(prompt: PushPromptConfig) {
-        if (!prompt.trigger.afterSeconds || prompt.trigger.afterSeconds < 0) {
-            return;
-        }
-
-        console.info(
-            'Deferring prompt activation by ' + prompt.trigger.afterSeconds
-        );
-
-        setTimeout(
-            this.activateDeferredPrompt,
-            prompt.trigger.afterSeconds * 1000,
-            prompt
-        );
-    }
-
-    private activatePrompt(prompt: PushPromptConfig) {
-        // TODO is identity ok for comparison here... might need to use ID
-        if (this.activePrompts.indexOf(prompt) > -1) {
-            return;
-        }
-
-        this.activePrompts.push(prompt);
-    }
-
-    private activatePrompts(prompts: PushPromptConfig[]) {
-        console.info('Will activate prompts: ', prompts);
-
-        for (let i = 0; i < prompts.length; ++i) {
-            const prompt = prompts[i];
-
-            if (prompt.trigger.afterSeconds !== undefined) {
-                this.deferPromptActivation(prompt);
-                continue;
-            }
-
-            this.activatePrompt(prompt);
-        }
-
-        this.render();
-    }
-
     private setState(state: PromptManagerState) {
         console.info('Setting prompt manager state:' + state);
         this.state = state;
@@ -469,10 +268,11 @@ export class PromptManager {
                 this.channels = await this.kumulosClient
                     .getChannelSubscriptionManager()
                     .listChannels();
+                this.promptLoadCallback?.(this.prompts);
                 this.setState('ready');
                 break;
             case 'requesting':
-                this.render();
+                this.renderPromptCallback?.(this.currentlyRequestingPrompt);
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
@@ -480,16 +280,15 @@ export class PromptManager {
                 this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
                     this.context
                 );
-                await this.evaluateTriggers();
-                this.render();
+                this.renderPromptCallback?.(this.currentlyRequestingPrompt);
                 break;
             case 'postaction':
-                this.render();
+                this.renderPromptCallback?.(this.currentlyRequestingPrompt);
                 break;
         }
     }
 
-    private async loadPrompts(): Promise<void> {
+    async loadPrompts(): Promise<void> {
         this.platformConfig = await loadPlatformConfig(this.context);
 
         if (!this.platformConfig.publicKey) {

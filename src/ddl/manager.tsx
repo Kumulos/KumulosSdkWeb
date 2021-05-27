@@ -92,6 +92,8 @@ export default class DDLManager {
 
     private async loadDDLConfig() {
         this.config = await loadDDLConfig(this.context);
+        console.log(this.config);
+
         if (this.config) {
             persistDDLConfig(this.config);
         }
