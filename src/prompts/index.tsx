@@ -28,6 +28,7 @@ import { PromptReminderDelayConfig } from '../core';
 import { UIContext } from './ui-context';
 import { loadPlatformConfig } from '../core/config';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
+import { maybePersistReminder, isPromptSuppressed } from './prompt-reminder';
 
 export type PromptManagerState =
     | 'loading'
@@ -162,7 +163,7 @@ export class PromptManager {
     };
 
     private onPromptDeclined = (prompt: PushPromptConfig) => {
-        this.maybePersistReminder(prompt);
+        maybePersistReminder(prompt);
         this.hidePrompt(prompt);
     };
 
@@ -301,7 +302,7 @@ export class PromptManager {
             const prompt = this.prompts[id];
             for (let i = 0; i < this.eventQueue.length; ++i) {
                 const event = this.eventQueue[i];
-                const promptSuppressed = await this.isPromptSuppressed(prompt);
+                const promptSuppressed = await isPromptSuppressed(prompt);
 
                 if (
                     !promptSuppressed &&
@@ -341,70 +342,11 @@ export class PromptManager {
         return false;
     }
 
-    private maybePersistReminder(prompt: PushPromptConfig) {
-        const { uiActions } = prompt as PromptUiActions;
-
-        if (!uiActions) {
-            return;
-        }
-
-        const { type } = uiActions.decline;
-
-        switch (type) {
-            case UiActionType.REMIND:
-                return persistPromptReminder(prompt.uuid, {
-                    declinedOn: Date.now()
-                });
-            case UiActionType.DECLINE:
-                return persistPromptReminder(prompt.uuid, 'suppressed');
-            default:
-                return console.warn(
-                    `Unsupported decline action type ${type} supported for prompt ${prompt.uuid}, fall back to always show this prompt when declined`
-                );
-        }
-    }
-
     private hidePrompt(prompt: PushPromptConfig) {
         const idx = this.activePrompts.indexOf(prompt);
         this.activePrompts.splice(idx, 1);
 
         this.render();
-    }
-
-    private async isPromptSuppressed(
-        prompt: PushPromptConfig
-    ): Promise<boolean> {
-        const reminder = await getPromptReminder(prompt.uuid);
-
-        if (!reminder) {
-            return false;
-        }
-
-        if ('suppressed' === reminder) {
-            return true;
-        }
-
-        const { uiActions } = prompt as PromptUiActions;
-
-        if (uiActions.decline.type !== UiActionType.REMIND) {
-            return false;
-        }
-
-        return !this.hasPromptReminderElapsed(
-            reminder.declinedOn,
-            uiActions.decline.delay
-        );
-    }
-
-    private hasPromptReminderElapsed(
-        declinedOnMillis: number,
-        delayConfig: PromptReminderDelayConfig
-    ): boolean {
-        return (
-            Date.now() - declinedOnMillis >
-            REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] *
-                delayConfig.duration
-        );
     }
 
     private deferPromptActivation(prompt: PushPromptConfig) {

@@ -5,6 +5,7 @@ import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
 import { loadDDLConfig } from '../../core/config';
 import { persistDDLConfig } from '../../core/storage';
+import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 
 export enum DDLManagerState {
     LOADING = 'loading',
@@ -18,7 +19,7 @@ export default class DDLManager {
 
     private state!: DDLManagerState;
     private config?: DDLPromptConfig[];
-    private currentConfig?: DDLPromptConfig;
+    private prompt?: DDLPromptConfig;
 
     constructor(ctx: Context, rootFrame: RootFrame) {
         this.rootContainer = rootFrame.createContainer('ddl');
@@ -36,6 +37,7 @@ export default class DDLManager {
     };
 
     private onBannerCancelled = (config: DDLPromptConfig) => {
+        maybePersistReminder(config);
         this.setState(DDLManagerState.HANDLED);
     };
 
@@ -55,9 +57,9 @@ export default class DDLManager {
                 // TODO - new state for managing multiples as precondition state for 'READY'
                 // using a single (first) config for now
 
-                this.currentConfig = this.config?.shift();
+                this.prompt = this.config?.shift();
 
-                if (this.currentConfig) {
+                if (this.prompt && !isPromptSuppressed(this.prompt)) {
                     setTimeout(() => this.render(), 2000);
                 } else {
                     this.render();
@@ -66,7 +68,7 @@ export default class DDLManager {
                 break;
             case DDLManagerState.HANDLED:
                 this.config = this.config?.filter(
-                    c => c.uuid !== this.currentConfig?.uuid
+                    c => c.uuid !== this.prompt?.uuid
                 );
 
                 if (this.config) {
@@ -82,7 +84,7 @@ export default class DDLManager {
     private render() {
         render(
             <Ui
-                config={this.currentConfig}
+                config={this.prompt}
                 onBannerConfirm={this.onBannerConfirm}
                 onBannerCancelled={this.onBannerCancelled}
             />,

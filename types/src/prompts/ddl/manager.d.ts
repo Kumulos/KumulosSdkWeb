@@ -10,7 +10,7 @@ export default class DDLManager {
     private readonly rootContainer;
     private state;
     private config?;
-    private currentConfig?;
+    private prompt?;
     constructor(ctx: Context, rootFrame: RootFrame);
     private onBannerConfirm;
     private onBannerCancelled;

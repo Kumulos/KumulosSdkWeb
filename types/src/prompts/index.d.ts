@@ -33,10 +33,7 @@ export declare class PromptManager {
     private render;
     private evaluateTriggers;
     promptActionNeedsTaken(prompt: PushPromptConfig): boolean;
-    private maybePersistReminder;
     private hidePrompt;
-    private isPromptSuppressed;
-    private hasPromptReminderElapsed;
     private deferPromptActivation;
     private activatePrompt;
     private activatePrompts;
