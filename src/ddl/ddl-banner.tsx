@@ -1,7 +1,6 @@
 import { Component, h, createRef, RefObject } from 'preact';
-import { SDKFeature, DDLBannerPromptConfig } from '../core';
+import { DDLBannerPromptConfig } from '../core';
 import DeeplinkButton from './deeplink-button';
-import { UIContext, UIContextState } from './ui-context';
 
 const styles = {
     bannerIconStyle: {
