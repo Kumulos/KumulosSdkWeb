@@ -3,7 +3,7 @@ import { getBrowserName, parseQueryString } from '../utils';
 
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
-import { loadConfig } from '../config';
+import { loadPlatformConfig } from '../config';
 
 export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 
@@ -69,7 +69,9 @@ export default function getPushOpsManager(
     const browser = getBrowserName();
 
     if (browser === 'safari') {
-        manager = loadConfig(ctx).then(cfg => new SafariPushManager(cfg));
+        manager = loadPlatformConfig(ctx).then(
+            cfg => new SafariPushManager(cfg)
+        );
     } else {
         manager = Promise.resolve(new W3cPushManager());
     }

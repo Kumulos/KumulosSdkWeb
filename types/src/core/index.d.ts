@@ -1,5 +1,6 @@
 import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
+export declare const DDL_BASE_URL = "https://links.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -200,10 +201,10 @@ export declare type DDLPromptConfig = DDLBannerPromptConfig;
 export declare type PromptConfig = PushPromptConfig | DDLPromptConfig;
 export declare type PushPromptConfigs = Record<string, PushPromptConfig>;
 export interface PlatformConfig {
-    publicKey: string;
+    publicKey?: string;
     iconUrl?: string;
-    prompts: PushPromptConfigs;
-    safariPushId: string | null;
+    prompts?: PushPromptConfigs;
+    safariPushId?: string | null;
 }
 export declare enum SDKFeature {
     PUSH = "push",

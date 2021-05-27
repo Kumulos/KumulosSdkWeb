@@ -6,6 +6,7 @@ const SDK_VERSION = '1.8.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
+export const DDL_BASE_URL = 'https://links.kumulos.com';
 
 export type InstallId = string;
 export type UserId = string;
@@ -272,10 +273,10 @@ export type PromptConfig = PushPromptConfig | DDLPromptConfig;
 export type PushPromptConfigs = Record<string, PushPromptConfig>;
 
 export interface PlatformConfig {
-    publicKey: string;
+    publicKey?: string;
     iconUrl?: string;
-    prompts: PushPromptConfigs;
-    safariPushId: string | null;
+    prompts?: PushPromptConfigs;
+    safariPushId?: string | null;
 }
 
 export enum SDKFeature {
@@ -361,8 +362,6 @@ export class Context {
 
     hasFeature(feature: SDKFeature) {
         if (!this.features) {
-            // TODO: backwards compat, (for consistency) as push side of things
-            // prob wont query this as it stands currently
             return feature === SDKFeature.PUSH ? true : false;
         }
 

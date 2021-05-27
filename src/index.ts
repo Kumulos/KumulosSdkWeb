@@ -86,11 +86,7 @@ export default class Kumulos {
                 return;
             }
 
-            this.ddlManager = new DDLManager(
-                this,
-                this.context,
-                this.rootFrame
-            );
+            this.ddlManager = new DDLManager(this.context, this.rootFrame);
         }
     }
 

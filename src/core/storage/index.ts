@@ -1,4 +1,9 @@
-import { Configuration, Context, PromptReminder } from '../index';
+import {
+    Configuration,
+    Context,
+    PromptReminder,
+    DDLPromptConfig
+} from '../index';
 import {
     Store,
     del as idbDel,
@@ -31,6 +36,12 @@ export function persistConfig(config: Configuration): Promise<Configuration> {
         autoResubscribe: config.autoResubscribe,
         pushPrompts: config.pushPrompts
     });
+}
+
+export function persistDDLConfig(
+    config: DDLPromptConfig[]
+): Promise<DDLPromptConfig[]> {
+    return set<DDLPromptConfig[]>('ddlconfig', config);
 }
 
 export function persistPromptReminder(

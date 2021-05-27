@@ -1,64 +1,43 @@
 import { h, render } from 'preact';
 import Kumulos from '../index';
-import {
-    Context,
-    PlatformConfig,
-    DDLPromptConfig,
-    DDLBannerPromptConfig
-} from '../core/index';
+import { Context, DDLPromptConfig } from '../core/index';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import Ui from './ui';
-import { fetchDDLConfig } from './api';
-import { UIContext } from './ui-context';
-import { loadConfig } from '../core/config';
+import { loadDDLConfig } from '../core/config';
+import { persistDDLConfig } from '../core/storage';
 
 export enum DDLManagerState {
     LOADING = 'loading',
-    READY = 'ready'
+    READY = 'ready',
+    HANDLED = 'handled'
 }
 
 export default class DDLManager {
-    private readonly kumulosClient: Kumulos;
     private readonly context: Context;
     private readonly rootContainer: RootFrameContainer;
-    private containerEl?: HTMLDivElement;
 
     private state!: DDLManagerState;
-    private platformConfig!: PlatformConfig;
-    private config?: DDLBannerPromptConfig[];
+    private config?: DDLPromptConfig[];
+    private currentConfig?: DDLPromptConfig;
 
-    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
+    constructor(ctx: Context, rootFrame: RootFrame) {
         this.rootContainer = rootFrame.createContainer('ddl');
-        this.kumulosClient = client;
         this.context = ctx;
 
         console.info('DDLManager: initialising');
 
-        this.createInjectionContainer();
         this.setState(DDLManagerState.LOADING);
     }
 
-    private createInjectionContainer() {
-        this.containerEl = document.createElement('div');
-        this.containerEl.className = 'kumulos-ddl-injection-container';
-
-        document.body.prepend(this.containerEl);
-    }
-
     private onBannerConfirm = (config: DDLPromptConfig) => {
-        this.clearPrompt(config);
+        this.setState(DDLManagerState.HANDLED);
 
         window.location.href = config.storeUrl;
     };
 
     private onBannerCancelled = (config: DDLPromptConfig) => {
-        this.clearPrompt(config);
+        this.setState(DDLManagerState.HANDLED);
     };
-
-    private clearPrompt(config: DDLPromptConfig) {
-        this.config = this.config?.filter(c => c.uuid !== config.uuid);
-        this.setState(DDLManagerState.READY);
-    }
 
     private setState(state: DDLManagerState) {
         console.info('Setting DDL manager state:' + state);
@@ -76,33 +55,45 @@ export default class DDLManager {
                 // TODO - new state for managing multiples as precondition state for 'READY'
                 // using a single (first) config for now
 
-                const config = this.config?.shift();
+                this.currentConfig = this.config?.shift();
 
-                if (config) {
-                    setTimeout(() => this.render(config), 2000);
+                if (this.currentConfig) {
+                    setTimeout(() => this.render(), 2000);
                 } else {
                     this.render();
                 }
 
                 break;
+            case DDLManagerState.HANDLED:
+                this.config = this.config?.filter(
+                    c => c.uuid !== this.currentConfig?.uuid
+                );
+
+                if (this.config) {
+                    persistDDLConfig(this.config);
+                }
+
+                this.setState(DDLManagerState.READY);
+
+                break;
         }
     }
 
-    private render(config?: DDLPromptConfig) {
+    private render() {
         render(
-            <UIContext.Provider value={{ platformConfig: this.platformConfig }}>
-                <Ui
-                    config={config}
-                    onBannerConfirm={this.onBannerConfirm}
-                    onBannerCancelled={this.onBannerCancelled}
-                />
-            </UIContext.Provider>,
+            <Ui
+                config={this.currentConfig}
+                onBannerConfirm={this.onBannerConfirm}
+                onBannerCancelled={this.onBannerCancelled}
+            />,
             this.rootContainer.element
         );
     }
 
     private async loadDDLConfig() {
-        this.platformConfig = await loadConfig(this.context);
-        this.config = await fetchDDLConfig(this.context);
+        this.config = await loadDDLConfig(this.context);
+        if (this.config) {
+            persistDDLConfig(this.config);
+        }
     }
 }

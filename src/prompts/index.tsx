@@ -26,7 +26,7 @@ import { triggerMatched } from './triggers';
 import { persistPromptReminder, getPromptReminder } from '../core/storage';
 import { PromptReminderDelayConfig } from '../core';
 import { UIContext } from './ui-context';
-import { loadConfig } from '../core/config';
+import { loadPlatformConfig } from '../core/config';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 
 export type PromptManagerState =
@@ -490,9 +490,9 @@ export class PromptManager {
     }
 
     private async loadPrompts(): Promise<void> {
-        this.platformConfig = await loadConfig(this.context);
+        this.platformConfig = await loadPlatformConfig(this.context);
 
-        if (null === this.platformConfig) {
+        if (!this.platformConfig.publicKey) {
             console.error('Failed to load prompts config');
             return;
         }

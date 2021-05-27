@@ -49,10 +49,10 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
         this.props.onCancel(this.props.config);
     };
 
-    renderBanner = (uiContext?: UIContextState) => {
+    render() {
         const { config } = this.props;
 
-        const { canonicalLinkUrl, position, labels, colors } = config;
+        const { canonicalLinkUrl, position, labels, colors, imageUrl } = config;
         const { heading, body, acceptAction } = labels.bannerdl;
         const { bg, fg, acceptActionBg, acceptActionFg } = colors.bannerdl;
 
@@ -70,7 +70,7 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
 
         const bannerIconStyle = {
             ...styles.bannerIconStyle,
-            backgroundImage: `url(${uiContext?.platformConfig.iconUrl})`
+            backgroundImage: `url(${imageUrl})`
         };
 
         return (
@@ -111,9 +111,5 @@ export class DDLBanner extends Component<DDLBannerProps, never> {
                 </div>
             </div>
         );
-    };
-
-    render() {
-        return <UIContext.Consumer>{this.renderBanner}</UIContext.Consumer>;
     }
 }
