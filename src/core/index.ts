@@ -174,26 +174,30 @@ interface TooltipConfig {
     };
 }
 
-type DialogLabelConfig<T extends PromptTypeName> = Record<
+type DialogLabelConfig = {
+    heading: string;
+    body: string;
+    declineAction: string;
+    acceptAction: string;
+};
+
+type NamedDialogLabelConfig<T extends PromptTypeName> = Record<
     T,
-    {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    }
+    DialogLabelConfig
 >;
 
-type DialogColorConfig<T extends PromptTypeName> = Record<
+type DialogColorConfig = {
+    fg: string;
+    bg: string;
+    declineActionFg: string;
+    declineActionBg: string;
+    acceptActionFg: string;
+    acceptActionBg: string;
+};
+
+type NamedDialogColorConfig<T extends PromptTypeName> = Record<
     T,
-    {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    }
+    DialogColorConfig
 >;
 
 interface ToastMessage {
@@ -220,8 +224,9 @@ export interface BellPromptConfig extends BasePromptConfig {
 
 // ALERT
 
-type AlertLabelConfig = DialogLabelConfig<PromptTypeName.ALERT> & ToastMessage;
-type AlertColorConfig = DialogColorConfig<PromptTypeName.ALERT>;
+type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> &
+    ToastMessage;
+type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
 
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
@@ -233,9 +238,9 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
 
 // BANNER
 
-type BannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER> &
+type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> &
     ToastMessage;
-type BannerColorConfig = DialogColorConfig<PromptTypeName.BANNER>;
+type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
 
 export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.BANNER;
@@ -247,15 +252,12 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
 
 // DDL BANNER
 
-type DdlBannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER_DL>;
-type DdlBannerColorConfig = DialogColorConfig<PromptTypeName.BANNER_DL>;
-
 export interface DdlBannerPromptConfig
     extends BasePromptConfig,
         PromptUiActions {
     type: PromptTypeName.BANNER_DL;
-    labels: DdlBannerLabelConfig;
-    colors: DdlBannerColorConfig;
+    labels: DialogLabelConfig;
+    colors: DialogColorConfig;
     imageUrl: string;
     storeUrl: string;
     canonicalLinkUrl: string;

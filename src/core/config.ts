@@ -78,22 +78,18 @@ export async function loadDdlConfigTest(
         uuid: 'link1',
         type: PromptTypeName.BANNER_DL,
         labels: {
-            bannerdl: {
-                heading: 'Creek Cycles App',
-                body: '20% off all purchases with code 20Appy',
-                declineAction: '',
-                acceptAction: '20% off'
-            }
+            heading: 'Creek Cycles App',
+            body: '20% off all purchases with code 20Appy',
+            declineAction: '',
+            acceptAction: '20% off'
         },
         colors: {
-            bannerdl: {
-                bg: 'rgba(255,255,0,1)',
-                fg: 'rgba(0,0,0,1)',
-                declineActionFg: '',
-                declineActionBg: '',
-                acceptActionFg: 'rgba(255,255,255,1)',
-                acceptActionBg: 'rgba(0,0,0,1)'
-            }
+            bg: 'rgba(255,255,0,1)',
+            fg: 'rgba(0,0,0,1)',
+            declineActionFg: '',
+            declineActionBg: '',
+            acceptActionFg: 'rgba(255,255,255,1)',
+            acceptActionBg: 'rgba(0,0,0,1)'
         },
         position: PromptPosition.TOP,
         storeUrl:
