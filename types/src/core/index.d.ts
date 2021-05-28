@@ -236,7 +236,7 @@ export declare class Context {
     readonly serviceWorkerPath: string;
     readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
-    readonly features?: SDKFeature[];
+    readonly features: SDKFeature[];
     private readonly subscribers;
     constructor(config: Configuration);
     subscribe(event: SdkEventType, handler: SdkEventHandler): void;

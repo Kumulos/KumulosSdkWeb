@@ -311,7 +311,7 @@ export class Context {
     readonly serviceWorkerPath: string;
     readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
-    readonly features?: SDKFeature[];
+    readonly features: SDKFeature[];
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
 
@@ -323,7 +323,7 @@ export class Context {
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
         this.pushPrompts = config.pushPrompts ?? 'auto';
         this.autoResubscribe = config.autoResubscribe ?? true;
-        this.features = config.features;
+        this.features = config.features ?? [SDKFeature.PUSH];
 
         this.subscribers = {};
     }
@@ -354,10 +354,6 @@ export class Context {
     }
 
     hasFeature(feature: SDKFeature) {
-        if (!this.features) {
-            return feature === SDKFeature.PUSH ? true : false;
-        }
-
         return this.features.includes(feature);
     }
 }

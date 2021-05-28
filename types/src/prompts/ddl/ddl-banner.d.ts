@@ -1,14 +1,14 @@
 import { Component, h } from 'preact';
-import { DdlBannerPromptConfig } from '../../core';
-export interface DdlBannerProps {
-    config: DdlBannerPromptConfig;
-    onConfirm: (config: DdlBannerPromptConfig) => void;
-    onCancel: (config: DdlBannerPromptConfig) => void;
+import { DDLBannerPromptConfig } from '../../core';
+export interface DDLBannerProps {
+    config: DDLBannerPromptConfig;
+    onConfirm: (config: DDLBannerPromptConfig) => void;
+    onCancel: (config: DDLBannerPromptConfig) => void;
     dimensions: (width: number, height: number) => void;
 }
-export declare class DdlBanner extends Component<DdlBannerProps, never> {
+export declare class DDLBanner extends Component<DDLBannerProps, never> {
     private containerRef;
-    constructor(props: DdlBannerProps);
+    constructor(props: DDLBannerProps);
     componentDidMount(): void;
     onConfirm: () => void;
     onCancel: () => void;
