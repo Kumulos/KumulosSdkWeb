@@ -13,12 +13,6 @@ import { get, set } from './storage';
 
 import { authedFetchJson } from './utils';
 
-interface DDLConfigApiShape {
-    config: DDLPromptConfig;
-    storeUrl: string;
-    canonicalUrl: string;
-}
-
 async function loadConfig<TConfigType>(
     url: string,
     cacheKey: string,
@@ -68,21 +62,11 @@ export async function loadPlatformConfig(
 export async function loadDDLConfig(
     ctx: Context
 ): Promise<DDLPromptConfig[] | undefined> {
-    // const apiResult = await loadConfig<DDLConfigApiShape[]>(
+    // return await loadConfig<DDLPromptConfig[]>(
     //     `${DDL_BASE_URL}/v1/banners`,
     //     'ddl',
     //     ctx
     // );
-
-    // if (!Array.isArray(apiResult)) {
-    //     return;
-    // }
-
-    // return apiResult.map(r => ({
-    //     ...r.config,
-    //     storeUrl: r.storeUrl,
-    //     canonicalLinkUrl: r.canonicalUrl
-    // }));
 
     return loadDDLConfigTest(ctx);
 }
