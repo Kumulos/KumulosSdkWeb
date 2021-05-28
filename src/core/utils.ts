@@ -36,7 +36,15 @@ export function getBrowserName(): string {
     return '';
 }
 
-export function isBrowserSupported(): boolean {
+export function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean {
+    if (
+        undefined !== sdkFeatures &&
+        sdkFeatures.includes(SDKFeature.DDL) &&
+        !sdkFeatures.includes(SDKFeature.PUSH)
+    ) {
+        return true;
+    }
+
     const requiredThings = [typeof Promise, typeof fetch, typeof indexedDB];
 
     const browser = getBrowserName();
@@ -194,14 +202,6 @@ export function onDOMReady(fn: () => void) {
 
 export function isMobile(): boolean {
     return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
-}
-
-export function configHasDdlFeature(config: any) {
-    return (
-        config &&
-        Array.isArray(config.features) &&
-        config.features.includes(SDKFeature.DDL)
-    );
 }
 
 export function deferPromptActivation(

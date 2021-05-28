@@ -1,11 +1,7 @@
 import { EventType } from '../core';
 import Kumulos from '../index';
 import { getPageViewedProps } from './utils';
-import {
-    isBrowserSupported,
-    configHasDdlFeature,
-    onDOMReady
-} from '../core/utils';
+import { isBrowserSupported, onDOMReady } from '../core/utils';
 
 type CmdFn = (k: Kumulos) => void;
 type Cmd = string | CmdFn;
@@ -30,7 +26,7 @@ function main() {
         return;
     }
 
-    if (!isBrowserSupported() && !configHasDdlFeature(init[1])) {
+    if (!isBrowserSupported(init[1].features)) {
         console.warn(
             'Kumulos: this browser does not support all required features, aborting initialization...'
         );
