@@ -5,10 +5,10 @@ export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'p
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
-    private readonly rootContainer;
+    private readonly pushContainer;
+    private readonly triggerFilter;
     private state?;
     private subscriptionState?;
-    private eventQueue;
     private prompts;
     private activePrompts;
     private currentlyRequestingPrompt?;
@@ -34,7 +34,6 @@ export declare class PromptManager {
     private evaluateTriggers;
     promptActionNeedsTaken(prompt: PushPromptConfig): boolean;
     private hidePrompt;
-    private deferPromptActivation;
     private activatePrompt;
     private activatePrompts;
     private setState;

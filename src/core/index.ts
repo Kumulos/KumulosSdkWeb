@@ -363,9 +363,10 @@ export function assertConfigValid(config: any) {
         throw 'Config must be an object';
     }
 
-    const features = Array.isArray(config.features)
-        ? config.features
-        : undefined;
+    const features =
+        Array.isArray(config.features) && config.features.length
+            ? config.features
+            : undefined;
 
     if (!features || features.includes(SDKFeature.PUSH)) {
         return assertPushConfigValid(config);
