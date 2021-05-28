@@ -196,7 +196,7 @@ export function isMobile(): boolean {
     return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
 }
 
-export function configHasDDLFeature(config: any) {
+export function configHasDdlFeature(config: any) {
     return (
         config &&
         Array.isArray(config.features) &&

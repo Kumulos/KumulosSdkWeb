@@ -2,7 +2,7 @@ import {
     Context,
     PUSH_BASE_URL,
     PlatformConfig,
-    DDLPromptConfig,
+    DdlPromptConfig,
     PromptTypeName,
     ReminderTimeUnit,
     UiActionType,
@@ -59,22 +59,22 @@ export async function loadPlatformConfig(
     );
 }
 
-export async function loadDDLConfig(
+export async function loadDdlConfig(
     ctx: Context
-): Promise<DDLPromptConfig[] | undefined> {
+): Promise<DdlPromptConfig[] | undefined> {
     // return await loadConfig<DDLPromptConfig[]>(
     //     `${DDL_BASE_URL}/v1/banners`,
     //     'ddl',
     //     ctx
     // );
 
-    return loadDDLConfigTest(ctx);
+    return loadDdlConfigTest(ctx);
 }
 
-export async function loadDDLConfigTest(
+export async function loadDdlConfigTest(
     ctx: Context
-): Promise<DDLPromptConfig[]> {
-    const config: DDLPromptConfig = {
+): Promise<DdlPromptConfig[]> {
+    const config: DdlPromptConfig = {
         uuid: 'link1',
         type: PromptTypeName.BANNER_DL,
         labels: {

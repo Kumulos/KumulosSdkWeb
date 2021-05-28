@@ -1,14 +1,14 @@
 import { Component, h } from 'preact';
 
-import { DDLPromptConfig } from '../../core';
-import { DDLBanner } from './ddl-banner';
+import { DdlPromptConfig } from '../../core';
+import { DdlBanner } from './ddl-banner';
 import { createPortal } from 'preact/compat';
 import { PromptPosition } from '../../core';
 
 interface UiProps {
-    config: DDLPromptConfig;
-    onBannerConfirm: (config: DDLPromptConfig) => void;
-    onBannerCancelled: (config: DDLPromptConfig) => void;
+    config: DdlPromptConfig;
+    onBannerConfirm: (config: DdlPromptConfig) => void;
+    onBannerCancelled: (config: DdlPromptConfig) => void;
 }
 
 export default class Ui extends Component<UiProps, never> {
@@ -41,12 +41,12 @@ export default class Ui extends Component<UiProps, never> {
         ] = `${offset}px`;
     };
 
-    onBannerConfirm = (config: DDLPromptConfig) => {
+    onBannerConfirm = (config: DdlPromptConfig) => {
         this.resetBodyStyles();
         this.props.onBannerConfirm(config);
     };
 
-    onBannerCancelled = (config: DDLPromptConfig) => {
+    onBannerCancelled = (config: DdlPromptConfig) => {
         this.resetBodyStyles();
         this.props.onBannerCancelled(config);
     };
@@ -68,7 +68,7 @@ export default class Ui extends Component<UiProps, never> {
         }
 
         return createPortal(
-            <DDLBanner
+            <DdlBanner
                 config={this.props.config}
                 onConfirm={this.onBannerConfirm}
                 onCancel={this.onBannerCancelled}

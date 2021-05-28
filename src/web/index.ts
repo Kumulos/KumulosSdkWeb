@@ -3,7 +3,7 @@ import Kumulos from '../index';
 import { getPageViewedProps } from './utils';
 import {
     isBrowserSupported,
-    configHasDDLFeature,
+    configHasDdlFeature,
     onDOMReady
 } from '../core/utils';
 
@@ -30,7 +30,7 @@ function main() {
         return;
     }
 
-    if (!isBrowserSupported() && !configHasDDLFeature(init[1])) {
+    if (!isBrowserSupported() && !configHasDdlFeature(init[1])) {
         console.warn(
             'Kumulos: this browser does not support all required features, aborting initialization...'
         );

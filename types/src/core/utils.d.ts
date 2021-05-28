@@ -18,5 +18,5 @@ export declare function parseQueryString(qs?: string, excludedQueryKeys?: string
 } | undefined;
 export declare function onDOMReady(fn: () => void): void;
 export declare function isMobile(): boolean;
-export declare function configHasDDLFeature(config: any): any;
+export declare function configHasDdlFeature(config: any): any;
 export declare function deferPromptActivation(prompt: PromptConfig, activateFn: (prompt: PromptConfig) => void): boolean;

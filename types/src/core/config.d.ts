@@ -1,4 +1,4 @@
-import { Context, PlatformConfig, DDLPromptConfig } from '.';
+import { Context, PlatformConfig, DdlPromptConfig } from '.';
 export declare function loadPlatformConfig(ctx: Context): Promise<PlatformConfig>;
-export declare function loadDDLConfig(ctx: Context): Promise<DDLPromptConfig[] | undefined>;
-export declare function loadDDLConfigTest(ctx: Context): Promise<DDLPromptConfig[]>;
+export declare function loadDdlConfig(ctx: Context): Promise<DdlPromptConfig[] | undefined>;
+export declare function loadDdlConfigTest(ctx: Context): Promise<DdlPromptConfig[]>;

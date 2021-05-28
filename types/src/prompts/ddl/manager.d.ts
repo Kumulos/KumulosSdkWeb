@@ -1,10 +1,10 @@
 import { Context } from '../../core/index';
 import RootFrame from '../../core/root-frame';
-export declare enum DDLManagerState {
+export declare enum DdlManagerState {
     LOADING = "loading",
     READY = "ready"
 }
-export default class DDLManager {
+export default class DdlManager {
     private readonly context;
     private readonly ddlContainer;
     private config?;
@@ -16,8 +16,4 @@ export default class DDLManager {
     private onEnter;
     private render;
     private renderEmpty;
-}
-;
-    private render;
-    private loadDDLConfig;
 }

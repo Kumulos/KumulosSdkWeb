@@ -2,7 +2,7 @@ import {
     Configuration,
     Context,
     PromptReminder,
-    DDLPromptConfig
+    DdlPromptConfig
 } from '../index';
 import {
     Store,
@@ -39,9 +39,9 @@ export function persistConfig(config: Configuration): Promise<Configuration> {
 }
 
 export function persistDDLConfig(
-    config: DDLPromptConfig[]
-): Promise<DDLPromptConfig[]> {
-    return set<DDLPromptConfig[]>('ddlconfig', config);
+    config: DdlPromptConfig[]
+): Promise<DdlPromptConfig[]> {
+    return set<DdlPromptConfig[]>('ddlconfig', config);
 }
 
 export function persistPromptReminder(

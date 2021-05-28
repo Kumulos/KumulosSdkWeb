@@ -28,7 +28,7 @@ import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
 import { registerServiceWorker, isMobile } from './core/utils';
 import RootFrame from './core/root-frame';
-import DDLManager from './prompts/ddl/manager';
+import DdlManager from './prompts/ddl/manager';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -40,7 +40,7 @@ export default class Kumulos {
     private readonly context: Context;
     private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
     private readonly promptManager?: PromptManager;
-    private readonly ddlManager?: DDLManager;
+    private readonly ddlManager?: DdlManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
     private readonly rootFrame: RootFrame;
 
@@ -81,12 +81,12 @@ export default class Kumulos {
         if (this.context.hasFeature(SDKFeature.DDL)) {
             if (!isMobile()) {
                 console.info(
-                    'DDLManager: DDL feature support only available on mobile devices.'
+                    'DdlManager: DDL feature support only available on mobile devices.'
                 );
                 return;
             }
 
-            this.ddlManager = new DDLManager(this.context, this.rootFrame);
+            this.ddlManager = new DdlManager(this.context, this.rootFrame);
         }
     }
 

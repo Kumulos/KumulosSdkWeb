@@ -186,19 +186,19 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
     backgroundMask?: BackgroundMaskConfig;
 }
-declare type DDLBannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER_DL>;
-declare type DDLBannerColorConfig = DialogColorConfig<PromptTypeName.BANNER_DL>;
-export interface DDLBannerPromptConfig extends BasePromptConfig, PromptUiActions {
+declare type DdlBannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER_DL>;
+declare type DdlBannerColorConfig = DialogColorConfig<PromptTypeName.BANNER_DL>;
+export interface DdlBannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.BANNER_DL;
-    labels: DDLBannerLabelConfig;
-    colors: DDLBannerColorConfig;
+    labels: DdlBannerLabelConfig;
+    colors: DdlBannerColorConfig;
     imageUrl: string;
     storeUrl: string;
     canonicalLinkUrl: string;
 }
 export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
-export declare type DDLPromptConfig = DDLBannerPromptConfig;
-export declare type PromptConfig = PushPromptConfig | DDLPromptConfig;
+export declare type DdlPromptConfig = DdlBannerPromptConfig;
+export declare type PromptConfig = PushPromptConfig | DdlPromptConfig;
 export declare type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 export interface PlatformConfig {
     publicKey?: string;

@@ -1,58 +1,58 @@
 import { h, render } from 'preact';
-import { Context, DDLPromptConfig, PromptConfig } from '../../core/index';
+import { Context, DdlPromptConfig, PromptConfig } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
-import { loadDDLConfig } from '../../core/config';
+import { loadDdlConfig } from '../../core/config';
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 import { deferPromptActivation } from '../../core/utils';
 
-export enum DDLManagerState {
+export enum DdlManagerState {
     LOADING = 'loading',
     READY = 'ready'
 }
 
-export default class DDLManager {
+export default class DdlManager {
     private readonly context: Context;
     private readonly ddlContainer: RootFrameContainer;
-    private config?: DDLPromptConfig[];
+    private config?: DdlPromptConfig[];
 
     constructor(ctx: Context, rootFrame: RootFrame) {
         this.ddlContainer = rootFrame.createContainer('ddl');
         this.context = ctx;
 
-        console.info('DDLManager: initialising');
+        console.info('DdlManager: initialising');
 
-        this.setState(DDLManagerState.LOADING);
+        this.setState(DdlManagerState.LOADING);
     }
 
-    private onBannerConfirm = (prompt: DDLPromptConfig) => {
+    private onBannerConfirm = (prompt: DdlPromptConfig) => {
         this.hidePrompt(prompt);
 
         window.location.href = prompt.storeUrl;
     };
 
-    private onBannerCancelled = (prompt: DDLPromptConfig) => {
+    private onBannerCancelled = (prompt: DdlPromptConfig) => {
         maybePersistReminder(prompt);
         this.hidePrompt(prompt);
     };
 
-    private hidePrompt(prompt: DDLPromptConfig) {
+    private hidePrompt(prompt: DdlPromptConfig) {
         this.config = this.config?.filter(c => c.uuid !== prompt.uuid);
-        this.setState(DDLManagerState.READY);
+        this.setState(DdlManagerState.READY);
     }
 
-    private setState(state: DDLManagerState) {
-        console.info('Setting DDL manager state:' + state);
+    private setState(state: DdlManagerState) {
+        console.info('Setting DdlManager state:' + state);
         this.onEnter(state);
     }
 
-    private async onEnter(state: DDLManagerState) {
+    private async onEnter(state: DdlManagerState) {
         switch (state) {
-            case DDLManagerState.LOADING:
-                this.config = await loadDDLConfig(this.context);
-                this.setState(DDLManagerState.READY);
+            case DdlManagerState.LOADING:
+                this.config = await loadDdlConfig(this.context);
+                this.setState(DdlManagerState.READY);
                 break;
-            case DDLManagerState.READY:
+            case DdlManagerState.READY:
                 const prompt = this.config?.shift();
 
                 if (!prompt) {
@@ -76,7 +76,7 @@ export default class DDLManager {
     private render = (prompt: PromptConfig) => {
         render(
             <Ui
-                config={prompt as DDLPromptConfig}
+                config={prompt as DdlPromptConfig}
                 onBannerConfirm={this.onBannerConfirm}
                 onBannerCancelled={this.onBannerCancelled}
             />,

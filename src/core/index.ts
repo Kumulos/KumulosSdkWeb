@@ -247,15 +247,15 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
 
 // DDL BANNER
 
-type DDLBannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER_DL>;
-type DDLBannerColorConfig = DialogColorConfig<PromptTypeName.BANNER_DL>;
+type DdlBannerLabelConfig = DialogLabelConfig<PromptTypeName.BANNER_DL>;
+type DdlBannerColorConfig = DialogColorConfig<PromptTypeName.BANNER_DL>;
 
-export interface DDLBannerPromptConfig
+export interface DdlBannerPromptConfig
     extends BasePromptConfig,
         PromptUiActions {
     type: PromptTypeName.BANNER_DL;
-    labels: DDLBannerLabelConfig;
-    colors: DDLBannerColorConfig;
+    labels: DdlBannerLabelConfig;
+    colors: DdlBannerColorConfig;
     imageUrl: string;
     storeUrl: string;
     canonicalLinkUrl: string;
@@ -266,9 +266,9 @@ export type PushPromptConfig =
     | AlertPromptConfig
     | BannerPromptConfig;
 
-export type DDLPromptConfig = DDLBannerPromptConfig;
+export type DdlPromptConfig = DdlBannerPromptConfig;
 
-export type PromptConfig = PushPromptConfig | DDLPromptConfig;
+export type PromptConfig = PushPromptConfig | DdlPromptConfig;
 export type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 
 export interface PlatformConfig {

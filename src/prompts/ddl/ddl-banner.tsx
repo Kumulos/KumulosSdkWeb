@@ -1,5 +1,5 @@
 import { Component, h, createRef, RefObject } from 'preact';
-import { DDLBannerPromptConfig } from '../../core';
+import { DdlBannerPromptConfig } from '../../core';
 import DeeplinkButton from './deeplink-button';
 
 const styles = {
@@ -14,17 +14,17 @@ const styles = {
     }
 };
 
-export interface DDLBannerProps {
-    config: DDLBannerPromptConfig;
-    onConfirm: (config: DDLBannerPromptConfig) => void;
-    onCancel: (config: DDLBannerPromptConfig) => void;
+export interface DdlBannerProps {
+    config: DdlBannerPromptConfig;
+    onConfirm: (config: DdlBannerPromptConfig) => void;
+    onCancel: (config: DdlBannerPromptConfig) => void;
     dimensions: (width: number, height: number) => void;
 }
 
-export class DDLBanner extends Component<DDLBannerProps, never> {
+export class DdlBanner extends Component<DdlBannerProps, never> {
     private containerRef: RefObject<HTMLDivElement>;
 
-    constructor(props: DDLBannerProps) {
+    constructor(props: DdlBannerProps) {
         super(props);
 
         this.containerRef = createRef<HTMLDivElement>();
