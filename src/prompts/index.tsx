@@ -1,17 +1,13 @@
 import {
     Context,
-    EventPayload,
     SdkEvent,
-    PromptUiActions,
-    ReminderTimeUnit,
     PlatformConfig,
-    UiActionType,
     ChannelSubAction,
     PromptAction,
     UserChannelSelectDialogAction,
     ChannelListItem,
     PushPromptConfig,
-    PushPromptConfigs,
+    PromptConfigs,
     PromptConfig
 } from '../core';
 import getPushOpsManager, {
@@ -23,7 +19,7 @@ import { h, render } from 'preact';
 import { Channel } from '../core/channels';
 import Kumulos from '..';
 import Ui from './ui';
-import { triggerMatched } from './triggers';
+import { PromptTriggerEventFilter } from './triggers';
 import { UIContext } from './ui-context';
 import { loadPlatformConfig } from '../core/config';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
@@ -46,11 +42,11 @@ export class PromptManager {
     private readonly kumulosClient: Kumulos;
     private readonly context: Context;
     private readonly pushContainer: RootFrameContainer;
+    private readonly triggerFilter: PromptTriggerEventFilter<PushPromptConfig>;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
-    private eventQueue: EventPayload;
-    private prompts: PushPromptConfigs;
+    private prompts: PromptConfigs<PushPromptConfig>;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
@@ -61,25 +57,22 @@ export class PromptManager {
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.prompts = {};
-        this.eventQueue = [];
         this.activePrompts = [];
         this.channels = [];
+        this.triggerFilter = new PromptTriggerEventFilter<PushPromptConfig>(
+            ctx,
+            this.onEventTracked
+        );
 
         this.pushContainer = rootFrame.createContainer('push');
         this.kumulosClient = client;
         this.context = ctx;
-
-        ctx.subscribe('eventTracked', this.onEventTracked);
 
         this.setState('loading');
     }
 
     private onEventTracked = (e: SdkEvent) => {
         console.info('Prompt trigger saw event', e);
-
-        const events = e.data as EventPayload;
-
-        this.eventQueue.push(...events);
 
         if (this.state !== 'ready') {
             console.info('Not ready, waiting on queue');
@@ -292,25 +285,14 @@ export class PromptManager {
     private async evaluateTriggers() {
         console.info('Evaluating prompt triggers');
 
-        const matchedPrompts = [];
-        for (let id in this.prompts) {
-            const prompt = this.prompts[id];
-            for (let i = 0; i < this.eventQueue.length; ++i) {
-                const event = this.eventQueue[i];
-                const promptSuppressed = await isPromptSuppressed(prompt);
-
-                if (
-                    !promptSuppressed &&
-                    triggerMatched(prompt, event) &&
-                    this.promptActionNeedsTaken(prompt)
-                ) {
-                    matchedPrompts.push(prompt);
-                }
+        const matchedPrompts = await this.triggerFilter.filterPrompts(
+            this.prompts,
+            prompt => {
+                return this.promptActionNeedsTaken(prompt);
             }
-        }
+        );
 
         this.activatePrompts(matchedPrompts);
-        this.eventQueue = [];
     }
 
     promptActionNeedsTaken(prompt: PushPromptConfig): boolean {

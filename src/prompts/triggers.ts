@@ -1,6 +1,16 @@
-import { FilterValue, KumulosEvent, PropFilter, PromptConfig } from '../core';
+import {
+    FilterValue,
+    KumulosEvent,
+    PropFilter,
+    PromptConfig,
+    PromptConfigs,
+    Context,
+    SdkEvent,
+    EventPayload
+} from '../core';
 
 import { escapeRegExp } from '../core/utils';
+import { isPromptSuppressed } from './prompt-reminder';
 
 function propIn(filterValue: FilterValue, propValue: any): boolean {
     if (!Array.isArray(filterValue)) {
@@ -99,4 +109,50 @@ export function triggerMatched(
     }
 
     return allPropFiltersMatch;
+}
+
+export class PromptTriggerEventFilter<T extends PromptConfig> {
+    private eventQueue: EventPayload = [];
+    private eventReceivedCallback?: (e: SdkEvent) => void;
+
+    constructor(ctx: Context, eventReceivedCallback?: (e: SdkEvent) => void) {
+        this.eventReceivedCallback = eventReceivedCallback;
+        ctx.subscribe('eventTracked', this.handleSdkEvent);
+    }
+
+    async filterPrompts(
+        prompts: PromptConfigs<T>,
+        filter: (prompt: T) => boolean
+    ) {
+        console.info('Evaluating prompt triggers');
+
+        const matchedPrompts = [];
+        for (let id in prompts) {
+            const prompt = prompts[id];
+            for (let i = 0; i < this.eventQueue.length; ++i) {
+                const event = this.eventQueue[i];
+                const promptSuppressed = await isPromptSuppressed(prompt);
+
+                if (
+                    !promptSuppressed &&
+                    triggerMatched(prompt, event) &&
+                    filter(prompt)
+                ) {
+                    matchedPrompts.push(prompt);
+                }
+            }
+        }
+
+        this.eventQueue = [];
+
+        return matchedPrompts;
+    }
+
+    private handleSdkEvent = (e: SdkEvent) => {
+        const events = e.data as EventPayload;
+
+        this.eventQueue.push(...events);
+
+        this.eventReceivedCallback?.(e);
+    };
 }

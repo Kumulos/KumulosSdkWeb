@@ -1,8 +1,10 @@
-import { KumulosEvent, PromptConfig, PromptConfigs, Context } from '../core';
+import { KumulosEvent, PromptConfig } from '../core';
 export declare function triggerMatched(prompt: PromptConfig, event: KumulosEvent): boolean;
-export declare class PromptFilter {
+g, event: KumulosEvent): boolean;
+export declare class PromptTriggerEventFilter<T extends PromptConfig> {
     private eventQueue;
-    constructor(ctx: Context);
-    filterPrompts(prompts: PromptConfigs, filter: (prompt: PromptConfig) => boolean): Promise<PromptConfig[]>;
+    private eventReceivedCallback?;
+    constructor(ctx: Context, eventReceivedCallback?: (e: SdkEvent) => void);
+    filterPrompts(prompts: PromptConfigs<T>, filter: (prompt: T) => boolean): Promise<T[]>;
     private handleSdkEvent;
 }
