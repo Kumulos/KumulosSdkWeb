@@ -23,8 +23,8 @@ import { PromptTriggerEventFilter } from './triggers';
 import { UIContext } from './ui-context';
 import { loadPlatformConfig } from '../core/config';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
-import { maybePersistReminder, isPromptSuppressed } from './prompt-reminder';
-import { deferPromptActivation } from '../core/utils';
+import { maybePersistReminder } from './prompt-reminder';
+import { deferPromptActivation } from './utils';
 
 export type PromptManagerState =
     | 'loading'

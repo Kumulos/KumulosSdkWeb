@@ -203,23 +203,3 @@ export function onDOMReady(fn: () => void) {
 export function isMobile(): boolean {
     return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
 }
-
-export function deferPromptActivation(
-    prompt: PromptConfig,
-    activateFn: (prompt: PromptConfig) => void
-) {
-    if (
-        prompt.trigger.afterSeconds === undefined ||
-        prompt.trigger.afterSeconds < 0
-    ) {
-        return false;
-    }
-
-    console.info(
-        'Deferring prompt activation by ' + prompt.trigger.afterSeconds
-    );
-
-    setTimeout(activateFn, prompt.trigger.afterSeconds * 1000, prompt);
-
-    return true;
-}

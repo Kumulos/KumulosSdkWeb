@@ -1,5 +1,6 @@
-import { KumulosEvent, PromptConfig, PromptConfigs, Context, SdkEvent } from '../core';
+import { KumulosEvent, PromptConfig } from '../core';
 export declare function triggerMatched(prompt: PromptConfig, event: KumulosEvent): boolean;
+g, event: KumulosEvent): boolean;
 export declare class PromptTriggerEventFilter<T extends PromptConfig> {
     private eventQueue;
     private eventReceivedCallback?;

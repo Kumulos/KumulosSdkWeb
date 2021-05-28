@@ -4,7 +4,7 @@ import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
 import { loadDdlConfig } from '../../core/config';
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
-import { deferPromptActivation } from '../../core/utils';
+import { deferPromptActivation } from '../utils';
 
 export enum DdlManagerState {
     LOADING = 'loading',

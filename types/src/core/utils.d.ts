@@ -1,4 +1,4 @@
-import { Context, SDKFeature, PromptConfig } from '.';
+import { Context, SDKFeature } from '.';
 export declare function uuidv4(): string;
 export declare function getBrowserName(): string;
 export declare function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean;
@@ -18,4 +18,3 @@ export declare function parseQueryString(qs?: string, excludedQueryKeys?: string
 } | undefined;
 export declare function onDOMReady(fn: () => void): void;
 export declare function isMobile(): boolean;
-export declare function deferPromptActivation(prompt: PromptConfig, activateFn: (prompt: PromptConfig) => void): boolean;
