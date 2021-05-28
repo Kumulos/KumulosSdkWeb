@@ -62,8 +62,6 @@ export default class Ui extends Component<UiProps, never> {
         ] = this.siteMargin ? `${this.siteMargin}px` : '';
     }
 
-    renderBanner() {}
-
     render() {
         if (!this.props.config) {
             return null;

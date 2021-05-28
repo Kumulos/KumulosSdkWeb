@@ -301,10 +301,6 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
-        // if (prompt.feature !== SDKFeature.PUSH) {
-        //     return null;
-        // }
-
         switch (prompt.type) {
             case 'bell':
                 return (

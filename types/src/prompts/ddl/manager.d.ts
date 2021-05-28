@@ -17,3 +17,7 @@ export default class DDLManager {
     private render;
     private renderEmpty;
 }
+;
+    private render;
+    private loadDDLConfig;
+}

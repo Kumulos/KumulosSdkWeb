@@ -200,6 +200,7 @@ export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | Ba
 export declare type DDLPromptConfig = DDLBannerPromptConfig;
 export declare type PromptConfig = PushPromptConfig | DDLPromptConfig;
 export declare type PushPromptConfigs = Record<string, PushPromptConfig>;
+export declare type PromptConfigs = Record<string, PromptConfig>;
 export interface PlatformConfig {
     publicKey?: string;
     iconUrl?: string;

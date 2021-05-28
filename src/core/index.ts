@@ -271,6 +271,7 @@ export type DDLPromptConfig = DDLBannerPromptConfig;
 export type PromptConfig = PushPromptConfig | DDLPromptConfig;
 
 export type PushPromptConfigs = Record<string, PushPromptConfig>;
+export type PromptConfigs = Record<string, PromptConfig>;
 
 export interface PlatformConfig {
     publicKey?: string;
@@ -287,16 +288,10 @@ export enum SDKFeature {
 export interface Configuration {
     apiKey: string;
     secretKey: string;
-
-    // TODO: remove this note, make vapidPublicKey optional and enforce check only when
-    //   a) no features specified (e.g. backward compat)
-    //   b) or if 'push' feature specified (proposed but would keep config interface consistent)
     vapidPublicKey?: string;
-
     serviceWorkerPath?: string;
     pushPrompts: PushPromptConfigs | 'auto';
     autoResubscribe?: boolean;
-
     features?: SDKFeature[];
 }
 

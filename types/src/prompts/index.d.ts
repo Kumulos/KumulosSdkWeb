@@ -40,3 +40,6 @@ export declare class PromptManager {
     private onEnter;
     private loadPrompts;
 }
+nEnter;
+    private loadPrompts;
+}
