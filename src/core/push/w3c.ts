@@ -59,7 +59,13 @@ export default class W3cPushManager implements PushOpsManager {
         const workerReg = await getActiveServiceWorkerReg();
         const existingSub = await workerReg.pushManager.getSubscription();
 
-        if (existingSub && !hasSameKey(ctx.vapidPublicKey!, existingSub)) {
+        if (undefined === ctx.vapidPublicKey) {
+            throw Error(
+                'w3c: vapidPublicKey must be present to register for push'
+            );
+        }
+
+        if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
             await existingSub?.unsubscribe();
         }
 
