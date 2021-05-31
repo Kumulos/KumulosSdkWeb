@@ -15,7 +15,6 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 
 export function maybePersistReminder(prompt: PromptConfig) {
     const { uiActions } = prompt as PromptUiActions;
-    console.log(uiActions);
 
     if (!uiActions) {
         return;
@@ -41,8 +40,6 @@ export async function isPromptSuppressed(
     prompt: PromptConfig
 ): Promise<boolean> {
     const reminder = await getPromptReminder(prompt.uuid);
-
-    console.log(prompt.uuid, reminder);
 
     if (!reminder) {
         return false;
