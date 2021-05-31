@@ -59,12 +59,6 @@ export default class W3cPushManager implements PushOpsManager {
         const workerReg = await getActiveServiceWorkerReg();
         const existingSub = await workerReg.pushManager.getSubscription();
 
-        if (undefined === ctx.vapidPublicKey) {
-            return Promise.reject(
-                'vapidPublicKey must be present when attempting to register for push notifications'
-            );
-        }
-
         if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
             await existingSub?.unsubscribe();
         }
@@ -130,7 +124,7 @@ export default class W3cPushManager implements PushOpsManager {
         const reg = await getActiveServiceWorkerReg();
         const sub = await reg?.pushManager.getSubscription();
 
-        if (sub && perm === 'granted' && hasSameKey(ctx.vapidPublicKey!, sub)) {
+        if (sub && perm === 'granted' && hasSameKey(ctx.vapidPublicKey, sub)) {
             return 'subscribed';
         }
 
@@ -169,7 +163,7 @@ export default class W3cPushManager implements PushOpsManager {
             existingEndpointHash !== undefined &&
             existingEndpointHash === existingSubHash &&
             existingSub &&
-            hasSameKey(ctx.vapidPublicKey!, existingSub) &&
+            hasSameKey(ctx.vapidPublicKey, existingSub) &&
             (existingExpiry === null ||
                 existingExpiry === undefined ||
                 existingExpiry > Date.now())

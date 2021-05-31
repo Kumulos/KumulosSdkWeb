@@ -213,7 +213,7 @@ export declare enum SDKFeature {
 export interface Configuration {
     apiKey: string;
     secretKey: string;
-    vapidPublicKey?: string;
+    vapidPublicKey: string;
     serviceWorkerPath?: string;
     pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
@@ -231,7 +231,7 @@ declare type SdkEventHandler = (event: SdkEvent) => void;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;
-    readonly vapidPublicKey?: string;
+    readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
     readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
