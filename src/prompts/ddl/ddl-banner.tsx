@@ -84,7 +84,6 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                         <h1>{heading}</h1>
                     </div>
                     <div class="kumulos-banner-body">{body}</div>
-                    <div class="kumulos-banner-rating">*****</div>
                 </div>
 
                 <div class="kumulos-banner-actions">
