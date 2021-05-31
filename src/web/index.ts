@@ -67,4 +67,4 @@ function main() {
     (window.Kumulos as any) = executor;
 }
 
-onDOMReady(main);
+main();

@@ -16,7 +16,7 @@ export default class RootFrame {
         this.element.id = 'kumulos-ui-root';
         this.containers = [];
 
-        document.body.appendChild(this.element);
+        onDOMReady(() => document.body.appendChild(this.element));
     }
 
     createContainer(name: string) {
