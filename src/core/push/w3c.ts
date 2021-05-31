@@ -60,8 +60,8 @@ export default class W3cPushManager implements PushOpsManager {
         const existingSub = await workerReg.pushManager.getSubscription();
 
         if (undefined === ctx.vapidPublicKey) {
-            throw Error(
-                'w3c: vapidPublicKey must be present to register for push'
+            return Promise.reject(
+                'vapidPublicKey must be present when attempting to register for push notifications'
             );
         }
 
