@@ -274,7 +274,7 @@ export type PromptConfig = PushPromptConfig | DdlPromptConfig;
 export type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 
 export interface PlatformConfig {
-    publicKey?: string;
+    publicKey: string;
     iconUrl?: string;
     prompts?: PromptConfigs<PushPromptConfig>;
     safariPushId?: string | null;

@@ -201,7 +201,7 @@ export declare type DdlPromptConfig = DdlBannerPromptConfig;
 export declare type PromptConfig = PushPromptConfig | DdlPromptConfig;
 export declare type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 export interface PlatformConfig {
-    publicKey?: string;
+    publicKey: string;
     iconUrl?: string;
     prompts?: PromptConfigs<PushPromptConfig>;
     safariPushId?: string | null;
