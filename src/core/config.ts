@@ -3,10 +3,6 @@ import {
     PUSH_BASE_URL,
     PlatformConfig,
     DdlPromptConfig,
-    PromptTypeName,
-    ReminderTimeUnit,
-    UiActionType,
-    PromptPosition,
     DDL_BASE_URL
 } from '.';
 import { get, set } from './storage';
@@ -62,54 +58,9 @@ export async function loadPlatformConfig(
 export async function loadDdlConfig(
     ctx: Context
 ): Promise<DdlPromptConfig[] | undefined> {
-    // return await loadConfig<DDLPromptConfig[]>(
-    //     `${DDL_BASE_URL}/v1/banners`,
-    //     'ddl',
-    //     ctx
-    // );
-
-    return loadDdlConfigTest(ctx);
-}
-
-export async function loadDdlConfigTest(
-    ctx: Context
-): Promise<DdlPromptConfig[]> {
-    const config: DdlPromptConfig = {
-        uuid: 'link1',
-        type: PromptTypeName.BANNER_DL,
-        labels: {
-            heading: 'Creek Cycles App',
-            body: '20% off all purchases with code 20Appy',
-            declineAction: '',
-            acceptAction: '20% off'
-        },
-        colors: {
-            bg: 'rgba(255,255,0,1)',
-            fg: 'rgba(0,0,0,1)',
-            declineActionFg: '',
-            declineActionBg: '',
-            acceptActionFg: 'rgba(255,255,255,1)',
-            acceptActionBg: 'rgba(0,0,0,1)'
-        },
-        position: PromptPosition.TOP,
-        storeUrl:
-            'https://play.google.com/store/apps/details?id=com.kumulos.companion',
-        canonicalLinkUrl: 'https://reactnative.lnk.click/deep-1',
-        imageUrl: '',
-        trigger: {
-            event: 'k.pageViewed',
-            afterSeconds: 2
-        },
-        uiActions: {
-            decline: {
-                type: UiActionType.REMIND,
-                delay: {
-                    duration: 1,
-                    timeUnit: ReminderTimeUnit.DAYS
-                }
-            }
-        }
-    };
-
-    return Promise.resolve([config]);
+    return await loadConfig<DdlPromptConfig[]>(
+        `${DDL_BASE_URL}/v1/banners`,
+        'ddl',
+        ctx
+    );
 }
