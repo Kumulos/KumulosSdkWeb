@@ -24,7 +24,7 @@ export declare enum PromptTypeName {
     BELL = "bell",
     ALERT = "alert",
     BANNER = "banner",
-    BANNER_DL = "bannerdl"
+    DDL_BANNER = "ddl_banner"
 }
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
@@ -189,7 +189,7 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     backgroundMask?: BackgroundMaskConfig;
 }
 export interface DdlBannerPromptConfig extends BasePromptConfig, PromptUiActions {
-    type: PromptTypeName.BANNER_DL;
+    type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DialogColorConfig;
     imageUrl: string;
