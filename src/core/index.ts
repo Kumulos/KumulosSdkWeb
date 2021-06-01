@@ -37,7 +37,7 @@ export enum PromptTypeName {
     BELL = 'bell',
     ALERT = 'alert',
     BANNER = 'banner',
-    BANNER_DL = 'bannerdl'
+    DDL_BANNER = 'ddl_banner'
 }
 
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
@@ -255,7 +255,7 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
 export interface DdlBannerPromptConfig
     extends BasePromptConfig,
         PromptUiActions {
-    type: PromptTypeName.BANNER_DL;
+    type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DialogColorConfig;
     imageUrl: string;

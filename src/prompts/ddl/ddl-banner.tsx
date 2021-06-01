@@ -53,13 +53,25 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
 
         const { canonicalLinkUrl, position, labels, colors, imageUrl } = config;
         const { heading, body, acceptAction } = labels;
-        const { bg, fg, acceptActionBg, acceptActionFg } = colors;
+        const {
+            bg,
+            fg,
+            acceptActionBg,
+            acceptActionFg,
+            declineActionBg,
+            declineActionFg
+        } = colors;
 
         const classes = `kumulos-prompt kumulos-banner-container kumulos-banner-compact kumulos-prompt-position-${position}`;
 
         const containerStyle = {
             backgroundColor: bg,
             color: fg
+        };
+
+        const declineActionStyle: h.JSX.CSSProperties = {
+            backgroundColor: declineActionBg,
+            color: declineActionFg
         };
 
         const actionStyle: h.JSX.CSSProperties = {
@@ -74,7 +86,11 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
 
         return (
             <div style={containerStyle} class={classes} ref={this.containerRef}>
-                <div class="kumulos-banner-close" onTouchEnd={this.onCancel}>
+                <div
+                    class="kumulos-banner-close"
+                    style={declineActionStyle}
+                    onTouchEnd={this.onCancel}
+                >
                     &#10006;
                 </div>
                 <div style={bannerIconStyle} class="kumulos-banner-icon"></div>
