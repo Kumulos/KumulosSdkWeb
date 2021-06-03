@@ -1,5 +1,7 @@
 import { h } from 'preact';
 
+import './app-rating.scss';
+
 export interface AppRatingProps {
     stars: number;
     ratingCount: number;
@@ -28,11 +30,9 @@ export function AppRating(props: AppRatingProps) {
     }
 
     return (
-        <div class="kumulos-banner-rating">
+        <div class="kumulos-rating">
             {createStars()}
-            <span class="kumulos-banner-rating-count">
-                ({props.ratingCount})
-            </span>
+            <span class="kumulos-rating-count">({props.ratingCount})</span>
         </div>
     );
 }
@@ -42,7 +42,7 @@ interface AppRatingStarProps {
 }
 
 function AppRatingStar(props: AppRatingStarProps) {
-    let starEl = <span>&#9734;</span>;
+    let starEl;
 
     if (props.state === 'on') {
         starEl = <span>&#9733;</span>;
@@ -50,12 +50,12 @@ function AppRatingStar(props: AppRatingStarProps) {
         starEl = (
             <div>
                 <span>&#9734;</span>
-                <span class="kumulos-half">&#9733;</span>
+                <span class="kumulos-rating-halfstar">&#9733;</span>
             </div>
         );
     } else {
         starEl = <span>&#9734;</span>;
     }
 
-    return <div class="kumulos-banner-rating-star">{starEl}</div>;
+    return <div class="kumulos-rating-star">{starEl}</div>;
 }

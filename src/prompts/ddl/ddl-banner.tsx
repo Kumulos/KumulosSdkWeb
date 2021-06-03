@@ -1,7 +1,7 @@
 import { Component, h, createRef, RefObject } from 'preact';
 import { DdlBannerPromptConfig } from '../../core';
 import DeeplinkButton from './deeplink-button';
-import { AppRating } from './app-rating';
+import { AppRating } from '../../components/app-rating';
 
 const styles = {
     bannerIconStyle: {
