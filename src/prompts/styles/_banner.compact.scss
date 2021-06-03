@@ -16,29 +16,4 @@
         font-weight: bold;
         margin-right: 10px;
     }
-
-    .kumulos-banner-rating {
-        display: flex;
-        height: 20px;
-        font-size: 16px;
-        color: rgba(128, 128, 0, 1);
-        align-items: center;
-
-        .kumulos-banner-rating-star {
-            position: relative;
-
-            .kumulos-half {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 50%;
-                overflow: hidden;
-            }
-        }
-
-        .kumulos-banner-rating-count {
-            font-size: 12px;
-            margin-left: 3px;
-        }
-    }
 }
