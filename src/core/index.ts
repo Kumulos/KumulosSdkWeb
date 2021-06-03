@@ -254,7 +254,7 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
 
 export interface AppRating {
     rating: number;
-    count: number;
+    ratingCount: number;
 }
 
 export interface DdlBannerPromptConfig

@@ -110,7 +110,7 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                     <div class="kumulos-banner-body">{body}</div>
                     {appRating && (
                         <AppRating
-                            ratingCount={appRating.count}
+                            ratingCount={appRating.ratingCount}
                             stars={appRating.rating}
                         />
                     )}
