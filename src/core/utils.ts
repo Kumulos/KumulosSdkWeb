@@ -122,12 +122,24 @@ export function authedFetch(
     return fetch(url, options);
 }
 
+export class AuthedFetchError extends Error {
+    constructor(statusCode: number, statusText: string) {
+        super(`authed fetch failed: ${statusCode}, ${statusText}`);
+    }
+}
+
 export function authedFetchJson<T>(
     ctx: Context,
     url: RequestInfo,
     options?: RequestInit
 ): Promise<T> {
-    return authedFetch(ctx, url, options).then(r => r.json());
+    return authedFetch(ctx, url, options).then(r => {
+        if (!r.ok) {
+            throw new AuthedFetchError(r.status, r.statusText);
+        }
+
+        return r.json();
+    });
 }
 
 // Based on the alphabets in https://tools.ietf.org/html/rfc4648 Tables 1 & 2
