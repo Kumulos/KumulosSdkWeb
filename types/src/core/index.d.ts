@@ -190,14 +190,14 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
 }
 export interface AppRating {
     rating: number;
-    count: number;
+    ratingCount: number;
 }
 export interface DdlBannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DialogColorConfig;
     imageUrl: string;
-    storeUrl: string;
+    storeLinkUrl: string;
     canonicalLinkUrl: string;
     appRating?: AppRating;
 }

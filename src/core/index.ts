@@ -264,7 +264,7 @@ export interface DdlBannerPromptConfig
     labels: DialogLabelConfig;
     colors: DialogColorConfig;
     imageUrl: string;
-    storeUrl: string;
+    storeLinkUrl: string;
     canonicalLinkUrl: string;
     appRating?: AppRating;
 }
