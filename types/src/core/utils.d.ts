@@ -5,6 +5,9 @@ export declare function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean;
 export declare function cyrb53(str: string, seed?: number): number;
 export declare function escapeRegExp(str: string): string;
 export declare function authedFetch(ctx: Context, url: RequestInfo, options?: RequestInit): Promise<Response>;
+export declare class AuthedFetchError extends Error {
+    constructor(statusCode: number, statusText: string);
+}
 export declare function authedFetchJson<T>(ctx: Context, url: RequestInfo, options?: RequestInit): Promise<T>;
 export declare function base64UrlEncode(buffer: ArrayBuffer): string;
 export declare function registerServiceWorker(path: string): Promise<ServiceWorkerRegistration>;

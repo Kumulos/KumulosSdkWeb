@@ -3,7 +3,8 @@ import {
     PUSH_BASE_URL,
     PlatformConfig,
     DdlPromptConfig,
-    DDL_BASE_URL
+    DDL_BASE_URL,
+    getInstallId
 } from '.';
 import { get, set } from './storage';
 
@@ -58,9 +59,18 @@ export async function loadPlatformConfig(
 export async function loadDdlConfig(
     ctx: Context
 ): Promise<DdlPromptConfig[] | undefined> {
-    return await loadConfig<DdlPromptConfig[]>(
-        `${DDL_BASE_URL}/v1/banners`,
-        'ddl',
-        ctx
-    );
+    const webInstallId = await getInstallId();
+
+    try {
+        return await authedFetchJson<DdlPromptConfig[]>(
+            ctx,
+            `${DDL_BASE_URL}/v1/banners?webInstallId=${webInstallId}`
+        );
+    } catch (err) {
+        console.warn(
+            `loadDdlConfig: failed to load Deferred DeepLink configuration`,
+            err.message
+        );
+        // undefined return / no config
+    }
 }

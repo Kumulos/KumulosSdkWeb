@@ -252,6 +252,11 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
 
 // DDL BANNER
 
+export interface AppRating {
+    rating: number;
+    ratingCount: number;
+}
+
 export interface DdlBannerPromptConfig
     extends BasePromptConfig,
         PromptUiActions {
@@ -259,8 +264,9 @@ export interface DdlBannerPromptConfig
     labels: DialogLabelConfig;
     colors: DialogColorConfig;
     imageUrl: string;
-    storeUrl: string;
+    storeLinkUrl: string;
     canonicalLinkUrl: string;
+    appRating?: AppRating;
 }
 
 export type PushPromptConfig =

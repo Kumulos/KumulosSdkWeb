@@ -1,6 +1,7 @@
 import { Component, h, createRef, RefObject } from 'preact';
 import { DdlBannerPromptConfig } from '../../core';
 import DeeplinkButton from './deeplink-button';
+import { AppRating } from '../../components/app-rating';
 
 const styles = {
     bannerIconStyle: {
@@ -51,7 +52,14 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
     render() {
         const { config } = this.props;
 
-        const { canonicalLinkUrl, position, labels, colors, imageUrl } = config;
+        const {
+            canonicalLinkUrl,
+            position,
+            labels,
+            colors,
+            imageUrl,
+            appRating
+        } = config;
         const { heading, body, acceptAction } = labels;
         const {
             bg,
@@ -100,6 +108,12 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                         <h1>{heading}</h1>
                     </div>
                     <div class="kumulos-banner-body">{body}</div>
+                    {appRating && (
+                        <AppRating
+                            ratingCount={appRating.ratingCount}
+                            stars={appRating.rating}
+                        />
+                    )}
                 </div>
 
                 <div class="kumulos-banner-actions">

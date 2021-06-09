@@ -28,7 +28,7 @@ export default class DdlManager {
     private onBannerConfirm = (prompt: DdlPromptConfig) => {
         this.hidePrompt(prompt);
 
-        window.location.href = prompt.storeUrl;
+        window.location.href = prompt.storeLinkUrl;
     };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
@@ -50,6 +50,11 @@ export default class DdlManager {
         switch (state) {
             case DdlManagerState.LOADING:
                 this.config = await loadDdlConfig(this.context);
+
+                if (!this.config) {
+                    return;
+                }
+
                 this.setState(DdlManagerState.READY);
                 break;
             case DdlManagerState.READY:
