@@ -39,8 +39,7 @@ export function getBrowserName(): string {
 export function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean {
     if (
         undefined !== sdkFeatures &&
-        sdkFeatures.includes(SDKFeature.DDL) &&
-        !sdkFeatures.includes(SDKFeature.PUSH)
+        sdkFeatures.includes(SDKFeature.DDL)
     ) {
         return true;
     }
