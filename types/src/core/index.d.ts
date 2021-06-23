@@ -192,10 +192,13 @@ export interface AppRating {
     rating: number;
     ratingCount: number;
 }
+declare type DdlDialogColorConfig = DialogColorConfig & {
+    ratingFg: string;
+};
 export interface DdlBannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
-    colors: DialogColorConfig;
+    colors: DdlDialogColorConfig;
     imageUrl: string;
     storeLinkUrl: string;
     canonicalLinkUrl: string;

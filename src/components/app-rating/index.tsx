@@ -5,6 +5,7 @@ import './app-rating.scss';
 export interface AppRatingProps {
     stars: number;
     ratingCount: number;
+    color: string;
 }
 
 export function AppRating(props: AppRatingProps) {
@@ -29,8 +30,12 @@ export function AppRating(props: AppRatingProps) {
         return starEls;
     }
 
+    const ratingStyle = {
+        color: props.color
+    };
+
     return (
-        <div class="kumulos-rating">
+        <div class="kumulos-rating" style={ratingStyle}>
             {createStars()}
             <span class="kumulos-rating-count">({props.ratingCount})</span>
         </div>

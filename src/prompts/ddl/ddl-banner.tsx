@@ -67,7 +67,8 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
             acceptActionBg,
             acceptActionFg,
             declineActionBg,
-            declineActionFg
+            declineActionFg,
+            ratingFg
         } = colors;
 
         const classes = `kumulos-prompt kumulos-banner-container kumulos-banner-compact kumulos-prompt-position-${position}`;
@@ -112,6 +113,7 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                         <AppRating
                             ratingCount={appRating.ratingCount}
                             stars={appRating.rating}
+                            color={ratingFg}
                         />
                     )}
                 </div>
