@@ -1,7 +1,7 @@
 import { EventType } from '../core';
 import Kumulos from '../index';
 import { getPageViewedProps } from './utils';
-import { isBrowserSupported, onDOMReady } from '../core/utils';
+import { isBrowserSupported } from '../core/utils';
 
 type CmdFn = (k: Kumulos) => void;
 type Cmd = string | CmdFn;
