@@ -37,15 +37,24 @@ export function getBrowserName(): string {
 }
 
 export function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean {
-    if (
-        undefined !== sdkFeatures &&
-        sdkFeatures.includes(SDKFeature.DDL)
-    ) {
-        return true;
-    }
+    const checkPushSupported = undefined === sdkFeatures || sdkFeatures.includes(SDKFeature.PUSH);
+    const checkDdlSupported = sdkFeatures?.includes(SDKFeature.DDL);
 
     const requiredThings = [typeof Promise, typeof fetch, typeof indexedDB];
 
+    if (checkPushSupported && !isBrowserSupportedForPush(requiredThings)) {
+        return false;
+    }
+
+    if (checkDdlSupported && !isBrowserSupportedForDdl(requiredThings)) {
+        return false;
+    }
+
+    return true;
+}
+
+
+function isBrowserSupportedForPush(requiredThings: any) {
     const browser = getBrowserName();
 
     if ('safari' === browser) {
@@ -60,8 +69,16 @@ export function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean {
         );
     }
 
+    return checkRequired(requiredThings);
+}
+
+function isBrowserSupportedForDdl(requiredThings: any) {
+    return checkRequired(requiredThings);
+}
+
+function checkRequired(requiredThings: any) {
     return requiredThings.reduce(
-        (supported: boolean, thing) => supported && thing !== 'undefined',
+        (supported: boolean, thing: any) => supported && thing !== 'undefined',
         true
     );
 }
