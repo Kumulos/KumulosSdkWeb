@@ -27,8 +27,23 @@ export default class DdlManager {
     }
 
     private onBannerConfirm = (prompt: DdlPromptConfig) => {
-        this.performConfirmAction(prompt);
-        this.hidePrompt(prompt);
+        const { uiActions: {accept} } = prompt;
+
+        switch (accept.type) {
+            case UiActionType.DDL_OPEN_STORE:
+                copy(accept.deepLinkUrl)
+                    .then(() => {
+                        this.hidePrompt(prompt);
+                        window.location.href = accept.url;
+                    })
+                    .catch((e) => {
+                        console.error('Unable to capture deeplink url for deferred app pickup', e);
+                    });
+            default:
+                return console.error(
+                    `Unsupported accept action type ${accept.type} supported for prompt ${prompt.uuid}`
+                );
+        }
     };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
@@ -44,29 +59,6 @@ export default class DdlManager {
     private setState(state: DdlManagerState) {
         console.info('Setting DdlManager state:' + state);
         this.onEnter(state);
-    }
-
-    private performConfirmAction(prompt: DdlPromptConfig) {
-        const { uiActions: {accept} } = prompt as DdlUiActions;
-
-        switch (accept.type) {
-            case UiActionType.DDL_OPEN_STORE:
-                copy(accept.deepLinkUrl)
-                    .then(() => {
-                        window.location.href = accept.url;
-                    })
-                    .catch((e) => {
-                        console.error('Unable to capture deeplink url for deferred app pickup', e);
-                    });
-            default:
-                return console.error(
-                    `Unsupported accept action type ${accept.type} supported for prompt ${prompt.uuid}`
-                );
-        }
-    }
-
-    private openStorePage(url: string) {
-
     }
 
     private async onEnter(state: DdlManagerState) {

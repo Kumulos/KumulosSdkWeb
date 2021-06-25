@@ -13,8 +13,6 @@ export default class DdlManager {
     private onBannerCancelled;
     private hidePrompt;
     private setState;
-    private performConfirmAction;
-    private openStorePage;
     private onEnter;
     private render;
     private renderEmpty;
