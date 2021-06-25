@@ -14,6 +14,7 @@ export default class DdlManager {
     private hidePrompt;
     private setState;
     private performConfirmAction;
+    private openStorePage;
     private onEnter;
     private render;
     private renderEmpty;

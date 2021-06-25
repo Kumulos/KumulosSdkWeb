@@ -51,13 +51,22 @@ export default class DdlManager {
 
         switch (accept.type) {
             case UiActionType.DDL_OPEN_STORE:
-                copy(accept.deepLinkUrl);
-                window.location.href = accept.url;
+                copy(accept.deepLinkUrl)
+                    .then(() => {
+                        window.location.href = accept.url;
+                    })
+                    .catch((e) => {
+                        console.error('Unable to capture deeplink url for deferred app pickup', e);
+                    });
             default:
                 return console.error(
                     `Unsupported accept action type ${accept.type} supported for prompt ${prompt.uuid}`
                 );
         }
+    }
+
+    private openStorePage(url: string) {
+
     }
 
     private async onEnter(state: DdlManagerState) {
