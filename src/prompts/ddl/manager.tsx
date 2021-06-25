@@ -1,6 +1,6 @@
 import { h, render } from 'preact';
 import copy from 'clipboard-copy';
-import { Context, DdlPromptConfig, PromptConfig, DdlUiActions, UiActionType } from '../../core/index';
+import { Context, DdlPromptConfig, PromptConfig, UiActionType } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
 import { loadDdlConfig } from '../../core/config';

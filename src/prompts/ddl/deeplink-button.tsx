@@ -1,5 +1,4 @@
-import { Component, h, createRef, RefObject } from 'preact';
-import copy from 'clipboard-copy';
+import { Component, h } from 'preact';
 
 interface DeeplinkButtonProps {
     style: h.JSX.CSSProperties;
