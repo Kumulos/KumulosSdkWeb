@@ -1,5 +1,4 @@
 import { h, render } from 'preact';
-import copy from 'clipboard-copy';
 import { Context, DdlPromptConfig, PromptConfig, UiActionType } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
@@ -27,23 +26,7 @@ export default class DdlManager {
     }
 
     private onBannerConfirm = (prompt: DdlPromptConfig) => {
-        const { uiActions: {accept} } = prompt;
-
-        switch (accept.type) {
-            case UiActionType.DDL_OPEN_STORE:
-                copy(accept.deepLinkUrl)
-                    .then(() => {
-                        this.hidePrompt(prompt);
-                        window.location.href = accept.url;
-                    })
-                    .catch((e) => {
-                        console.error('Unable to capture deeplink url for deferred app pickup', e);
-                    });
-            default:
-                return console.error(
-                    `Unsupported accept action type ${accept.type} supported for prompt ${prompt.uuid}`
-                );
-        }
+        this.hidePrompt(prompt);
     };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {

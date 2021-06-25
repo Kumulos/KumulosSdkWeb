@@ -122,6 +122,7 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                         style={actionStyle}
                         class="kumulos-action-button kumulos-action-button-confirm"
                         text={acceptAction}
+                        promptActions={config}
                         onAction={this.onConfirm}
                     />
                 </div>
