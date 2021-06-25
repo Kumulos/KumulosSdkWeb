@@ -1,5 +1,6 @@
 import { h, render } from 'preact';
-import { Context, DdlPromptConfig, PromptConfig } from '../../core/index';
+import copy from 'clipboard-copy';
+import { Context, DdlPromptConfig, PromptConfig, DdlUiActions, UiActionType } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
 import { loadDdlConfig } from '../../core/config';
@@ -26,9 +27,8 @@ export default class DdlManager {
     }
 
     private onBannerConfirm = (prompt: DdlPromptConfig) => {
+        this.performConfirmAction(prompt);
         this.hidePrompt(prompt);
-
-        window.location.href = prompt.storeLinkUrl;
     };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
@@ -44,6 +44,20 @@ export default class DdlManager {
     private setState(state: DdlManagerState) {
         console.info('Setting DdlManager state:' + state);
         this.onEnter(state);
+    }
+
+    private performConfirmAction(prompt: DdlPromptConfig) {
+        const { uiActions: {accept} } = prompt as DdlUiActions;
+
+        switch (accept.type) {
+            case UiActionType.DDL_OPEN_STORE:
+                copy(accept.deepLinkUrl);
+                window.location.href = accept.url;
+            default:
+                return console.error(
+                    `Unsupported accept action type ${accept.type} supported for prompt ${prompt.uuid}`
+                );
+        }
     }
 
     private async onEnter(state: DdlManagerState) {

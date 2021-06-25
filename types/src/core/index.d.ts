@@ -1,6 +1,6 @@
 import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
-export declare const DDL_BASE_URL = "https://links.kumulos.com";
+export declare const DDL_BASE_URL = "http://deeplink.app.local";
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -84,7 +84,9 @@ export interface ChannelSubAction {
 }
 export declare enum UiActionType {
     DECLINE = "decline",
-    REMIND = "remind"
+    REMIND = "remind",
+    DDL_OPEN_STORE = "openStore",
+    DDL_OPEN_DEEPLINK = "openDeeplink"
 }
 interface DeclinePromptAction {
     type: UiActionType.DECLINE;
@@ -195,13 +197,25 @@ export interface AppRating {
 declare type DdlDialogColorConfig = DialogColorConfig & {
     ratingFg: string;
 };
-export interface DdlBannerPromptConfig extends BasePromptConfig, PromptUiActions {
+declare type OpenStoreUiAction = {
+    type: UiActionType.DDL_OPEN_STORE;
+    url: string;
+    deepLinkUrl: string;
+};
+declare type OpenDeepLinkUiAction = {
+    type: UiActionType.DDL_OPEN_DEEPLINK;
+    deepLinkUrl: string;
+};
+export declare type DdlUiActions = PromptUiActions & {
+    uiActions: {
+        accept: OpenStoreUiAction | OpenDeepLinkUiAction;
+    };
+};
+export interface DdlBannerPromptConfig extends BasePromptConfig, DdlUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DdlDialogColorConfig;
     imageUrl: string;
-    storeLinkUrl: string;
-    canonicalLinkUrl: string;
     appRating?: AppRating;
 }
 export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;

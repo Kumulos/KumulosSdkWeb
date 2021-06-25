@@ -6,7 +6,7 @@ const SDK_VERSION = '1.8.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
-export const DDL_BASE_URL = 'https://links.kumulos.com';
+export const DDL_BASE_URL = 'http://deeplink.app.local';
 
 export type InstallId = string;
 export type UserId = string;
@@ -106,7 +106,9 @@ export interface ChannelSubAction {
 
 export enum UiActionType {
     DECLINE = 'decline',
-    REMIND = 'remind'
+    REMIND = 'remind',
+    DDL_OPEN_STORE = 'openStore',
+    DDL_OPEN_DEEPLINK = 'openDeeplink'
 }
 
 interface DeclinePromptAction {
@@ -259,15 +261,29 @@ export interface AppRating {
 
 type DdlDialogColorConfig = DialogColorConfig & {ratingFg: string};
 
+type OpenStoreUiAction = {
+    type: UiActionType.DDL_OPEN_STORE,
+    url: string,
+    deepLinkUrl: string
+};
+type OpenDeepLinkUiAction = {
+    type: UiActionType.DDL_OPEN_DEEPLINK,
+    deepLinkUrl: string
+};
+
+export type DdlUiActions = PromptUiActions & {
+    uiActions: {
+        accept: OpenStoreUiAction | OpenDeepLinkUiAction
+    }
+}
+
 export interface DdlBannerPromptConfig
     extends BasePromptConfig,
-        PromptUiActions {
+        DdlUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DdlDialogColorConfig;
     imageUrl: string;
-    storeLinkUrl: string;
-    canonicalLinkUrl: string;
     appRating?: AppRating;
 }
 

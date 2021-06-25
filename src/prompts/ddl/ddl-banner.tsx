@@ -53,7 +53,6 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
         const { config } = this.props;
 
         const {
-            canonicalLinkUrl,
             position,
             labels,
             colors,
@@ -123,7 +122,6 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                         style={actionStyle}
                         class="kumulos-action-button kumulos-action-button-confirm"
                         text={acceptAction}
-                        linkUrl={canonicalLinkUrl}
                         onAction={this.onConfirm}
                     />
                 </div>
