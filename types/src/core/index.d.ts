@@ -1,5 +1,6 @@
 import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
+export declare const DDL_BASE_URL = "https://links.kumulos.com";
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -23,7 +24,7 @@ export declare enum PromptTypeName {
     BELL = "bell",
     ALERT = "alert",
     BANNER = "banner",
-    CHANNEL = "channel"
+    DDL_BANNER = "ddl_banner"
 }
 export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
 export declare type FilterValue = number | boolean | string | string[];
@@ -83,7 +84,9 @@ export interface ChannelSubAction {
 }
 export declare enum UiActionType {
     DECLINE = "decline",
-    REMIND = "remind"
+    REMIND = "remind",
+    DDL_OPEN_STORE = "openStore",
+    DDL_OPEN_DEEPLINK = "openDeeplink"
 }
 interface DeclinePromptAction {
     type: UiActionType.DECLINE;
@@ -132,12 +135,31 @@ interface BasePromptConfig {
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
 }
-interface BellLabelConfig {
+interface TooltipConfig {
     tooltip: {
         subscribe: string;
     };
+}
+declare type DialogLabelConfig = {
+    heading: string;
+    body: string;
+    declineAction: string;
+    acceptAction: string;
+};
+declare type NamedDialogLabelConfig<T extends PromptTypeName> = Record<T, DialogLabelConfig>;
+declare type DialogColorConfig = {
+    fg: string;
+    bg: string;
+    declineActionFg: string;
+    declineActionBg: string;
+    acceptActionFg: string;
+    acceptActionBg: string;
+};
+declare type NamedDialogColorConfig<T extends PromptTypeName> = Record<T, DialogColorConfig>;
+interface ToastMessage {
     thanksForSubscribing: string;
 }
+declare type BellLabelConfig = ToastMessage & TooltipConfig;
 export interface BellColorConfig {
     bell: {
         fg: string;
@@ -150,25 +172,8 @@ export interface BellPromptConfig extends BasePromptConfig {
     colors?: BellColorConfig;
     position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
-interface AlertLabelConfig {
-    thanksForSubscribing: string;
-    alert: {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    };
-}
-export interface AlertColorConfig {
-    alert: {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    };
-}
+declare type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> & ToastMessage;
+declare type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
     labels: AlertLabelConfig;
@@ -176,25 +181,8 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     position: PromptPosition.TOP | PromptPosition.CENTER;
     backgroundMask?: BackgroundMaskConfig;
 }
-interface BannerLabelConfig {
-    thanksForSubscribing: string;
-    banner: {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    };
-}
-export interface BannerColorConfig {
-    banner: {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    };
-}
+declare type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> & ToastMessage;
+declare type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
 export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.BANNER;
     labels: BannerLabelConfig;
@@ -202,23 +190,56 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     position: PromptPosition.TOP | PromptPosition.BOTTOM;
     backgroundMask?: BackgroundMaskConfig;
 }
-export declare type PromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
-export declare type PromptConfigs = {
-    [key: string]: PromptConfig;
+export interface AppRating {
+    rating: number;
+    ratingCount: number;
+}
+declare type DdlDialogColorConfig = DialogColorConfig & {
+    ratingFg: string;
 };
+declare type OpenStoreUiAction = {
+    type: UiActionType.DDL_OPEN_STORE;
+    url: string;
+    deepLinkUrl: string;
+};
+declare type OpenDeepLinkUiAction = {
+    type: UiActionType.DDL_OPEN_DEEPLINK;
+    deepLinkUrl: string;
+};
+export declare type DdlUiActions = PromptUiActions & {
+    uiActions: {
+        accept: OpenStoreUiAction | OpenDeepLinkUiAction;
+    };
+};
+export interface DdlBannerPromptConfig extends BasePromptConfig, DdlUiActions {
+    type: PromptTypeName.DDL_BANNER;
+    labels: DialogLabelConfig;
+    colors: DdlDialogColorConfig;
+    imageUrl: string;
+    appRating?: AppRating;
+}
+export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
+export declare type DdlPromptConfig = DdlBannerPromptConfig;
+export declare type PromptConfig = PushPromptConfig | DdlPromptConfig;
+export declare type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
-    prompts: PromptConfigs;
-    safariPushId: string | null;
+    prompts?: PromptConfigs<PushPromptConfig>;
+    safariPushId?: string | null;
+}
+export declare enum SDKFeature {
+    PUSH = "push",
+    DDL = "ddl"
 }
 export interface Configuration {
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?: string;
-    pushPrompts?: PromptConfigs | 'auto';
+    pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
+    features?: SDKFeature[];
 }
 export declare type PromptReminder = {
     declinedOn: number;
@@ -235,14 +256,14 @@ export declare class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: {
-        [key: string]: PromptConfig;
-    } | 'auto';
+    readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
+    readonly features: SDKFeature[];
     private readonly subscribers;
     constructor(config: Configuration);
     subscribe(event: SdkEventType, handler: SdkEventHandler): void;
     broadcast(event: SdkEventType, data: any): void;
+    hasFeature(feature: SDKFeature): boolean;
 }
 export declare function assertConfigValid(config: any): void;
 export declare function getInstallId(): Promise<InstallId>;

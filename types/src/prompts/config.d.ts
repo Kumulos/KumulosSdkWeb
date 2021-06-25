@@ -1,2 +1,2 @@
-import { Context, PromptConfigs } from '../core';
-export declare function loadPromptConfigs(ctx: Context): Promise<PromptConfigs>;
+import { Context, PushPromptConfigs } from '../core';
+export declare function loadPromptConfigs(ctx: Context): Promise<PushPromptConfigs>;

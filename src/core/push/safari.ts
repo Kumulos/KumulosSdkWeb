@@ -10,7 +10,7 @@ import { cyrb53, defer } from '../utils';
 import { get, set } from '../storage';
 
 import { PushSubscriptionState } from '../push';
-import { loadConfig } from '../config';
+import { loadPlatformConfig } from '../config';
 
 function hashToken(ctx: Context, token: string): number {
     return cyrb53(`${ctx.apiKey}:${token}`);
@@ -42,7 +42,7 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
-        const cfg = await loadConfig(ctx);
+        const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             cfg.safariPushId as string
         );
@@ -90,7 +90,7 @@ export default class SafariPushManager implements PushOpsManager {
     async getCurrentSubscriptionState(
         ctx: Context
     ): Promise<PushSubscriptionState> {
-        const cfg = await loadConfig(ctx);
+        const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             cfg.safariPushId as string
         );
@@ -114,7 +114,7 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        const cfg = await loadConfig(ctx);
+        const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             cfg.safariPushId as string
         );

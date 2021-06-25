@@ -2,10 +2,11 @@ import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.7.2';
+const SDK_VERSION = '1.8.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
+export const DDL_BASE_URL = 'https://links.kumulos.com';
 
 export type InstallId = string;
 export type UserId = string;
@@ -36,7 +37,7 @@ export enum PromptTypeName {
     BELL = 'bell',
     ALERT = 'alert',
     BANNER = 'banner',
-    CHANNEL = 'channel'
+    DDL_BANNER = 'ddl_banner'
 }
 
 // Note duplicate 'in' vs 'IN' due to misalignment in server config and published docs for manual config
@@ -105,7 +106,9 @@ export interface ChannelSubAction {
 
 export enum UiActionType {
     DECLINE = 'decline',
-    REMIND = 'remind'
+    REMIND = 'remind',
+    DDL_OPEN_STORE = 'openStore',
+    DDL_OPEN_DEEPLINK = 'openDeeplink'
 }
 
 interface DeclinePromptAction {
@@ -167,12 +170,45 @@ interface BasePromptConfig {
     actions?: PromptAction[];
 }
 
-interface BellLabelConfig {
+interface TooltipConfig {
     tooltip: {
         subscribe: string;
     };
+}
+
+type DialogLabelConfig = {
+    heading: string;
+    body: string;
+    declineAction: string;
+    acceptAction: string;
+};
+
+type NamedDialogLabelConfig<T extends PromptTypeName> = Record<
+    T,
+    DialogLabelConfig
+>;
+
+type DialogColorConfig = {
+    fg: string;
+    bg: string;
+    declineActionFg: string;
+    declineActionBg: string;
+    acceptActionFg: string;
+    acceptActionBg: string;
+};
+
+type NamedDialogColorConfig<T extends PromptTypeName> = Record<
+    T,
+    DialogColorConfig
+>;
+
+interface ToastMessage {
     thanksForSubscribing: string;
 }
+
+// BELL
+
+type BellLabelConfig = ToastMessage & TooltipConfig;
 
 export interface BellColorConfig {
     bell: {
@@ -188,26 +224,11 @@ export interface BellPromptConfig extends BasePromptConfig {
     position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
 
-interface AlertLabelConfig {
-    thanksForSubscribing: string;
-    alert: {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    };
-}
+// ALERT
 
-export interface AlertColorConfig {
-    alert: {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    };
-}
+type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> &
+    ToastMessage;
+type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
 
 export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.ALERT;
@@ -217,26 +238,11 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
     backgroundMask?: BackgroundMaskConfig;
 }
 
-interface BannerLabelConfig {
-    thanksForSubscribing: string;
-    banner: {
-        heading: string;
-        body: string;
-        declineAction: string;
-        acceptAction: string;
-    };
-}
+// BANNER
 
-export interface BannerColorConfig {
-    banner: {
-        fg: string;
-        bg: string;
-        declineActionFg: string;
-        declineActionBg: string;
-        acceptActionFg: string;
-        acceptActionBg: string;
-    };
-}
+type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> &
+    ToastMessage;
+type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
 
 export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     type: PromptTypeName.BANNER;
@@ -246,18 +252,61 @@ export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
     backgroundMask?: BackgroundMaskConfig;
 }
 
-export type PromptConfig =
+// DDL BANNER
+
+export interface AppRating {
+    rating: number;
+    ratingCount: number;
+}
+
+type DdlDialogColorConfig = DialogColorConfig & {ratingFg: string};
+
+type OpenStoreUiAction = {
+    type: UiActionType.DDL_OPEN_STORE,
+    url: string,
+    deepLinkUrl: string
+};
+type OpenDeepLinkUiAction = {
+    type: UiActionType.DDL_OPEN_DEEPLINK,
+    deepLinkUrl: string
+};
+
+export type DdlUiActions = PromptUiActions & {
+    uiActions: {
+        accept: OpenStoreUiAction | OpenDeepLinkUiAction
+    }
+}
+
+export interface DdlBannerPromptConfig
+    extends BasePromptConfig,
+        DdlUiActions {
+    type: PromptTypeName.DDL_BANNER;
+    labels: DialogLabelConfig;
+    colors: DdlDialogColorConfig;
+    imageUrl: string;
+    appRating?: AppRating;
+}
+
+export type PushPromptConfig =
     | BellPromptConfig
     | AlertPromptConfig
     | BannerPromptConfig;
 
-export type PromptConfigs = { [key: string]: PromptConfig };
+export type DdlPromptConfig = DdlBannerPromptConfig;
+
+export type PromptConfig = PushPromptConfig | DdlPromptConfig;
+export type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 
 export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
-    prompts: PromptConfigs;
-    safariPushId: string | null;
+    prompts?: PromptConfigs<PushPromptConfig>;
+    safariPushId?: string | null;
+}
+
+export enum SDKFeature {
+    PUSH = 'push',
+    DDL = 'ddl'
 }
 
 export interface Configuration {
@@ -265,8 +314,9 @@ export interface Configuration {
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?: string;
-    pushPrompts?: PromptConfigs | 'auto';
+    pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
+    features?: SDKFeature[];
 }
 
 export type PromptReminder =
@@ -285,8 +335,9 @@ export class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: { [key: string]: PromptConfig } | 'auto';
+    readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
+    readonly features: SDKFeature[];
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
 
@@ -298,6 +349,7 @@ export class Context {
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
         this.pushPrompts = config.pushPrompts ?? 'auto';
         this.autoResubscribe = config.autoResubscribe ?? true;
+        this.features = config.features ?? [SDKFeature.PUSH];
 
         this.subscribers = {};
     }
@@ -326,6 +378,10 @@ export class Context {
             });
         }
     }
+
+    hasFeature(feature: SDKFeature) {
+        return this.features.includes(feature);
+    }
 }
 
 export function assertConfigValid(config: any) {
@@ -333,6 +389,17 @@ export function assertConfigValid(config: any) {
         throw 'Config must be an object';
     }
 
+    const features =
+        Array.isArray(config.features) && config.features.length
+            ? config.features
+            : undefined;
+
+    if (!features || features.includes(SDKFeature.PUSH)) {
+        return assertPushConfigValid(config);
+    }
+}
+
+function assertPushConfigValid(config: any) {
     const requiredStringProps = ['apiKey', 'secretKey', 'vapidPublicKey'];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {

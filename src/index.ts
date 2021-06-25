@@ -10,7 +10,8 @@ import {
     getInstallId,
     getUserId,
     trackEvent,
-    trackInstallDetails
+    trackInstallDetails,
+    SDKFeature
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
@@ -25,7 +26,9 @@ import getPushOpsManager, {
 
 import { ChannelSubscriptionManager } from './core/channels';
 import { PromptManager } from './prompts';
-import { registerServiceWorker } from './core/utils';
+import { registerServiceWorker, isMobile } from './core/utils';
+import RootFrame from './core/root-frame';
+import DdlManager from './prompts/ddl/manager';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -35,9 +38,11 @@ interface KumulosConfig extends Configuration {
 export default class Kumulos {
     private readonly config: KumulosConfig;
     private readonly context: Context;
-    private readonly serviceWorkerReg: Promise<ServiceWorkerRegistration>;
-    private readonly promptManager: PromptManager;
+    private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
+    private readonly promptManager?: PromptManager;
+    private readonly ddlManager?: DdlManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
+    private readonly rootFrame: RootFrame;
 
     constructor(config: KumulosConfig) {
         assertConfigValid(config);
@@ -47,22 +52,42 @@ export default class Kumulos {
 
         persistConfig(config);
         trackInstallDetails(this.context);
-        trackOpenFromQuery(this.context);
 
-        this.serviceWorkerReg = registerServiceWorker(
-            this.context.serviceWorkerPath
-        );
+        this.rootFrame = new RootFrame();
 
-        this.promptManager = new PromptManager(this, this.context);
+        if (this.context.hasFeature(SDKFeature.PUSH)) {
+            trackOpenFromQuery(this.context);
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.addEventListener(
-                'message',
-                this.onWorkerMessage
+            this.serviceWorkerReg = registerServiceWorker(
+                this.context.serviceWorkerPath
             );
+
+            this.promptManager = new PromptManager(
+                this,
+                this.context,
+                this.rootFrame
+            );
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.addEventListener(
+                    'message',
+                    this.onWorkerMessage
+                );
+            }
+
+            this.maybeFireOpenedHandler();
         }
 
-        this.maybeFireOpenedHandler();
+        if (this.context.hasFeature(SDKFeature.DDL)) {
+            if (!isMobile()) {
+                console.info(
+                    'DdlManager: DDL feature support only available on mobile devices.'
+                );
+                return;
+            }
+
+            this.ddlManager = new DdlManager(this.context, this.rootFrame);
+        }
     }
 
     getInstallId(): Promise<InstallId> {

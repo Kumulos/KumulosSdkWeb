@@ -1,13 +1,14 @@
-import { Context, PromptConfig } from '../core';
+import { Context, PushPromptConfig } from '../core';
 import Kumulos from '..';
+import RootFrame from '../core/root-frame';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
-    private readonly uiRoot;
+    private readonly pushContainer;
+    private readonly triggerFilter;
     private state?;
     private subscriptionState?;
-    private eventQueue;
     private prompts;
     private activePrompts;
     private currentlyRequestingPrompt?;
@@ -16,7 +17,7 @@ export declare class PromptManager {
     private ui?;
     private platformConfig?;
     private currentPostAction?;
-    constructor(client: Kumulos, ctx: Context);
+    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame);
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;
@@ -31,12 +32,8 @@ export declare class PromptManager {
     private handleUserChannelSelection;
     private render;
     private evaluateTriggers;
-    promptActionNeedsTaken(prompt: PromptConfig): boolean;
-    private maybePersistReminder;
+    promptActionNeedsTaken(prompt: PushPromptConfig): boolean;
     private hidePrompt;
-    private isPromptSuppressed;
-    private hasPromptReminderElapsed;
-    private deferPromptActivation;
     private activatePrompt;
     private activatePrompts;
     private setState;

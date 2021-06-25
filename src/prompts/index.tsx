@@ -1,43 +1,36 @@
 import {
     Context,
-    EventPayload,
-    PromptConfig,
     SdkEvent,
-    PromptUiActions,
-    ReminderTimeUnit,
     PlatformConfig,
-    UiActionType,
     ChannelSubAction,
     PromptAction,
     UserChannelSelectDialogAction,
-    ChannelListItem
+    ChannelListItem,
+    PushPromptConfig,
+    PromptConfigs,
+    PromptConfig
 } from '../core';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
 } from '../core/push';
-import { h, render, createContext } from 'preact';
+import { h, render } from 'preact';
 
 import { Channel } from '../core/channels';
 import Kumulos from '..';
 import Ui from './ui';
-import { triggerMatched } from './triggers';
-import { persistPromptReminder, getPromptReminder } from '../core/storage';
-import { PromptReminderDelayConfig } from '../core';
+import { PromptTriggerEventFilter } from './triggers';
 import { UIContext } from './ui-context';
-import { loadConfig } from '../core/config';
-import { onDOMReady } from '../core/utils';
+import { loadPlatformConfig } from '../core/config';
+import RootFrame, { RootFrameContainer } from '../core/root-frame';
+import { maybePersistReminder } from './prompt-reminder';
+import { deferPromptActivation } from './utils';
 
 export type PromptManagerState =
     | 'loading'
     | 'ready'
     | 'requesting'
     | 'postaction';
-
-const REMINDER_TIME_UNIT_TO_MILLIS = {
-    [ReminderTimeUnit.HOURS]: 1000 * 60 * 60,
-    [ReminderTimeUnit.DAYS]: 1000 * 60 * 60 * 24
-};
 
 // loading -> ready
 // ready -> requesting
@@ -48,45 +41,38 @@ const REMINDER_TIME_UNIT_TO_MILLIS = {
 export class PromptManager {
     private readonly kumulosClient: Kumulos;
     private readonly context: Context;
-    private readonly uiRoot: HTMLDivElement;
+    private readonly pushContainer: RootFrameContainer;
+    private readonly triggerFilter: PromptTriggerEventFilter<PushPromptConfig>;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
-    private eventQueue: EventPayload;
-    private prompts: { [x: string]: PromptConfig };
-    private activePrompts: PromptConfig[];
-    private currentlyRequestingPrompt?: PromptConfig;
+    private prompts: PromptConfigs<PushPromptConfig>;
+    private activePrompts: PushPromptConfig[];
+    private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
     private channels: Channel[];
     private ui?: Ui;
     private platformConfig?: PlatformConfig;
     private currentPostAction?: PromptAction;
 
-    constructor(client: Kumulos, ctx: Context) {
+    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.prompts = {};
-        this.eventQueue = [];
         this.activePrompts = [];
         this.channels = [];
+        this.triggerFilter = new PromptTriggerEventFilter<PushPromptConfig>(
+            ctx,
+            this.onEventTracked
+        );
 
-        this.uiRoot = document.createElement('div');
-        this.uiRoot.id = 'kumulos-ui-root';
+        this.pushContainer = rootFrame.createContainer('push');
         this.kumulosClient = client;
         this.context = ctx;
 
-        ctx.subscribe('eventTracked', this.onEventTracked);
-
-        onDOMReady(() => {
-            document.body.appendChild(this.uiRoot);
-            this.setState('loading');
-        });
+        this.setState('loading');
     }
 
     private onEventTracked = (e: SdkEvent) => {
         console.info('Prompt trigger saw event', e);
-
-        const events = e.data as EventPayload;
-
-        this.eventQueue.push(...events);
 
         if (this.state !== 'ready') {
             console.info('Not ready, waiting on queue');
@@ -97,11 +83,11 @@ export class PromptManager {
     };
 
     private activateDeferredPrompt = (prompt: PromptConfig) => {
-        this.activatePrompt(prompt);
+        this.activatePrompt(prompt as PushPromptConfig);
         this.render();
     };
 
-    private onRequestNativePrompt = async (prompt: PromptConfig) => {
+    private onRequestNativePrompt = async (prompt: PushPromptConfig) => {
         if ('requesting' === this.state) {
             return;
         }
@@ -118,7 +104,7 @@ export class PromptManager {
     };
 
     private onRequestPostActionPrompt = async (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         action: PromptAction
     ) => {
         if ('postaction' === this.state) {
@@ -136,7 +122,7 @@ export class PromptManager {
     };
 
     private onPromptAccepted = async (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => {
         if (this.subscriptionState === 'unsubscribed') {
@@ -150,12 +136,12 @@ export class PromptManager {
         await this.handleUserChannelSelection(channelSelections);
 
         if (this.subscriptionState === 'subscribed') {
-            this.ui?.showToast(prompt.labels?.thanksForSubscribing);
+            this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
         }
     };
 
     private onPostActionConfirm = async (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => {
         await this.handleUserChannelSelection(channelSelections);
@@ -164,12 +150,12 @@ export class PromptManager {
         this.hideAndSuppressPrompts(prompt);
     };
 
-    private onPromptDeclined = (prompt: PromptConfig) => {
-        this.maybePersistReminder(prompt);
+    private onPromptDeclined = (prompt: PushPromptConfig) => {
+        maybePersistReminder(prompt);
         this.hidePrompt(prompt);
     };
 
-    private hideAndSuppressPrompts(prompt: PromptConfig) {
+    private hideAndSuppressPrompts(prompt: PushPromptConfig) {
         const { subscriptionState } = this;
 
         this.hidePrompt(prompt);
@@ -179,7 +165,7 @@ export class PromptManager {
         }
     }
 
-    private async handlePromptActions(prompt: PromptConfig) {
+    private async handlePromptActions(prompt: PushPromptConfig) {
         if (!prompt.actions) {
             return;
         }
@@ -193,7 +179,9 @@ export class PromptManager {
         await this.handleChannelPostActions(prompt);
     }
 
-    private async handleChannelSubActions(prompt: PromptConfig): Promise<void> {
+    private async handleChannelSubActions(
+        prompt: PushPromptConfig
+    ): Promise<void> {
         if (undefined === prompt.actions) {
             return;
         }
@@ -226,7 +214,7 @@ export class PromptManager {
     }
 
     private async handleChannelPostActions(
-        prompt: PromptConfig
+        prompt: PushPromptConfig
     ): Promise<void> {
         if (undefined === prompt.actions) {
             return;
@@ -290,35 +278,24 @@ export class PromptManager {
                     currentPostAction={this.currentPostAction}
                 />
             </UIContext.Provider>,
-            this.uiRoot
+            this.pushContainer.element
         );
     }
 
     private async evaluateTriggers() {
         console.info('Evaluating prompt triggers');
 
-        const matchedPrompts = [];
-        for (let id in this.prompts) {
-            const prompt = this.prompts[id];
-            for (let i = 0; i < this.eventQueue.length; ++i) {
-                const event = this.eventQueue[i];
-                const promptSuppressed = await this.isPromptSuppressed(prompt);
-
-                if (
-                    !promptSuppressed &&
-                    triggerMatched(prompt, event) &&
-                    this.promptActionNeedsTaken(prompt)
-                ) {
-                    matchedPrompts.push(prompt);
-                }
+        const matchedPrompts = await this.triggerFilter.filterPrompts(
+            this.prompts,
+            prompt => {
+                return this.promptActionNeedsTaken(prompt);
             }
-        }
+        );
 
         this.activatePrompts(matchedPrompts);
-        this.eventQueue = [];
     }
 
-    promptActionNeedsTaken(prompt: PromptConfig): boolean {
+    promptActionNeedsTaken(prompt: PushPromptConfig): boolean {
         if (this.subscriptionState === 'unsubscribed') {
             return true;
         }
@@ -342,87 +319,14 @@ export class PromptManager {
         return false;
     }
 
-    private maybePersistReminder(prompt: PromptConfig) {
-        const { uiActions } = prompt as PromptUiActions;
-
-        if (!uiActions) {
-            return;
-        }
-
-        const { type } = uiActions.decline;
-
-        switch (type) {
-            case UiActionType.REMIND:
-                return persistPromptReminder(prompt.uuid, {
-                    declinedOn: Date.now()
-                });
-            case UiActionType.DECLINE:
-                return persistPromptReminder(prompt.uuid, 'suppressed');
-            default:
-                return console.warn(
-                    `Unsupported decline action type ${type} supported for prompt ${prompt.uuid}, fall back to always show this prompt when declined`
-                );
-        }
-    }
-
-    private hidePrompt(prompt: PromptConfig) {
+    private hidePrompt(prompt: PushPromptConfig) {
         const idx = this.activePrompts.indexOf(prompt);
         this.activePrompts.splice(idx, 1);
 
         this.render();
     }
 
-    private async isPromptSuppressed(prompt: PromptConfig): Promise<boolean> {
-        const reminder = await getPromptReminder(prompt.uuid);
-
-        if (!reminder) {
-            return false;
-        }
-
-        if ('suppressed' === reminder) {
-            return true;
-        }
-
-        const { uiActions } = prompt as PromptUiActions;
-
-        if (uiActions.decline.type !== UiActionType.REMIND) {
-            return false;
-        }
-
-        return !this.hasPromptReminderElapsed(
-            reminder.declinedOn,
-            uiActions.decline.delay
-        );
-    }
-
-    private hasPromptReminderElapsed(
-        declinedOnMillis: number,
-        delayConfig: PromptReminderDelayConfig
-    ): boolean {
-        return (
-            Date.now() - declinedOnMillis >
-            REMINDER_TIME_UNIT_TO_MILLIS[delayConfig.timeUnit] *
-                delayConfig.duration
-        );
-    }
-
-    private deferPromptActivation(prompt: PromptConfig) {
-        if (!prompt.trigger.afterSeconds || prompt.trigger.afterSeconds < 0) {
-            return;
-        }
-
-        console.info(
-            'Deferring prompt activation by ' + prompt.trigger.afterSeconds
-        );
-
-        setTimeout(
-            this.activateDeferredPrompt,
-            prompt.trigger.afterSeconds * 1000,
-            prompt
-        );
-    }
-
-    private activatePrompt(prompt: PromptConfig) {
+    private activatePrompt(prompt: PushPromptConfig) {
         // TODO is identity ok for comparison here... might need to use ID
         if (this.activePrompts.indexOf(prompt) > -1) {
             return;
@@ -431,14 +335,13 @@ export class PromptManager {
         this.activePrompts.push(prompt);
     }
 
-    private activatePrompts(prompts: PromptConfig[]) {
+    private activatePrompts(prompts: PushPromptConfig[]) {
         console.info('Will activate prompts: ', prompts);
 
         for (let i = 0; i < prompts.length; ++i) {
             const prompt = prompts[i];
 
-            if (prompt.trigger.afterSeconds !== undefined) {
-                this.deferPromptActivation(prompt);
+            if (deferPromptActivation(prompt, this.activateDeferredPrompt)) {
                 continue;
             }
 
@@ -489,9 +392,9 @@ export class PromptManager {
     }
 
     private async loadPrompts(): Promise<void> {
-        this.platformConfig = await loadConfig(this.context);
+        this.platformConfig = await loadPlatformConfig(this.context);
 
-        if (null === this.platformConfig) {
+        if (!this.platformConfig.publicKey) {
             console.error('Failed to load prompts config');
             return;
         }

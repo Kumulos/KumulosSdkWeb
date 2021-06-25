@@ -1,4 +1,4 @@
-import { Context } from '.';
+import { Context, SDKFeature, PromptConfig } from '.';
 
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
@@ -36,9 +36,25 @@ export function getBrowserName(): string {
     return '';
 }
 
-export function isBrowserSupported(): boolean {
+export function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean {
+    const checkPushSupported = undefined === sdkFeatures || sdkFeatures.includes(SDKFeature.PUSH);
+    const checkDdlSupported = sdkFeatures?.includes(SDKFeature.DDL);
+
     const requiredThings = [typeof Promise, typeof fetch, typeof indexedDB];
 
+    if (checkPushSupported && !isBrowserSupportedForPush(requiredThings)) {
+        return false;
+    }
+
+    if (checkDdlSupported && !isBrowserSupportedForDdl(requiredThings)) {
+        return false;
+    }
+
+    return true;
+}
+
+
+function isBrowserSupportedForPush(requiredThings: any) {
     const browser = getBrowserName();
 
     if ('safari' === browser) {
@@ -53,8 +69,16 @@ export function isBrowserSupported(): boolean {
         );
     }
 
+    return checkRequired(requiredThings);
+}
+
+function isBrowserSupportedForDdl(requiredThings: any) {
+    return checkRequired(requiredThings);
+}
+
+function checkRequired(requiredThings: any) {
     return requiredThings.reduce(
-        (supported: boolean, thing) => supported && thing !== 'undefined',
+        (supported: boolean, thing: any) => supported && thing !== 'undefined',
         true
     );
 }
@@ -114,12 +138,24 @@ export function authedFetch(
     return fetch(url, options);
 }
 
+export class AuthedFetchError extends Error {
+    constructor(statusCode: number, statusText: string) {
+        super(`authed fetch failed: ${statusCode}, ${statusText}`);
+    }
+}
+
 export function authedFetchJson<T>(
     ctx: Context,
     url: RequestInfo,
     options?: RequestInit
 ): Promise<T> {
-    return authedFetch(ctx, url, options).then(r => r.json());
+    return authedFetch(ctx, url, options).then(r => {
+        if (!r.ok) {
+            throw new AuthedFetchError(r.status, r.statusText);
+        }
+
+        return r.json();
+    });
 }
 
 // Based on the alphabets in https://tools.ietf.org/html/rfc4648 Tables 1 & 2
@@ -190,4 +226,8 @@ export function onDOMReady(fn: () => void) {
     } else {
         document.addEventListener('DOMContentLoaded', fn);
     }
+}
+
+export function isMobile(): boolean {
+    return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
 }

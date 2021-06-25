@@ -1,9 +1,7 @@
-import './prompts.scss';
-
 import { Component, Fragment, h, JSX } from 'preact';
 
 import {
-    PromptConfig,
+    PushPromptConfig,
     PromptTypeName,
     AlertPromptConfig,
     BannerPromptConfig,
@@ -14,7 +12,7 @@ import {
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
-import { getBrowserName } from '../core/utils';
+import { getBrowserName, isMobile } from '../core/utils';
 import { Bell } from './bell';
 import { Dialog } from './dialog';
 import { ChannelsDialog } from './dialog/channels-dialog';
@@ -25,19 +23,15 @@ export function inversePosition(pos: string): 'left' | 'right' {
     return pos.indexOf('left') > -1 ? 'right' : 'left';
 }
 
-export function isMobile(): boolean {
-    return /android|iPhone|iPad|iPod|mobile/i.test(navigator.userAgent);
-}
-
-export interface PromptUiProps<T extends PromptConfig> {
+export interface PromptUiProps<T extends PushPromptConfig> {
     config: T;
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
-    onPromptDeclined: (prompt: PromptConfig) => void;
+    onPromptDeclined: (prompt: PushPromptConfig) => void;
     action?: UserChannelSelectInlineAction;
 }
 
@@ -59,7 +53,7 @@ export class Tooltip extends Component<TooltipProps, never> {
 
 interface OverlayProps {
     promptState: PromptManagerState;
-    prompt?: PromptConfig;
+    prompt?: PushPromptConfig;
     subscriptionState: PushSubscriptionState;
 }
 
@@ -202,19 +196,19 @@ class BackgroundMask extends Component<
 }
 
 interface UiProps {
-    prompts: PromptConfig[];
+    prompts: PushPromptConfig[];
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
-    onPromptDeclined: (prompt: PromptConfig) => void;
+    onPromptDeclined: (prompt: PushPromptConfig) => void;
     onPostActionConfirm: (
-        prompt: PromptConfig,
+        prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
-    currentlyRequestingPrompt?: PromptConfig;
+    currentlyRequestingPrompt?: PushPromptConfig;
     currentPostAction?: PromptAction;
 }
 
@@ -298,7 +292,7 @@ export default class Ui extends Component<UiProps, UiState> {
         return <BackgroundMask style={style} />;
     }
 
-    renderPrompt(prompt: PromptConfig) {
+    renderPrompt(prompt: PushPromptConfig) {
         if ('requesting' === this.props.promptManagerState) {
             return null;
         }

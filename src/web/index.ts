@@ -3,27 +3,18 @@ import Kumulos from '../index';
 import { getPageViewedProps } from './utils';
 import { isBrowserSupported } from '../core/utils';
 
-type CmdFn = (k:Kumulos) => void;
+type CmdFn = (k: Kumulos) => void;
 type Cmd = string | CmdFn;
 type QueuedCommand = [Cmd, ...any[]];
-type LazyKumulos = {q?: QueuedCommand[]};
+type LazyKumulos = { q?: QueuedCommand[] };
 
 interface Win extends Window {
-    Kumulos?:LazyKumulos;
+    Kumulos?: LazyKumulos;
 }
 
-declare var window : Win;
+declare var window: Win;
 
 function main() {
-    if (!isBrowserSupported()) {
-        console.warn('Kumulos: this browser does not support all required features, aborting initialization...');
-        return;
-    }
-
-    if (location.protocol !== 'https:') {
-        console.warn('Kumulos: this page is not served over HTTPS, some features may be unavailable...');
-    }
-
     if (!window.Kumulos?.q) {
         return;
     }
@@ -35,8 +26,21 @@ function main() {
         return;
     }
 
+    if (!isBrowserSupported(init[1].features)) {
+        console.warn(
+            'Kumulos: this browser does not support all required features, aborting initialization...'
+        );
+        return;
+    }
+
+    if (location.protocol !== 'https:') {
+        console.warn(
+            'Kumulos: this page is not served over HTTPS, some features may be unavailable...'
+        );
+    }
+
     const instance = new Kumulos(init[1]);
-    const executor = function (cmd:Cmd, ...args:any[]) {
+    const executor = function(cmd: Cmd, ...args: any[]) {
         try {
             if (typeof cmd === 'function') {
                 cmd(instance);
