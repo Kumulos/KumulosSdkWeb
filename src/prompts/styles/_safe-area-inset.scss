@@ -1,14 +1,14 @@
 @supports(padding: unquote('max(0px)')) {
-    .support-notch-left {
+    .kumulos-safe-area-inset-left {
         padding-left: unquote('max(10px, env(safe-area-inset-left))');
     }
-    .support-notch-right {
+    .kumulos-safe-area-inset-right {
         padding-right: unquote('max(10px, env(safe-area-inset-right))');
     }
-    .support-notch-top {
+    .kumulos-safe-area-inset-top {
         padding-top: unquote('max(10px, env(safe-area-inset-top))');
     }
-    .support-notch-bottom {
+    .kumulos-safe-area-inset-bottom {
         padding-bottom: unquote('max(10px, env(safe-area-inset-bottom))');
     }
 }

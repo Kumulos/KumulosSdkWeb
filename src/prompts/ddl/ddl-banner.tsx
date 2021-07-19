@@ -60,7 +60,9 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
     getCssClasses(promptPosition: PromptPosition) {
         const classes = [...CLASSES, `kumulos-prompt-position-${promptPosition}`];
 
-        classes.push(`support-notch-${promptPosition}`);
+        if ([PromptPosition.TOP, PromptPosition.BOTTOM].includes(promptPosition)) {
+            classes.push(`kumulos-safe-area-inset-${promptPosition}`);
+        }
 
         return classes.join(' ');
     }
