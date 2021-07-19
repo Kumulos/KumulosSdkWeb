@@ -18,9 +18,7 @@ const styles = {
 const CLASSES = [
     'kumulos-prompt',
     'kumulos-banner-container',
-    'kumulos-banner-compact',
-    'support-notch-landscape',
-    'support-notch-portrait'
+    'kumulos-banner-compact'
 ];
 
 export interface DdlBannerProps {
