@@ -1,5 +1,5 @@
 import { Component, h, createRef, RefObject } from 'preact';
-import { DdlBannerPromptConfig } from '../../core';
+import { DdlBannerPromptConfig, PromptPosition } from '../../core';
 import DeeplinkButton from './deeplink-button';
 import { AppRating } from '../../components/app-rating';
 
@@ -14,6 +14,14 @@ const styles = {
         height: 12
     }
 };
+
+const CLASSES = [
+    'kumulos-prompt',
+    'kumulos-banner-container',
+    'kumulos-banner-compact',
+    'support-notch-landscape',
+    'support-notch-portrait'
+];
 
 export interface DdlBannerProps {
     config: DdlBannerPromptConfig;
@@ -49,6 +57,14 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
         this.props.onCancel(this.props.config);
     };
 
+    getCssClasses(promptPosition: PromptPosition) {
+        const classes = [...CLASSES, `kumulos-prompt-position-${promptPosition}`];
+
+        classes.push(`support-notch-${promptPosition}`);
+
+        return classes.join(' ');
+    }
+
     render() {
         const { config } = this.props;
 
@@ -70,7 +86,7 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
             ratingFg
         } = colors;
 
-        const classes = `kumulos-prompt kumulos-banner-container kumulos-banner-compact kumulos-prompt-position-${position}`;
+        const classes = this.getCssClasses(position);
 
         const containerStyle = {
             backgroundColor: bg,

@@ -1,5 +1,5 @@
 import { Component, h } from 'preact';
-import { DdlBannerPromptConfig } from '../../core';
+import { DdlBannerPromptConfig, PromptPosition } from '../../core';
 export interface DdlBannerProps {
     config: DdlBannerPromptConfig;
     onConfirm: (config: DdlBannerPromptConfig) => void;
@@ -12,5 +12,6 @@ export declare class DdlBanner extends Component<DdlBannerProps, never> {
     componentDidMount(): void;
     onConfirm: () => void;
     onCancel: () => void;
+    getCssClasses(promptPosition: PromptPosition): string;
     render(): h.JSX.Element;
 }
