@@ -1,14 +1,14 @@
 @supports(padding: unquote('max(0px)')) {
-    .kumulos-safe-area-inset-left {
+    .kumulos-safe-area-inset-pad-left {
         padding-left: unquote('max(10px, env(safe-area-inset-left))');
     }
-    .kumulos-safe-area-inset-right {
+    .kumulos-safe-area-inset-pad-right {
         padding-right: unquote('max(10px, env(safe-area-inset-right))');
     }
-    .kumulos-safe-area-inset-top {
+    .kumulos-safe-area-inset-pad-top {
         padding-top: unquote('max(10px, env(safe-area-inset-top))');
     }
-    .kumulos-safe-area-inset-bottom {
+    .kumulos-safe-area-inset-pad-bottom {
         padding-bottom: unquote('max(10px, env(safe-area-inset-bottom))');
     }
 }
