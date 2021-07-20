@@ -18,7 +18,9 @@ const styles = {
 const CLASSES = [
     'kumulos-prompt',
     'kumulos-banner-container',
-    'kumulos-banner-compact'
+    'kumulos-banner-compact',
+    'kumulos-safe-area-inset-pad-left',
+    'kumulos-safe-area-inset-pad-right'
 ];
 
 export interface DdlBannerProps {
