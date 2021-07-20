@@ -10,21 +10,30 @@ import { get, set } from './storage';
 
 import { authedFetchJson } from './utils';
 
+const getCacheKeys = (key: string) => ({
+    CONFIG_CACHE_KEY: `${key}Config`,
+    CONFIG_CACHE_KEY_UPDATED: `${key}ConfigUpdated`
+});
+
+const MAX_CACHE_AGE_MS = 1 * 60 * 60 * 1000;
+
+enum ConfigCacheType {
+    PLATFORM = 'platform',
+    DDL = 'ddl'
+}
+
 async function loadConfig<TConfigType>(
     url: string,
     cacheKey: string,
     ctx: Context
 ): Promise<TConfigType> {
-    const CONFIG_CACHE_KEY = `${cacheKey}Config`;
-    const CONFIG_CACHE_KEY_UPDATED = `${cacheKey}ConfigUpdated`;
-    const MAX_AGE_MS = 1 * 60 * 60 * 1000;
+    const cacheKeys = getCacheKeys(cacheKey);
+    let config = await get<TConfigType>(cacheKeys.CONFIG_CACHE_KEY);
 
-    let config = await get<TConfigType>(CONFIG_CACHE_KEY);
-
-    const lastLoadTime = (await get<number>(CONFIG_CACHE_KEY_UPDATED)) ?? 0;
+    const lastLoadTime = (await get<number>(cacheKeys.CONFIG_CACHE_KEY_UPDATED)) ?? 0;
     let updatedRemoteConfig = false;
 
-    if (Date.now() - lastLoadTime > MAX_AGE_MS) {
+    if (Date.now() - lastLoadTime > MAX_CACHE_AGE_MS) {
         console.info('Config never synced/stale, syncing now...');
 
         try {
@@ -37,8 +46,8 @@ async function loadConfig<TConfigType>(
     }
 
     if (updatedRemoteConfig) {
-        await set(CONFIG_CACHE_KEY, config);
-        await set(CONFIG_CACHE_KEY_UPDATED, Date.now());
+        await set(cacheKeys.CONFIG_CACHE_KEY, config);
+        await set(cacheKeys.CONFIG_CACHE_KEY_UPDATED, Date.now());
     }
 
     return config;
@@ -50,7 +59,7 @@ export async function loadPlatformConfig(
     return (
         (await loadConfig<PlatformConfig>(
             `${PUSH_BASE_URL}/v1/web/config`,
-            'platform',
+            ConfigCacheType.PLATFORM,
             ctx
         )) ?? {}
     );
@@ -62,9 +71,10 @@ export async function loadDdlConfig(
     const webInstallId = await getInstallId();
 
     try {
-        return await authedFetchJson<DdlPromptConfig[]>(
-            ctx,
-            `${DDL_BASE_URL}/v1/banners?webInstallId=${webInstallId}`
+        return await loadConfig<DdlPromptConfig[]>(
+            `${DDL_BASE_URL}/v1/banners?webInstallId=${webInstallId}`,
+            ConfigCacheType.DDL,
+            ctx
         );
     } catch (err) {
         console.warn(
@@ -73,4 +83,18 @@ export async function loadDdlConfig(
         );
         // undefined return / no config
     }
+}
+
+export async function deleteDdlBannerConfigFromCache(bannerUuid: string): Promise<void> {
+    const cacheKeys = getCacheKeys(ConfigCacheType.DDL);
+
+    let configs = await get<DdlPromptConfig[]>(cacheKeys.CONFIG_CACHE_KEY);
+
+    if (!configs) {
+        return;
+    }
+
+    configs = configs.filter(c => c.uuid !== bannerUuid);
+
+    await set(cacheKeys.CONFIG_CACHE_KEY, configs);
 }
