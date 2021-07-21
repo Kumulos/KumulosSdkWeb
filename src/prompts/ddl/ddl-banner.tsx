@@ -49,15 +49,15 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
         this.props.dimensions(clientWidth, clientHeight);
     }
 
-    onConfirm = () => {
+    private onConfirm = () => {
         this.props.onConfirm(this.props.config);
     };
 
-    onCancel = () => {
+    private onCancel = () => {
         this.props.onCancel(this.props.config);
     };
 
-    getCssClasses(promptPosition: PromptPosition) {
+    private getCssClasses(promptPosition: PromptPosition) {
         const classes = [...CLASSES, `kumulos-prompt-position-${promptPosition}`];
 
         if ([PromptPosition.TOP, PromptPosition.BOTTOM].includes(promptPosition)) {
