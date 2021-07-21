@@ -1,4 +1,13 @@
-import { Context, SDKFeature, PromptConfig } from '.';
+import { Context, SDKFeature } from './index';
+
+type FeatureDependency = string | object | IDBFactory | PromiseConstructor | Notification | PushManager | ServiceWorkerContainer | SafariRemoteNotification;
+
+const CORE_FEATURE_DEPENDENCIES : FeatureDependency[] = [typeof Promise, typeof fetch, typeof indexedDB];
+
+const FEATURE_DEPENDENCY_CHECK : {[key in SDKFeature]: () => boolean} = {
+    'push': isBrowserSupportedForPush,
+    'ddl': isBrowserSupportedForDdl
+};
 
 // See: https://stackoverflow.com/a/2117523
 export function uuidv4() {
@@ -36,31 +45,23 @@ export function getBrowserName(): string {
     return '';
 }
 
-export function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean {
-    const checkPushSupported = undefined === sdkFeatures || sdkFeatures.includes(SDKFeature.PUSH);
-    const checkDdlSupported = sdkFeatures?.includes(SDKFeature.DDL);
-
-    const requiredThings = [typeof Promise, typeof fetch, typeof indexedDB];
-
-    if (checkPushSupported && !isBrowserSupportedForPush(requiredThings)) {
-        return false;
+export function isBrowserSupported(sdkFeatures?: SDKFeature[]) {
+    sdkFeatures = sdkFeatures ?? [];
+    if (!sdkFeatures.length) {
+        sdkFeatures.push(SDKFeature.PUSH);
     }
 
-    if (checkDdlSupported && !isBrowserSupportedForDdl(requiredThings)) {
-        return false;
-    }
-
-    return true;
+    return sdkFeatures.filter(f => FEATURE_DEPENDENCY_CHECK[f]()).length > 0;
 }
 
-
-function isBrowserSupportedForPush(requiredThings: any) {
+function isBrowserSupportedForPush() {
+    const coreDependencies = [...CORE_FEATURE_DEPENDENCIES];
     const browser = getBrowserName();
 
     if ('safari' === browser) {
-        requiredThings.push(typeof window.safari?.pushNotification);
+        coreDependencies.push(typeof window.safari?.pushNotification);
     } else {
-        requiredThings.push(
+        coreDependencies.push(
             ...[
                 typeof Notification,
                 typeof navigator.serviceWorker,
@@ -69,16 +70,16 @@ function isBrowserSupportedForPush(requiredThings: any) {
         );
     }
 
-    return checkRequired(requiredThings);
+    return checkRequired(coreDependencies);
 }
 
-function isBrowserSupportedForDdl(requiredThings: any) {
-    return checkRequired(requiredThings);
+function isBrowserSupportedForDdl() {
+    return checkRequired(CORE_FEATURE_DEPENDENCIES);
 }
 
-function checkRequired(requiredThings: any) {
-    return requiredThings.reduce(
-        (supported: boolean, thing: any) => supported && thing !== 'undefined',
+function checkRequired(coreDependencies: FeatureDependency[]) {
+    return coreDependencies.reduce(
+        (supported: boolean, dependency: FeatureDependency) => supported && dependency !== 'undefined',
         true
     );
 }

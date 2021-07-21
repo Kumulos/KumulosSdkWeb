@@ -1,4 +1,4 @@
-import { Context, SDKFeature } from '.';
+import { Context, SDKFeature } from './index';
 export declare function uuidv4(): string;
 export declare function getBrowserName(): string;
 export declare function isBrowserSupported(sdkFeatures?: SDKFeature[]): boolean;
