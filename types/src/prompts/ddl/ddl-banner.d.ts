@@ -10,7 +10,8 @@ export declare class DdlBanner extends Component<DdlBannerProps, never> {
     private containerRef;
     constructor(props: DdlBannerProps);
     componentDidMount(): void;
-    onConfirm: () => void;
-    onCancel: () => void;
+    private onConfirm;
+    private onCancel;
+    private getCssClasses;
     render(): h.JSX.Element;
 }
