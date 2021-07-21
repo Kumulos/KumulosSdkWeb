@@ -2,7 +2,7 @@ import { h, render } from 'preact';
 import { Context, DdlPromptConfig, PromptConfig, UiActionType } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
-import { loadDdlConfig } from '../../core/config';
+import { loadDdlConfig, deleteDdlBannerConfigFromCache } from '../../core/config';
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 import { deferPromptActivation } from '../utils';
 
@@ -25,8 +25,10 @@ export default class DdlManager {
         this.setState(DdlManagerState.LOADING);
     }
 
-    private onBannerConfirm = (prompt: DdlPromptConfig) => {
+    private onBannerConfirm = async (prompt: DdlPromptConfig) => {
         this.hidePrompt(prompt);
+
+        await deleteDdlBannerConfigFromCache(prompt.uuid);
     };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
