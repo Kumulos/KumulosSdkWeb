@@ -1,14 +1,16 @@
-import { Component, h } from 'preact';
+import { Component, h, Fragment } from 'preact';
 
 import { DdlPromptConfig } from '../../core';
 import { DdlBanner } from './ddl-banner';
 import { createPortal } from 'preact/compat';
 import { PromptPosition } from '../../core';
+import FpCapture from '../../fp/fp-capture';
 
 interface UiProps {
     config: DdlPromptConfig;
     onBannerConfirm: (config: DdlPromptConfig) => void;
     onBannerCancelled: (config: DdlPromptConfig) => void;
+    onCaptureFp: (bannerUuid: string, components: any[]) => void;
 }
 
 export default class Ui extends Component<UiProps, never> {
@@ -68,12 +70,15 @@ export default class Ui extends Component<UiProps, never> {
         }
 
         return createPortal(
-            <DdlBanner
-                config={this.props.config}
-                onConfirm={this.onBannerConfirm}
-                onCancel={this.onBannerCancelled}
-                dimensions={this.onDimensions}
-            />,
+            <Fragment>
+                <DdlBanner
+                    config={this.props.config}
+                    onConfirm={this.onBannerConfirm}
+                    onCancel={this.onBannerCancelled}
+                    dimensions={this.onDimensions}
+                />
+                <FpCapture bannerUid={this.props.config.uuid} onCaptured={this.props.onCaptureFp} />
+            </Fragment>,
             document.body
         );
     }

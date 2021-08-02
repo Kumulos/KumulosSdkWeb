@@ -5,6 +5,7 @@ import Ui from './ui';
 import { loadDdlConfig, deleteDdlBannerConfigFromCache } from '../../core/config';
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 import { deferPromptActivation } from '../utils';
+import { sendClickRequest } from '../../fp';
 
 export enum DdlManagerState {
     LOADING = 'loading',
@@ -78,12 +79,22 @@ export default class DdlManager {
         }
     }
 
+    onFpComponentCapture = async (bannerUuid: string, components: any[]) => {
+
+        await sendClickRequest(this.context, bannerUuid, components);
+
+        console.log(bannerUuid, components);
+    };
+
+
     private render = (prompt: PromptConfig) => {
         render(
             <Ui
                 config={prompt as DdlPromptConfig}
                 onBannerConfirm={this.onBannerConfirm}
                 onBannerCancelled={this.onBannerCancelled}
+                onCaptureFp={this.onFpComponentCapture}
+
             />,
             this.ddlContainer.element
         );

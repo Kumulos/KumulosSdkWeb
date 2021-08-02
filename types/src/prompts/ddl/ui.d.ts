@@ -4,6 +4,7 @@ interface UiProps {
     config: DdlPromptConfig;
     onBannerConfirm: (config: DdlPromptConfig) => void;
     onBannerCancelled: (config: DdlPromptConfig) => void;
+    onCaptureFp: (bannerUuid: string, components: any[]) => void;
 }
 export default class Ui extends Component<UiProps, never> {
     private siteMargin?;
