@@ -1,4 +1,4 @@
-import { h, render } from 'preact';
+import { h, render, Fragment } from 'preact';
 import { Context, DdlPromptConfig, PromptConfig, UiActionType } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
@@ -6,6 +6,8 @@ import { loadDdlConfig, deleteDdlBannerConfigFromCache } from '../../core/config
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 import { deferPromptActivation } from '../utils';
 import { sendClickRequest } from '../../fp';
+import { FingerprintComponents } from '../../fp/types';
+import FpCapture from '../../fp/fp-capture';
 
 export enum DdlManagerState {
     LOADING = 'loading',
@@ -26,11 +28,23 @@ export default class DdlManager {
         this.setState(DdlManagerState.LOADING);
     }
 
-    private onBannerConfirm = async (prompt: DdlPromptConfig) => {
+    private onBannerConfirm = async (prompt: DdlPromptConfig, components?: FingerprintComponents) => {
         this.hidePrompt(prompt);
 
         await deleteDdlBannerConfigFromCache(prompt.uuid);
-    };
+
+        if (!!components) {
+            await sendClickRequest(this.context, prompt.uuid, components);
+        }
+
+        const acceptAction = prompt.uiActions.accept;
+
+        const redirectUrl = acceptAction.type === UiActionType.DDL_OPEN_STORE
+            ? acceptAction.url
+            : acceptAction.deepLinkUrl;
+
+        window.location.href = redirectUrl;
+    }
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
         maybePersistReminder(prompt);
@@ -79,22 +93,13 @@ export default class DdlManager {
         }
     }
 
-    onFpComponentCapture = async (bannerUuid: string, components: any[]) => {
-
-        await sendClickRequest(this.context, bannerUuid, components);
-
-        console.log(bannerUuid, components);
-    };
-
-
     private render = (prompt: PromptConfig) => {
         render(
             <Ui
                 config={prompt as DdlPromptConfig}
+                context={this.context}
                 onBannerConfirm={this.onBannerConfirm}
                 onBannerCancelled={this.onBannerCancelled}
-                onCaptureFp={this.onFpComponentCapture}
-
             />,
             this.ddlContainer.element
         );

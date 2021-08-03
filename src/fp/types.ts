@@ -14,11 +14,13 @@ export enum ClientMessageType {
     FINGERPRINT_GENERATED = 'FINGERPRINT_GENERATED',
 }
 
+export type FingerprintComponents = Record<string, string>;
+
 export type HostMessage = Message<HostMessageType.REQUEST_FINGERPRINT>;
 
 export type ClientMessage =
     | Message<ClientMessageType.READY>
     | Message<
         ClientMessageType.FINGERPRINT_GENERATED,
-        { components: Record<string, string> }
+        { components: FingerprintComponents }
     >;

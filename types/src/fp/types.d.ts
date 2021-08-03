@@ -11,8 +11,9 @@ export declare enum ClientMessageType {
     READY = "READY",
     FINGERPRINT_GENERATED = "FINGERPRINT_GENERATED"
 }
+export declare type FingerprintComponents = Record<string, string>;
 export declare type HostMessage = Message<HostMessageType.REQUEST_FINGERPRINT>;
 export declare type ClientMessage = Message<ClientMessageType.READY> | Message<ClientMessageType.FINGERPRINT_GENERATED, {
-    components: Record<string, string>;
+    components: FingerprintComponents;
 }>;
 export {};

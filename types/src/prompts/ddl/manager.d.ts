@@ -14,7 +14,6 @@ export default class DdlManager {
     private hidePrompt;
     private setState;
     private onEnter;
-    onFpComponentCapture: (bannerUuid: string, components: any[]) => Promise<void>;
     private render;
     private renderEmpty;
 }

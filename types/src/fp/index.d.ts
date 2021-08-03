@@ -1,2 +1,3 @@
 import { Context } from "../core";
-export declare function sendClickRequest(ctx: Context, bannerUid: string, fingerprint: any[]): Promise<void>;
+import { FingerprintComponents } from "./types";
+export declare function sendClickRequest(ctx: Context, bannerUid: string, fingerprint: FingerprintComponents): Promise<Response>;

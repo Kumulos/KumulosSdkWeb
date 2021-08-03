@@ -1,18 +1,24 @@
 import { Component } from 'preact';
-import { DdlPromptConfig } from '../../core';
+import { DdlPromptConfig, Context } from '../../core';
+import { FingerprintComponents } from '../../fp/types';
 interface UiProps {
     config: DdlPromptConfig;
-    onBannerConfirm: (config: DdlPromptConfig) => void;
+    context: Context;
+    onBannerConfirm: (config: DdlPromptConfig, fingerprintComponents?: FingerprintComponents) => void;
     onBannerCancelled: (config: DdlPromptConfig) => void;
-    onCaptureFp: (bannerUuid: string, components: any[]) => void;
 }
-export default class Ui extends Component<UiProps, never> {
+interface UiState {
+    requestFpCapture: boolean;
+}
+export default class Ui extends Component<UiProps, UiState> {
     private siteMargin?;
     private siteTransition?;
-    onDimensions: (_bannerWidth: number, bannerHeight: number) => void;
-    onBannerConfirm: (config: DdlPromptConfig) => void;
-    onBannerCancelled: (config: DdlPromptConfig) => void;
-    resetBodyStyles(): void;
+    constructor(props: UiProps);
+    private onDimensions;
+    private onBannerConfirm;
+    private onBannerCancelled;
+    private onCaptureFp;
+    private resetBodyStyles;
     render(): import("preact").VNode<any> | null;
 }
 export {};

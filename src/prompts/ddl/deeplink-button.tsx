@@ -20,15 +20,12 @@ export default class DeeplinkButton extends Component<
         switch (accept.type) {
             case UiActionType.DDL_OPEN_STORE:
                 copy(accept.deepLinkUrl)
-                    .then(() => {
-                        this.props.onAction();
-                        window.location.href = accept.url;
-                    })
+                    .then(this.props.onAction)
                     .catch((e) => {
                         console.error('Unable to capture deeplink url for deferred app pickup', e);
                     });
             case UiActionType.DDL_OPEN_DEEPLINK:
-                // not yet implemented
+                this.props.onAction();
                 break;
             default:
                 return console.error(

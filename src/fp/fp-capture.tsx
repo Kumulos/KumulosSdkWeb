@@ -1,15 +1,21 @@
 import { Component, h, createRef, RefObject } from 'preact';
 import { createPortal } from 'preact/compat';
-import { ClientMessage, ClientMessageType, HostMessage, HostMessageType } from './types';
+import { ClientMessageType, HostMessage, HostMessageType, FingerprintComponents } from './types';
+import { FP_CAPTURE_URL } from '../core';
 
 interface FpCaptureProps {
-    bannerUid: string;
-    onCaptured: (bannerUid: string, components: any[]) => void;
+    requestCapture: boolean;
+    onCaptured: (components: FingerprintComponents) => void;
+}
+
+interface FpCaptureState {
+    isReady: boolean;
+    captureRequested: boolean;
 }
 
 export default class FpCapture extends Component<
     FpCaptureProps,
-    never
+    FpCaptureState
     > {
 
     private iFrameRef: RefObject<HTMLIFrameElement>;
@@ -18,6 +24,11 @@ export default class FpCapture extends Component<
         super(props);
 
         this.iFrameRef = createRef<HTMLIFrameElement>();
+
+        this.state = {
+            isReady: false,
+            captureRequested: this.props.requestCapture
+        };
     }
 
     componentDidMount() {
@@ -28,19 +39,31 @@ export default class FpCapture extends Component<
         window.removeEventListener('message', this.onMessage);
     }
 
+    componentDidUpdate(prevProps: FpCaptureProps) {
+        if (this.props.requestCapture === this.state.captureRequested) {
+            return;
+        }
+
+        const captureRequested = this.props.requestCapture && !this.state.captureRequested;
+
+        this.setState({ captureRequested }, this.requestFingerprint);
+    }
+
     private onMessage = (e: MessageEvent) => {
         const message = e.data;
 
         switch (message.type) {
             case ClientMessageType.READY:
-                this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT });
+                this.state.captureRequested && this.requestFingerprint();
                 break;
             case ClientMessageType.FINGERPRINT_GENERATED:
-                this.props.onCaptured(this.props.bannerUid, message.data.components)
+                this.props.onCaptured(message.data.components);
                 break;
         }
+    }
 
-        console.log(message);
+    private requestFingerprint = () => {
+        this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT })
     }
 
     private dispatchMessage = (message: HostMessage) => {
@@ -55,7 +78,7 @@ export default class FpCapture extends Component<
 
     render() {
         return createPortal(
-            <iframe ref={this.iFrameRef} src="http://127.0.0.1:8080/" style={{ width: 0, height: 0 }} />,
+            <iframe ref={this.iFrameRef} src={FP_CAPTURE_URL} style={{ width: 0, height: 0 }} />,
             document.body
         );
     }
