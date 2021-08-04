@@ -1,7 +1,7 @@
 import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
-export declare const DDL_BASE_URL = "http://deeplink.app.local";
-export declare const FP_CAPTURE_URL = "http://127.0.0.1:8081";
+export declare const DDL_BASE_URL = "https://links.kumulos.com";
+export declare const FP_CAPTURE_URL = "https://dust-28b38.web.app";
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {

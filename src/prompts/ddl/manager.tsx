@@ -1,5 +1,5 @@
 import { h, render, Fragment } from 'preact';
-import { Context, DdlPromptConfig, PromptConfig, UiActionType } from '../../core/index';
+import { Context, DdlPromptConfig, PromptConfig, UiActionType, SdkEvent, DdlBannerPromptConfig } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
 import { loadDdlConfig, deleteDdlBannerConfigFromCache } from '../../core/config';
@@ -7,7 +7,7 @@ import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 import { deferPromptActivation } from '../utils';
 import { sendClickRequest } from '../../fp';
 import { FingerprintComponents } from '../../fp/types';
-import FpCapture from '../../fp/fp-capture';
+import { PromptTriggerEventFilter } from '../triggers';
 
 export enum DdlManagerState {
     LOADING = 'loading',
@@ -18,24 +18,30 @@ export default class DdlManager {
     private readonly context: Context;
     private readonly ddlContainer: RootFrameContainer;
     private config?: DdlPromptConfig[];
+    private readonly triggerFilter: PromptTriggerEventFilter<DdlPromptConfig>;
 
     constructor(ctx: Context, rootFrame: RootFrame) {
+        console.info('DdlManager: initialising');
+
         this.ddlContainer = rootFrame.createContainer('ddl');
         this.context = ctx;
 
-        console.info('DdlManager: initialising');
+        this.triggerFilter = new PromptTriggerEventFilter<DdlPromptConfig>(
+            ctx,
+            (_: SdkEvent) => this.setState(DdlManagerState.LOADING)
+        );
 
         this.setState(DdlManagerState.LOADING);
     }
 
     private onBannerConfirm = async (prompt: DdlPromptConfig, components?: FingerprintComponents) => {
-        this.hidePrompt(prompt);
-
-        await deleteDdlBannerConfigFromCache(prompt.uuid);
-
         if (!!components) {
             await sendClickRequest(this.context, prompt.uuid, components);
         }
+
+        await deleteDdlBannerConfigFromCache(prompt.uuid);
+
+        this.hidePrompt(prompt);
 
         const acceptAction = prompt.uiActions.accept;
 
@@ -64,11 +70,18 @@ export default class DdlManager {
     private async onEnter(state: DdlManagerState) {
         switch (state) {
             case DdlManagerState.LOADING:
-                this.config = await loadDdlConfig(this.context);
+                const configs = await loadDdlConfig(this.context);
 
-                if (!this.config) {
+                if (!configs) {
                     return;
                 }
+
+                this.config = await this.triggerFilter.filterPrompts(
+                    configs.reduce<Record<string, DdlBannerPromptConfig>>((bag, c) => {
+                        bag[c.uuid] = c;
+                        return bag;
+                    }, {})
+                );
 
                 this.setState(DdlManagerState.READY);
                 break;

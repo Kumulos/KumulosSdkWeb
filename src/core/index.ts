@@ -6,8 +6,8 @@ const SDK_VERSION = '1.8.1';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
-export const DDL_BASE_URL = 'http://deeplink.app.local';
-export const FP_CAPTURE_URL = 'http://127.0.0.1:8081';
+export const DDL_BASE_URL = 'https://links.kumulos.com';
+export const FP_CAPTURE_URL = 'https://dust-28b38.web.app';
 
 export type InstallId = string;
 export type UserId = string;

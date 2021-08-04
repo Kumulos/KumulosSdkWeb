@@ -8,6 +8,7 @@ export default class DdlManager {
     private readonly context;
     private readonly ddlContainer;
     private config?;
+    private readonly triggerFilter;
     constructor(ctx: Context, rootFrame: RootFrame);
     private onBannerConfirm;
     private onBannerCancelled;
