@@ -7,7 +7,7 @@ const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
 export const DDL_BASE_URL = 'https://links.kumulos.com';
-export const FP_CAPTURE_URL = 'https://dust-28b38.web.app';
+export const FP_CAPTURE_URL = 'https://pd.app.delivery';
 
 export type InstallId = string;
 export type UserId = string;
