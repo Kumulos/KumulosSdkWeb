@@ -1,8 +1,18 @@
 import { h, render, Fragment } from 'preact';
-import { Context, DdlPromptConfig, PromptConfig, UiActionType, SdkEvent, DdlBannerPromptConfig } from '../../core/index';
+import {
+    Context,
+    DdlPromptConfig,
+    PromptConfig,
+    UiActionType,
+    SdkEvent,
+    DdlBannerPromptConfig
+} from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
-import { loadDdlConfig, deleteDdlBannerConfigFromCache } from '../../core/config';
+import {
+    loadDdlConfig,
+    deleteDdlBannerConfigFromCache
+} from '../../core/config';
 import { maybePersistReminder, isPromptSuppressed } from '../prompt-reminder';
 import { deferPromptActivation } from '../utils';
 import { sendClickRequest } from '../../fp';
@@ -30,11 +40,12 @@ export default class DdlManager {
             ctx,
             (_: SdkEvent) => this.setState(DdlManagerState.LOADING)
         );
-
-        this.setState(DdlManagerState.LOADING);
     }
 
-    private onBannerConfirm = async (prompt: DdlPromptConfig, components?: FingerprintComponents) => {
+    private onBannerConfirm = async (
+        prompt: DdlPromptConfig,
+        components?: FingerprintComponents
+    ) => {
         if (!!components) {
             await sendClickRequest(this.context, prompt.uuid, components);
         }
@@ -45,12 +56,13 @@ export default class DdlManager {
 
         const acceptAction = prompt.uiActions.accept;
 
-        const redirectUrl = acceptAction.type === UiActionType.DDL_OPEN_STORE
-            ? acceptAction.url
-            : acceptAction.deepLinkUrl;
+        const redirectUrl =
+            acceptAction.type === UiActionType.DDL_OPEN_STORE
+                ? acceptAction.url
+                : acceptAction.deepLinkUrl;
 
         window.location.href = redirectUrl;
-    }
+    };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
         maybePersistReminder(prompt);
@@ -77,10 +89,13 @@ export default class DdlManager {
                 }
 
                 this.config = await this.triggerFilter.filterPrompts(
-                    configs.reduce<Record<string, DdlBannerPromptConfig>>((bag, c) => {
-                        bag[c.uuid] = c;
-                        return bag;
-                    }, {})
+                    configs.reduce<Record<string, DdlBannerPromptConfig>>(
+                        (bag, c) => {
+                            bag[c.uuid] = c;
+                            return bag;
+                        },
+                        {}
+                    )
                 );
 
                 this.setState(DdlManagerState.READY);
