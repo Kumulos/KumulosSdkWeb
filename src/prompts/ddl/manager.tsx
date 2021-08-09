@@ -27,7 +27,8 @@ export enum DdlManagerState {
 export default class DdlManager {
     private readonly context: Context;
     private readonly ddlContainer: RootFrameContainer;
-    private config?: DdlPromptConfig[];
+    private config?: Record<string, DdlPromptConfig>;
+    private activeConfigs?: DdlPromptConfig[] = [];
     private readonly triggerFilter: PromptTriggerEventFilter<DdlPromptConfig>;
 
     constructor(ctx: Context, rootFrame: RootFrame) {
@@ -38,8 +39,13 @@ export default class DdlManager {
 
         this.triggerFilter = new PromptTriggerEventFilter<DdlPromptConfig>(
             ctx,
-            (_: SdkEvent) => this.setState(DdlManagerState.LOADING)
+            (_: SdkEvent) => {
+                this.updateActiveConfigs();
+                this.setState(DdlManagerState.READY);
+            }
         );
+
+        this.setState(DdlManagerState.LOADING);
     }
 
     private onBannerConfirm = async (
@@ -70,7 +76,9 @@ export default class DdlManager {
     };
 
     private hidePrompt(prompt: DdlPromptConfig) {
-        this.config = this.config?.filter(c => c.uuid !== prompt.uuid);
+        this.activeConfigs = this.activeConfigs?.filter(
+            c => c.uuid !== prompt.uuid
+        );
         this.setState(DdlManagerState.READY);
     }
 
@@ -80,37 +88,30 @@ export default class DdlManager {
     }
 
     private async onEnter(state: DdlManagerState) {
+        console.log(state);
         switch (state) {
             case DdlManagerState.LOADING:
-                const configs = await loadDdlConfig(this.context);
+                this.config = await this.loadConfig();
 
-                if (!configs) {
+                if (!this.config) {
                     return;
                 }
-
-                this.config = await this.triggerFilter.filterPrompts(
-                    configs.reduce<Record<string, DdlBannerPromptConfig>>(
-                        (bag, c) => {
-                            bag[c.uuid] = c;
-                            return bag;
-                        },
-                        {}
-                    )
-                );
 
                 this.setState(DdlManagerState.READY);
                 break;
             case DdlManagerState.READY:
-                const prompt = this.config?.shift();
+                await this.updateActiveConfigs();
+
+                const prompt = this.activeConfigs?.shift();
 
                 if (!prompt) {
                     this.renderEmpty();
-                    break;
+                    return;
                 }
 
                 const isSuppressed = await isPromptSuppressed(prompt);
                 if (isSuppressed) {
-                    break;
+                    return;
                 }
 
                 if (!deferPromptActivation(prompt, this.render)) {
@@ -135,5 +136,38 @@ export default class DdlManager {
 
     private renderEmpty() {
         render(null, this.ddlContainer.element);
+    }
+
+    private async updateActiveConfigs() {
+        if (!this.config) {
+            return;
+        }
+
+        const matchedConfigs = await this.triggerFilter.filterPrompts(
+            this.config
+        );
+
+        matchedConfigs.forEach(c => {
+            if (this.activeConfigs?.indexOf(c) !== -1) {
+                return;
+            }
+
+            this.activeConfigs.push(c);
+        });
+    }
+
+    private async loadConfig(): Promise<
+        Record<string, DdlPromptConfig> | undefined
+    > {
+        const configs = await loadDdlConfig(this.context);
+
+        if (undefined === configs) {
+            return;
+        }
+
+        return configs.reduce<Record<string, DdlPromptConfig>>((bag, c) => {
+            bag[c.uuid] = c;
+            return bag;
+        }, {});
     }
 }
