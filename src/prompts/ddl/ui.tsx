@@ -10,12 +10,15 @@ import { FingerprintComponents } from '../../fp/types';
 interface UiProps {
     config: DdlPromptConfig;
     context: Context;
-    onBannerConfirm: (config: DdlPromptConfig, fingerprintComponents?: FingerprintComponents) => void;
+    onBannerConfirm: (
+        config: DdlPromptConfig,
+        fingerprintComponents?: FingerprintComponents
+    ) => void;
     onBannerCancelled: (config: DdlPromptConfig) => void;
 }
 
 interface UiState {
-    requestFpCapture: boolean
+    requestFpCapture: boolean;
 }
 
 export default class Ui extends Component<UiProps, UiState> {
@@ -86,6 +89,10 @@ export default class Ui extends Component<UiProps, UiState> {
         ] = this.siteMargin ? `${this.siteMargin}px` : '';
     }
 
+    componentWillUnmount() {
+        this.resetBodyStyles();
+    }
+
     render() {
         if (!this.props.config) {
             return null;
@@ -99,7 +106,10 @@ export default class Ui extends Component<UiProps, UiState> {
                     onCancel={this.onBannerCancelled}
                     dimensions={this.onDimensions}
                 />
-                <FpCapture requestCapture={this.state.requestFpCapture} onCaptured={this.onCaptureFp} />
+                <FpCapture
+                    requestCapture={this.state.requestFpCapture}
+                    onCaptured={this.onCaptureFp}
+                />
             </Fragment>,
             document.body
         );

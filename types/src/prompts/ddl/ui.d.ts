@@ -19,6 +19,7 @@ export default class Ui extends Component<UiProps, UiState> {
     private onBannerCancelled;
     private onCaptureFp;
     private resetBodyStyles;
+    componentWillUnmount(): void;
     render(): import("preact").VNode<any> | null;
 }
 export {};
