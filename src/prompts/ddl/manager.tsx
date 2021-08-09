@@ -109,11 +109,6 @@ export default class DdlManager {
                     return;
                 }
 
-                const isSuppressed = await isPromptSuppressed(prompt);
-                if (isSuppressed) {
-                    return;
-                }
-
                 if (!deferPromptActivation(prompt, this.render)) {
                     this.render(prompt);
                 }
