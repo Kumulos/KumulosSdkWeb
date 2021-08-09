@@ -2,7 +2,7 @@ import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.8.1';
+const SDK_VERSION = '1.9.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -263,24 +263,22 @@ export interface AppRating {
 type DdlDialogColorConfig = DialogColorConfig & { ratingFg: string };
 
 export type OpenStoreUiAction = {
-    type: UiActionType.DDL_OPEN_STORE,
-    url: string,
-    deepLinkUrl: string
+    type: UiActionType.DDL_OPEN_STORE;
+    url: string;
+    deepLinkUrl: string;
 };
 type OpenDeepLinkUiAction = {
-    type: UiActionType.DDL_OPEN_DEEPLINK,
-    deepLinkUrl: string
+    type: UiActionType.DDL_OPEN_DEEPLINK;
+    deepLinkUrl: string;
 };
 
 export type DdlUiActions = PromptUiActions & {
     uiActions: {
-        accept: OpenStoreUiAction | OpenDeepLinkUiAction
-    }
-}
+        accept: OpenStoreUiAction | OpenDeepLinkUiAction;
+    };
+};
 
-export interface DdlBannerPromptConfig
-    extends BasePromptConfig,
-    DdlUiActions {
+export interface DdlBannerPromptConfig extends BasePromptConfig, DdlUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DdlDialogColorConfig;
@@ -322,8 +320,8 @@ export interface Configuration {
 
 export type PromptReminder =
     | {
-        declinedOn: number;
-    }
+          declinedOn: number;
+      }
     | 'suppressed';
 
 type SdkEventType = 'eventTracked';
@@ -463,7 +461,7 @@ export async function associateUser(
         attributes
     };
 
-    return trackEvent(ctx, EventType.USER_ASSOCIATED, props).then(_ => { });
+    return trackEvent(ctx, EventType.USER_ASSOCIATED, props).then(_ => {});
 }
 
 export async function clearUserAssociation(ctx: Context): Promise<void> {
