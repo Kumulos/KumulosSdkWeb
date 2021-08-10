@@ -66,7 +66,7 @@ export default class FpCapture extends Component<
                 this.state.captureRequested && this.requestFingerprint();
                 break;
             case ClientMessageType.FINGERPRINT_GENERATED:
-                // this.props.onCaptured(message.data.components);
+                this.props.onCaptured(message.data.components);
                 break;
         }
     };

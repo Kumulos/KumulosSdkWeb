@@ -4,8 +4,7 @@ import {
     DdlPromptConfig,
     PromptConfig,
     UiActionType,
-    SdkEvent,
-    DdlBannerPromptConfig
+    SdkEvent
 } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
 import Ui from './ui';
@@ -60,14 +59,7 @@ export default class DdlManager {
 
         this.hidePrompt(prompt);
 
-        const acceptAction = prompt.uiActions.accept;
-
-        const redirectUrl =
-            acceptAction.type === UiActionType.DDL_OPEN_STORE
-                ? acceptAction.url
-                : acceptAction.deepLinkUrl;
-
-        window.location.href = redirectUrl;
+        this.performClientRedirection(prompt);
     };
 
     private onBannerCancelled = (prompt: DdlPromptConfig) => {
@@ -82,13 +74,29 @@ export default class DdlManager {
         this.setState(DdlManagerState.READY);
     }
 
+    private performClientRedirection(config: DdlPromptConfig) {
+        const acceptAction = config.uiActions.accept;
+
+        switch (acceptAction.type) {
+            case UiActionType.DDL_OPEN_STORE:
+                window.location.href = acceptAction.url;
+                break;
+            case UiActionType.DDL_OPEN_DEEPLINK:
+                window.location.href = acceptAction.deepLinkUrl;
+                break;
+            default:
+                console.error(
+                    'DdlManager.performClientRedirection: Unsupported accept action type, unable to perform redirection'
+                );
+        }
+    }
+
     private setState(state: DdlManagerState) {
         console.info('Setting DdlManager state:' + state);
         this.onEnter(state);
     }
 
     private async onEnter(state: DdlManagerState) {
-        console.log(state);
         switch (state) {
             case DdlManagerState.LOADING:
                 this.config = await this.loadConfig();

@@ -14,6 +14,7 @@ export default class DdlManager {
     private onBannerConfirm;
     private onBannerCancelled;
     private hidePrompt;
+    private performClientRedirection;
     private setState;
     private onEnter;
     private render;

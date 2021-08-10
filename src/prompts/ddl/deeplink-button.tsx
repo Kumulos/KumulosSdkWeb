@@ -29,6 +29,7 @@ export default class DeeplinkButton extends Component<
                             e
                         );
                     });
+                break;
             case UiActionType.DDL_OPEN_DEEPLINK:
                 this.props.onAction();
                 break;
