@@ -9,13 +9,11 @@ import {
 import { FP_CAPTURE_URL } from '../core';
 
 interface FpCaptureProps {
-    requestCapture: boolean;
     onCaptured: (components: FingerprintComponents) => void;
 }
 
 interface FpCaptureState {
     isReady: boolean;
-    captureRequested: boolean;
 }
 
 export default class FpCapture extends Component<
@@ -30,8 +28,7 @@ export default class FpCapture extends Component<
         this.iFrameRef = createRef<HTMLIFrameElement>();
 
         this.state = {
-            isReady: false,
-            captureRequested: this.props.requestCapture
+            isReady: false
         };
     }
 
@@ -43,18 +40,20 @@ export default class FpCapture extends Component<
         window.removeEventListener('message', this.onMessage);
     }
 
-    componentDidUpdate(prevProps: FpCaptureProps) {
-        if (this.props.requestCapture === this.state.captureRequested) {
-            return;
-        }
+    public requestFp() {
+        console.info(`FpCapure: requesting fp capture`);
+        this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT });
+    }
 
-        const captureRequested =
-            this.props.requestCapture && !this.state.captureRequested;
-
-        this.setState({ captureRequested }, this.requestFingerprint);
+    public isReady() {
+        return this.state.isReady;
     }
 
     private onMessage = (e: MessageEvent) => {
+        console.info(
+            `FpCapure: message ${e.data.type} received from ${e.origin}`
+        );
+
         const message = e.data;
 
         if (e.origin !== FP_CAPTURE_URL) {
@@ -63,7 +62,7 @@ export default class FpCapture extends Component<
 
         switch (message.type) {
             case ClientMessageType.READY:
-                this.state.captureRequested && this.requestFingerprint();
+                this.setState({ isReady: true });
                 break;
             case ClientMessageType.FINGERPRINT_GENERATED:
                 this.props.onCaptured(message.data.components);
@@ -71,18 +70,18 @@ export default class FpCapture extends Component<
         }
     };
 
-    private requestFingerprint = () => {
-        this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT });
-    };
-
     private dispatchMessage = (message: HostMessage) => {
+        console.info(
+            `FpCapure: dispatching ${message.type} message to capture frame`
+        );
+
         const window = this.iFrameRef.current?.contentWindow;
 
         if (!window) {
             return;
         }
 
-        window.postMessage(message, '*');
+        window.postMessage(message, FP_CAPTURE_URL);
     };
 
     render() {

@@ -13,6 +13,7 @@ interface UiState {
 export default class Ui extends Component<UiProps, UiState> {
     private siteMargin?;
     private siteTransition?;
+    private fpRef;
     constructor(props: UiProps);
     private onDimensions;
     private onBannerConfirm;

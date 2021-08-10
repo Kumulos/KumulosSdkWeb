@@ -1,4 +1,4 @@
-import { Component, h, Fragment } from 'preact';
+import { Component, h, Fragment, RefObject, createRef } from 'preact';
 
 import { DdlPromptConfig, UiActionType, Context } from '../../core';
 import { DdlBanner } from './ddl-banner';
@@ -24,6 +24,7 @@ interface UiState {
 export default class Ui extends Component<UiProps, UiState> {
     private siteMargin?: number;
     private siteTransition?: string;
+    private fpRef: RefObject<FpCapture>;
 
     constructor(props: UiProps) {
         super(props);
@@ -31,6 +32,8 @@ export default class Ui extends Component<UiProps, UiState> {
         this.state = {
             requestFpCapture: false
         };
+
+        this.fpRef = createRef<FpCapture>();
     }
 
     private onDimensions = (_bannerWidth: number, bannerHeight: number) => {
@@ -60,11 +63,22 @@ export default class Ui extends Component<UiProps, UiState> {
     };
 
     private onBannerConfirm = (config: DdlPromptConfig) => {
-        if (config.uiActions.accept.type === UiActionType.DDL_OPEN_STORE) {
-            this.setState({ requestFpCapture: true });
-        } else {
-            this.resetBodyStyles();
-            this.props.onBannerConfirm(this.props.config);
+        const acceptAction = config.uiActions.accept;
+
+        switch (acceptAction.type) {
+            case UiActionType.DDL_OPEN_STORE:
+                if (this.fpRef.current?.isReady()) {
+                    this.fpRef.current.requestFp();
+                }
+                break;
+            case UiActionType.DDL_OPEN_DEEPLINK:
+                this.resetBodyStyles();
+                this.props.onBannerConfirm(this.props.config);
+                break;
+            default:
+                console.error(
+                    'Ui.onBannerConfirm: Unsupported accept action type, unable to confirm banner'
+                );
         }
     };
 
@@ -106,10 +120,7 @@ export default class Ui extends Component<UiProps, UiState> {
                     onCancel={this.onBannerCancelled}
                     dimensions={this.onDimensions}
                 />
-                <FpCapture
-                    requestCapture={this.state.requestFpCapture}
-                    onCaptured={this.onCaptureFp}
-                />
+                <FpCapture ref={this.fpRef} onCaptured={this.onCaptureFp} />
             </Fragment>,
             document.body
         );
