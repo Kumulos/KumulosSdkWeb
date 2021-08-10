@@ -1,6 +1,11 @@
 import { Component, h, createRef, RefObject } from 'preact';
 import { createPortal } from 'preact/compat';
-import { ClientMessageType, HostMessage, HostMessageType, FingerprintComponents } from './types';
+import {
+    ClientMessageType,
+    HostMessage,
+    HostMessageType,
+    FingerprintComponents
+} from './types';
 import { FP_CAPTURE_URL } from '../core';
 
 interface FpCaptureProps {
@@ -16,8 +21,7 @@ interface FpCaptureState {
 export default class FpCapture extends Component<
     FpCaptureProps,
     FpCaptureState
-    > {
-
+> {
     private iFrameRef: RefObject<HTMLIFrameElement>;
 
     constructor(props: FpCaptureProps) {
@@ -44,7 +48,8 @@ export default class FpCapture extends Component<
             return;
         }
 
-        const captureRequested = this.props.requestCapture && !this.state.captureRequested;
+        const captureRequested =
+            this.props.requestCapture && !this.state.captureRequested;
 
         this.setState({ captureRequested }, this.requestFingerprint);
     }
@@ -52,19 +57,23 @@ export default class FpCapture extends Component<
     private onMessage = (e: MessageEvent) => {
         const message = e.data;
 
+        if (e.origin !== FP_CAPTURE_URL) {
+            return;
+        }
+
         switch (message.type) {
             case ClientMessageType.READY:
                 this.state.captureRequested && this.requestFingerprint();
                 break;
             case ClientMessageType.FINGERPRINT_GENERATED:
-                this.props.onCaptured(message.data.components);
+                // this.props.onCaptured(message.data.components);
                 break;
         }
-    }
+    };
 
     private requestFingerprint = () => {
-        this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT })
-    }
+        this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT });
+    };
 
     private dispatchMessage = (message: HostMessage) => {
         const window = this.iFrameRef.current?.contentWindow;
@@ -74,11 +83,15 @@ export default class FpCapture extends Component<
         }
 
         window.postMessage(message, '*');
-    }
+    };
 
     render() {
         return createPortal(
-            <iframe ref={this.iFrameRef} src={FP_CAPTURE_URL} style={{ width: 0, height: 0 }} />,
+            <iframe
+                ref={this.iFrameRef}
+                src={FP_CAPTURE_URL}
+                style={{ width: 0, height: 0 }}
+            />,
             document.body
         );
     }
