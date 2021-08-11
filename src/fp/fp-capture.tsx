@@ -8,12 +8,18 @@ import {
 } from './types';
 import { FP_CAPTURE_URL } from '../core';
 
+enum CaptureState {
+    IDLE,
+    CAPTURING
+}
+
 interface FpCaptureProps {
     onCaptured: (components: FingerprintComponents) => void;
 }
 
 interface FpCaptureState {
     isReady: boolean;
+    captureState: CaptureState;
 }
 
 export default class FpCapture extends Component<
@@ -28,7 +34,8 @@ export default class FpCapture extends Component<
         this.iFrameRef = createRef<HTMLIFrameElement>();
 
         this.state = {
-            isReady: false
+            isReady: false,
+            captureState: CaptureState.IDLE
         };
     }
 
@@ -40,13 +47,30 @@ export default class FpCapture extends Component<
         window.removeEventListener('message', this.onMessage);
     }
 
-    public requestFp() {
-        console.info(`FpCapure: requesting fp capture`);
-        this.dispatchMessage({ type: HostMessageType.REQUEST_FINGERPRINT });
+    componentWillUpdate(_: FpCaptureProps, nextState: FpCaptureState) {
+        const { isReady, captureState } = nextState;
+        const prevCaptureState = this.state.captureState;
+
+        if (
+            isReady &&
+            captureState === CaptureState.CAPTURING &&
+            prevCaptureState === CaptureState.IDLE
+        ) {
+            this.dispatchMessage({
+                type: HostMessageType.REQUEST_FINGERPRINT
+            });
+        }
     }
 
-    public isReady() {
-        return this.state.isReady;
+    public requestFp() {
+        console.info(`FpCapure: requesting fp capture`);
+
+        if (this.state.captureState !== CaptureState.IDLE) {
+            console.error('FpCapture.requestFp: captureState not IDLE');
+            return;
+        }
+
+        this.setState({ captureState: CaptureState.CAPTURING });
     }
 
     private onMessage = (e: MessageEvent) => {
@@ -65,7 +89,9 @@ export default class FpCapture extends Component<
                 this.setState({ isReady: true });
                 break;
             case ClientMessageType.FINGERPRINT_GENERATED:
-                this.props.onCaptured(message.data.components);
+                this.setState({ captureState: CaptureState.IDLE }, () => {
+                    this.props.onCaptured(message.data.components);
+                });
                 break;
         }
     };

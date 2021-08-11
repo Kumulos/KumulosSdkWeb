@@ -67,9 +67,7 @@ export default class Ui extends Component<UiProps, UiState> {
 
         switch (acceptAction.type) {
             case UiActionType.DDL_OPEN_STORE:
-                if (this.fpRef.current?.isReady()) {
-                    this.fpRef.current.requestFp();
-                }
+                this.fpRef.current?.requestFp();
                 break;
             case UiActionType.DDL_OPEN_DEEPLINK:
                 this.resetBodyStyles();
