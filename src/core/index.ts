@@ -2,7 +2,7 @@ import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.8.1';
+const SDK_VERSION = '1.9.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -170,6 +170,10 @@ interface BasePromptConfig {
     actions?: PromptAction[];
 }
 
+interface WithImageUrl {
+    imageUrl?: string;
+}
+
 interface TooltipConfig {
     tooltip: {
         subscribe: string;
@@ -230,7 +234,10 @@ type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> &
     ToastMessage;
 type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
 
-export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
+export interface AlertPromptConfig
+    extends BasePromptConfig,
+        WithImageUrl,
+        PromptUiActions {
     type: PromptTypeName.ALERT;
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
@@ -244,7 +251,10 @@ type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> &
     ToastMessage;
 type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
 
-export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
+export interface BannerPromptConfig
+    extends BasePromptConfig,
+        WithImageUrl,
+        PromptUiActions {
     type: PromptTypeName.BANNER;
     labels: BannerLabelConfig;
     colors: BannerColorConfig;
@@ -259,31 +269,31 @@ export interface AppRating {
     ratingCount: number;
 }
 
-type DdlDialogColorConfig = DialogColorConfig & {ratingFg: string};
+type DdlDialogColorConfig = DialogColorConfig & { ratingFg: string };
 
 type OpenStoreUiAction = {
-    type: UiActionType.DDL_OPEN_STORE,
-    url: string,
-    deepLinkUrl: string
+    type: UiActionType.DDL_OPEN_STORE;
+    url: string;
+    deepLinkUrl: string;
 };
 type OpenDeepLinkUiAction = {
-    type: UiActionType.DDL_OPEN_DEEPLINK,
-    deepLinkUrl: string
+    type: UiActionType.DDL_OPEN_DEEPLINK;
+    deepLinkUrl: string;
 };
 
 export type DdlUiActions = PromptUiActions & {
     uiActions: {
-        accept: OpenStoreUiAction | OpenDeepLinkUiAction
-    }
-}
+        accept: OpenStoreUiAction | OpenDeepLinkUiAction;
+    };
+};
 
 export interface DdlBannerPromptConfig
     extends BasePromptConfig,
+        WithImageUrl,
         DdlUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DdlDialogColorConfig;
-    imageUrl: string;
     appRating?: AppRating;
 }
 

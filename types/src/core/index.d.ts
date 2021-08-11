@@ -135,6 +135,9 @@ interface BasePromptConfig {
     overlay?: PromptOverlayConfig;
     actions?: PromptAction[];
 }
+interface WithImageUrl {
+    imageUrl?: string;
+}
 interface TooltipConfig {
     tooltip: {
         subscribe: string;
@@ -174,7 +177,7 @@ export interface BellPromptConfig extends BasePromptConfig {
 }
 declare type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> & ToastMessage;
 declare type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
-export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
+export interface AlertPromptConfig extends BasePromptConfig, WithImageUrl, PromptUiActions {
     type: PromptTypeName.ALERT;
     labels: AlertLabelConfig;
     colors: AlertColorConfig;
@@ -183,7 +186,7 @@ export interface AlertPromptConfig extends BasePromptConfig, PromptUiActions {
 }
 declare type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> & ToastMessage;
 declare type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
-export interface BannerPromptConfig extends BasePromptConfig, PromptUiActions {
+export interface BannerPromptConfig extends BasePromptConfig, WithImageUrl, PromptUiActions {
     type: PromptTypeName.BANNER;
     labels: BannerLabelConfig;
     colors: BannerColorConfig;
@@ -211,11 +214,10 @@ export declare type DdlUiActions = PromptUiActions & {
         accept: OpenStoreUiAction | OpenDeepLinkUiAction;
     };
 };
-export interface DdlBannerPromptConfig extends BasePromptConfig, DdlUiActions {
+export interface DdlBannerPromptConfig extends BasePromptConfig, WithImageUrl, DdlUiActions {
     type: PromptTypeName.DDL_BANNER;
     labels: DialogLabelConfig;
     colors: DdlDialogColorConfig;
-    imageUrl: string;
     appRating?: AppRating;
 }
 export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
