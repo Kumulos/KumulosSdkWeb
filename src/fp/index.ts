@@ -10,7 +10,7 @@ export async function sendClickRequest(
     const url = `${DDL_BASE_URL}/v1/banners/${bannerUid}/taps`;
     const webInstallId = await getInstallId();
 
-    return await authedFetch(ctx, url, {
+    return authedFetch(ctx, url, {
         method: 'POST',
         body: JSON.stringify({
             webInstallId,
