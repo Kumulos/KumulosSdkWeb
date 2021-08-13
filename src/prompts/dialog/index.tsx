@@ -93,15 +93,17 @@ export class Dialog extends Component<
 
         const iconStyle = {
             ...styles.iconStyle,
-            backgroundImage: `url(${uiContext.platformConfig.iconUrl})`
+            backgroundImage: `url(${config.imageUrl})`
         };
 
         return (
             <div style={containerStyle} className={classes}>
-                <div
-                    style={iconStyle}
-                    className={`kumulos-${config.type}-icon`}
-                ></div>
+                {config.imageUrl && (
+                    <div
+                        style={iconStyle}
+                        className={`kumulos-${config.type}-icon`}
+                    ></div>
+                )}
 
                 <div className={`kumulos-${config.type}-content`}>
                     <div className={`kumulos-${config.type}-header`}>
