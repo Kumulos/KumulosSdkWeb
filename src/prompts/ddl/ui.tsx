@@ -1,21 +1,42 @@
-import { Component, h } from 'preact';
+import { Component, h, Fragment, RefObject, createRef } from 'preact';
 
-import { DdlPromptConfig } from '../../core';
+import { DdlPromptConfig, UiActionType, Context } from '../../core';
 import { DdlBanner } from './ddl-banner';
 import { createPortal } from 'preact/compat';
 import { PromptPosition } from '../../core';
+import FpCapture from '../../fp/fp-capture';
+import { FingerprintComponents } from '../../fp/types';
 
 interface UiProps {
     config: DdlPromptConfig;
-    onBannerConfirm: (config: DdlPromptConfig) => void;
+    context: Context;
+    onBannerConfirm: (
+        config: DdlPromptConfig,
+        fingerprintComponents?: FingerprintComponents
+    ) => void;
     onBannerCancelled: (config: DdlPromptConfig) => void;
 }
 
-export default class Ui extends Component<UiProps, never> {
+interface UiState {
+    requestFpCapture: boolean;
+}
+
+export default class Ui extends Component<UiProps, UiState> {
     private siteMargin?: number;
     private siteTransition?: string;
+    private fpRef: RefObject<FpCapture>;
 
-    onDimensions = (_bannerWidth: number, bannerHeight: number) => {
+    constructor(props: UiProps) {
+        super(props);
+
+        this.state = {
+            requestFpCapture: false
+        };
+
+        this.fpRef = createRef<FpCapture>();
+    }
+
+    private onDimensions = (_bannerWidth: number, bannerHeight: number) => {
         const { config } = this.props;
         const bodyStyle = window.getComputedStyle(document.body, null);
         this.siteMargin = parseFloat(
@@ -41,17 +62,35 @@ export default class Ui extends Component<UiProps, never> {
         ] = `${offset}px`;
     };
 
-    onBannerConfirm = (config: DdlPromptConfig) => {
-        this.resetBodyStyles();
-        this.props.onBannerConfirm(config);
+    private onBannerConfirm = (config: DdlPromptConfig) => {
+        const acceptAction = config.uiActions.accept;
+
+        switch (acceptAction.type) {
+            case UiActionType.DDL_OPEN_STORE:
+                this.fpRef.current?.requestFp();
+                break;
+            case UiActionType.DDL_OPEN_DEEPLINK:
+                this.resetBodyStyles();
+                this.props.onBannerConfirm(this.props.config);
+                break;
+            default:
+                console.error(
+                    'Ui.onBannerConfirm: Unsupported accept action type, unable to confirm banner'
+                );
+        }
     };
 
-    onBannerCancelled = (config: DdlPromptConfig) => {
+    private onBannerCancelled = (config: DdlPromptConfig) => {
         this.resetBodyStyles();
         this.props.onBannerCancelled(config);
     };
 
-    resetBodyStyles() {
+    private onCaptureFp = (components: FingerprintComponents) => {
+        this.resetBodyStyles();
+        this.props.onBannerConfirm(this.props.config, components);
+    };
+
+    private resetBodyStyles() {
         const { config } = this.props;
         document.body.style.transition = this.siteTransition ?? '';
 
@@ -62,18 +101,25 @@ export default class Ui extends Component<UiProps, never> {
         ] = this.siteMargin ? `${this.siteMargin}px` : '';
     }
 
+    componentWillUnmount() {
+        this.resetBodyStyles();
+    }
+
     render() {
         if (!this.props.config) {
             return null;
         }
 
         return createPortal(
-            <DdlBanner
-                config={this.props.config}
-                onConfirm={this.onBannerConfirm}
-                onCancel={this.onBannerCancelled}
-                dimensions={this.onDimensions}
-            />,
+            <Fragment>
+                <DdlBanner
+                    config={this.props.config}
+                    onConfirm={this.onBannerConfirm}
+                    onCancel={this.onBannerCancelled}
+                    dimensions={this.onDimensions}
+                />
+                <FpCapture ref={this.fpRef} onCaptured={this.onCaptureFp} />
+            </Fragment>,
             document.body
         );
     }

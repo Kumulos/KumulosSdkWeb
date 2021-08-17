@@ -122,7 +122,7 @@ export class PromptTriggerEventFilter<T extends PromptConfig> {
 
     async filterPrompts(
         prompts: PromptConfigs<T>,
-        filter: (prompt: T) => boolean
+        filter: (prompt: T) => boolean = (_: T) => true
     ) {
         console.info('Evaluating prompt triggers');
 

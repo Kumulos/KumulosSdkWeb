@@ -2,11 +2,12 @@ import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.9.0';
+const SDK_VERSION = '1.10.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
 export const DDL_BASE_URL = 'https://links.kumulos.com';
+export const FP_CAPTURE_URL = 'https://pd.app.delivery';
 
 export type InstallId = string;
 export type UserId = string;
@@ -271,7 +272,7 @@ export interface AppRating {
 
 type DdlDialogColorConfig = DialogColorConfig & { ratingFg: string };
 
-type OpenStoreUiAction = {
+export type OpenStoreUiAction = {
     type: UiActionType.DDL_OPEN_STORE;
     url: string;
     deepLinkUrl: string;

@@ -1,6 +1,6 @@
 import { Component, h } from 'preact';
 import copy from 'clipboard-copy';
-import { DdlUiActions, UiActionType, DdlBannerPromptConfig } from '../../core';
+import { DdlUiActions, UiActionType } from '../../core';
 
 interface DeeplinkButtonProps {
     style: h.JSX.CSSProperties;
@@ -15,27 +15,30 @@ export default class DeeplinkButton extends Component<
     never
 > {
     private handleAction = () => {
-        const { uiActions: {accept} } = this.props.promptActions;
+        const {
+            uiActions: { accept }
+        } = this.props.promptActions;
 
         switch (accept.type) {
             case UiActionType.DDL_OPEN_STORE:
                 copy(accept.deepLinkUrl)
-                    .then(() => {
-                        this.props.onAction();
-                        window.location.href = accept.url;
-                    })
-                    .catch((e) => {
-                        console.error('Unable to capture deeplink url for deferred app pickup', e);
+                    .then(this.props.onAction)
+                    .catch(e => {
+                        console.error(
+                            'Unable to capture deeplink url for deferred app pickup',
+                            e
+                        );
                     });
+                break;
             case UiActionType.DDL_OPEN_DEEPLINK:
-                    // not yet implemented
-                    break;
+                this.props.onAction();
+                break;
             default:
                 return console.error(
                     `Handle DeepLink Action: unsupported accept action type '${accept['type']}'`
                 );
         }
-    }
+    };
 
     render() {
         const { style, class: cssClass, text } = this.props;

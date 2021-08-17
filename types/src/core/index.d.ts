@@ -1,6 +1,7 @@
 import { Channel } from './channels';
 export declare const PUSH_BASE_URL = "https://push.kumulos.com";
 export declare const DDL_BASE_URL = "https://links.kumulos.com";
+export declare const FP_CAPTURE_URL = "https://pd.app.delivery";
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -200,7 +201,7 @@ export interface AppRating {
 declare type DdlDialogColorConfig = DialogColorConfig & {
     ratingFg: string;
 };
-declare type OpenStoreUiAction = {
+export declare type OpenStoreUiAction = {
     type: UiActionType.DDL_OPEN_STORE;
     url: string;
     deepLinkUrl: string;
