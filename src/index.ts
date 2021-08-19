@@ -29,6 +29,7 @@ import { PromptManager } from './prompts';
 import { registerServiceWorker, isMobile } from './core/utils';
 import RootFrame from './core/root-frame';
 import DdlManager from './prompts/ddl/manager';
+import InAppMessageManager from './inapp';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -43,6 +44,7 @@ export default class Kumulos {
     private readonly ddlManager?: DdlManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
     private readonly rootFrame: RootFrame;
+    private readonly inAppManager?: InAppMessageManager;
 
     constructor(config: KumulosConfig) {
         assertConfigValid(config);
@@ -54,6 +56,11 @@ export default class Kumulos {
         trackInstallDetails(this.context);
 
         this.rootFrame = new RootFrame();
+
+        this.inAppManager = new InAppMessageManager(
+            this.context,
+            this.rootFrame
+        );
 
         if (this.context.hasFeature(SDKFeature.PUSH)) {
             trackOpenFromQuery(this.context);

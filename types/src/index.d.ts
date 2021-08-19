@@ -13,6 +13,7 @@ export default class Kumulos {
     private readonly ddlManager?;
     private channelSubscriptionManager?;
     private readonly rootFrame;
+    private readonly inAppManager?;
     constructor(config: KumulosConfig);
     getInstallId(): Promise<InstallId>;
     getCurrentUserIdentifier(): Promise<UserId>;

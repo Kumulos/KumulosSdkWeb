@@ -9,6 +9,8 @@ export const PUSH_BASE_URL = 'https://push.kumulos.com';
 export const DDL_BASE_URL = 'https://links.kumulos.com';
 export const FP_CAPTURE_URL = 'https://pd.app.delivery';
 
+// export const PUSH_BASE_URL = 'http://push.kumulos.local';
+
 export type InstallId = string;
 export type UserId = string;
 

@@ -13,7 +13,8 @@ export enum TokenType {
 }
 
 export enum MessageType {
-    PUSH = 1
+    PUSH = 1,
+    INAPP = 2
 }
 
 export interface PushOpsManager {

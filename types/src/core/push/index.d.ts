@@ -5,7 +5,8 @@ export declare enum TokenType {
     SAFARI = 4
 }
 export declare enum MessageType {
-    PUSH = 1
+    PUSH = 1,
+    INAPP = 2
 }
 export interface PushOpsManager {
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
