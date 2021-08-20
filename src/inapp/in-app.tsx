@@ -2,7 +2,7 @@ import { Component, h, RefObject, createRef } from 'preact';
 
 import { InAppMessagePartForPreview } from './structs';
 
-const IN_APP_RENDER_RUNTIME_URL = 'http://localhost:55367';
+const IN_APP_RENDER_RUNTIME_URL = 'https://inapp-rend.web.app';
 
 interface InAppDisplayProps {
     width: string;

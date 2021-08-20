@@ -7,8 +7,10 @@ export default class InAppMessageManager {
     private currentMessage;
     private readonly container;
     constructor(context: Context, rootFrame: RootFrame);
-    private startPollForMessages;
-    private pollForMessages;
     private url;
+    private startPollForMessages;
+    private hasInAppBeenHandled;
+    private pollForMessages;
+    private onMessageAction;
     private renderInApp;
 }

@@ -6,6 +6,7 @@ import { createPortal } from 'preact/compat';
 import InAppDialog from './InAppDialog';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import { MessageType } from '../core/push';
+import { set, get } from '../core/storage';
 
 // v1/users/{userIdentifier}/messages
 export default class InAppMessageManager {
@@ -19,11 +20,16 @@ export default class InAppMessageManager {
         this.startPollForMessages();
     }
 
+    private url = () => `${PUSH_BASE_URL}/v1/users/${this.installId}/messages`;
+
     private async startPollForMessages() {
         this.installId = await getUserId();
 
         setInterval(this.pollForMessages, 1000);
     }
+
+    private hasInAppBeenHandled = async (id: number) =>
+        !!(await get(`inapp_${id}`));
 
     private pollForMessages = async () => {
         if (this.isPolling || this.currentMessage) {
@@ -39,7 +45,13 @@ export default class InAppMessageManager {
             ).then(r => r.json());
 
             if (messageData && messageData.length) {
-                this.currentMessage = messageData[0];
+                for (let i = 0; i < messageData.length; i++) {
+                    let msg = messageData[i];
+                    if (!(await this.hasInAppBeenHandled(msg.id))) {
+                        this.currentMessage = msg;
+                    }
+                }
+
                 this.renderInApp();
             }
         } catch (e) {
@@ -49,7 +61,20 @@ export default class InAppMessageManager {
         }
     };
 
-    private url = () => `${PUSH_BASE_URL}/v1/users/${this.installId}/messages`;
+    private onMessageAction = async (action: any) => {
+        console.info(
+            `InAppManager handling inapp message action: ${JSON.stringify(
+                action
+            )}`
+        );
+        switch (action.type) {
+            case 'closeMessage':
+                await set(`inapp_${this.currentMessage.id}`, true);
+                this.currentMessage = null;
+                this.renderInApp();
+                break;
+        }
+    };
 
     private renderInApp() {
         render(
@@ -61,19 +86,7 @@ export default class InAppMessageManager {
                                 type: MessageType.INAPP,
                                 data: this.currentMessage.content
                             }}
-                            onMessageAction={action => {
-                                console.info(
-                                    `InAppManager handling inapp message action: ${JSON.stringify(
-                                        action
-                                    )}`
-                                );
-                                switch (action.type) {
-                                    case 'closeMessage':
-                                        this.currentMessage = null;
-                                        this.renderInApp();
-                                        break;
-                                }
-                            }}
+                            onMessageAction={this.onMessageAction}
                         />
                     ) : null}
                 </Fragment>,
