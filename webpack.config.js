@@ -60,6 +60,7 @@ module.exports = [
         output: { ...output, library: 'kumulos', libraryTarget: 'umd' }
     },
     {
+        target: ['webworker', 'es5'],
         mode: environment,
         entry: {
             worker: './src/worker/index.ts'
@@ -71,6 +72,7 @@ module.exports = [
         output
     },
     {
+        target: ['web', 'es5'],
         mode: environment,
         entry: {
             'web-bundle': './src/web/index.ts'
