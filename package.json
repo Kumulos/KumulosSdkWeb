@@ -41,6 +41,6 @@
     },
     "dependencies": {
         "clipboard-copy": "^4.0.1",
-        "preact": "^10.5.13"
+        "preact": "^10.5.14"
     }
 }
