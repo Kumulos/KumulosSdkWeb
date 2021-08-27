@@ -123,7 +123,7 @@ export class PromptTriggerEventFilter<T extends PromptConfig> {
     async filterPrompts(
         prompts: PromptConfigs<T>,
         filter: (prompt: T) => boolean = (_: T) => true
-    ) {
+    ): Promise<T[]> {
         console.info('Evaluating prompt triggers');
 
         const matchedPrompts = [];
@@ -145,7 +145,10 @@ export class PromptTriggerEventFilter<T extends PromptConfig> {
 
         this.eventQueue = [];
 
-        return matchedPrompts;
+        // Cast necessary to narrow the type from the constraint.
+        // Seems the TS compiler isn't quite smart enough when handling
+        // the 'T extends PromptConfig' constraint.
+        return matchedPrompts as T[];
     }
 
     private handleSdkEvent = (e: SdkEvent) => {

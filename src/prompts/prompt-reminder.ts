@@ -49,7 +49,11 @@ export async function isPromptSuppressed(
         return true;
     }
 
-    const { uiActions } = prompt as PromptUiActions;
+    if (!('uiActions' in prompt)) {
+        return false;
+    }
+
+    const { uiActions } = prompt;
 
     if (uiActions.decline.type !== UiActionType.REMIND) {
         return false;

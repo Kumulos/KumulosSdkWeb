@@ -101,8 +101,7 @@ export function trackOpenFromQuery(ctx: Context) {
 export function notificationFromPayload(
     payload: PushPayload
 ): KumulosPushNotification {
-    const userData = { ...payload.data };
-    delete userData['k.message'];
+    const { 'k.message': _, ...userData } = payload.data;
 
     const push: KumulosPushNotification = {
         id: payload.data['k.message'].data.id,

@@ -30,7 +30,8 @@ async function loadConfig<TConfigType>(
     const cacheKeys = getCacheKeys(cacheKey);
     let config = await get<TConfigType>(cacheKeys.CONFIG_CACHE_KEY);
 
-    const lastLoadTime = (await get<number>(cacheKeys.CONFIG_CACHE_KEY_UPDATED)) ?? 0;
+    const lastLoadTime =
+        (await get<number>(cacheKeys.CONFIG_CACHE_KEY_UPDATED)) ?? 0;
     let updatedRemoteConfig = false;
 
     if (Date.now() - lastLoadTime > MAX_CACHE_AGE_MS) {
@@ -79,13 +80,15 @@ export async function loadDdlConfig(
     } catch (err) {
         console.warn(
             `loadDdlConfig: failed to load Deferred DeepLink configuration`,
-            err.message
+            err
         );
         // undefined return / no config
     }
 }
 
-export async function deleteDdlBannerConfigFromCache(bannerUuid: string): Promise<void> {
+export async function deleteDdlBannerConfigFromCache(
+    bannerUuid: string
+): Promise<void> {
     const cacheKeys = getCacheKeys(ConfigCacheType.DDL);
 
     let configs = await get<DdlPromptConfig[]>(cacheKeys.CONFIG_CACHE_KEY);
