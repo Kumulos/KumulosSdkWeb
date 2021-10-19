@@ -1,6 +1,6 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
-import { base64UrlEncode, cyrb53, onDOMReady } from '../utils';
+import { base64UrlEncode, cyrb53, onDOMReady, getBrowserName } from '../utils';
 import { get, set } from '../storage';
 
 function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
@@ -186,6 +186,12 @@ export default class W3cPushManager implements PushOpsManager {
     }
 
     isNativePromptShown(): Promise<boolean> {
+        const browserName = getBrowserName();
+
+        if (!['edge', 'chrome'].includes(browserName)) {
+            return Promise.resolve(true);
+        }
+
         return new Promise((resolve, reject) => {
             onDOMReady(() => {
                 let blurEventFired = false;
