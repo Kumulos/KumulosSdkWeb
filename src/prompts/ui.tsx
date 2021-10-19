@@ -268,7 +268,10 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     maybeRenderPromptBackgroundMask() {
-        if ('requesting' === this.props.promptManagerState) {
+        if (
+            'requesting' === this.props.promptManagerState ||
+            'requesting-silent' === this.props.promptManagerState
+        ) {
             return null;
         }
 
@@ -293,7 +296,10 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     renderPrompt(prompt: PushPromptConfig) {
-        if ('requesting' === this.props.promptManagerState) {
+        if (
+            'requesting' === this.props.promptManagerState ||
+            'requesting-silent' === this.props.promptManagerState
+        ) {
             return null;
         }
 
