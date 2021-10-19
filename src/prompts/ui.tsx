@@ -123,6 +123,44 @@ class Overlay extends Component<OverlayProps, never> {
     }
 }
 
+interface OverlaySilentProps {
+    promptState: PromptManagerState;
+    prompt?: PushPromptConfig;
+    subscriptionState: PushSubscriptionState;
+}
+
+class OverlaySilent extends Component<OverlayProps, never> {
+    render() {
+        const { promptState, prompt, subscriptionState } = this.props;
+
+        if (
+            !prompt ||
+            promptState !== 'requesting-silent' ||
+            subscriptionState !== 'unsubscribed'
+        ) {
+            return null;
+        }
+
+        return (
+            <BackgroundMask
+                // maintains backwards compat with existing blur class that
+                // was being applied directly by this component previously
+                blurClass="kumulos-overlay-blur"
+                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <p style={{ padding: 10, backgroundColor: '#ffffff' }}>
+                    !!! CLICK THE BLOCKED PUSH PERMS ARROW AND TEXT HERE !!!
+                </p>
+            </BackgroundMask>
+        );
+    }
+}
+
 class Toast extends Component<{ message: string }, never> {
     render() {
         return <div class="kumulos-toast">{this.props.message}</div>;
@@ -259,6 +297,15 @@ export default class Ui extends Component<UiProps, UiState> {
                         subscriptionState={this.props.subscriptionState}
                     />
                 )}
+
+                {!isMobile() && (
+                    <OverlaySilent
+                        promptState={this.props.promptManagerState}
+                        prompt={this.props.currentlyRequestingPrompt}
+                        subscriptionState={this.props.subscriptionState}
+                    />
+                )}
+
                 {this.state.toastQueue.length > 0 && (
                     <Toast message={this.state.toastQueue[0]} />
                 )}
@@ -268,7 +315,10 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     maybeRenderPromptBackgroundMask() {
-        if ('requesting' === this.props.promptManagerState) {
+        if (
+            'requesting' === this.props.promptManagerState ||
+            'requesting-silent' === this.props.promptManagerState
+        ) {
             return null;
         }
 
@@ -293,7 +343,10 @@ export default class Ui extends Component<UiProps, UiState> {
     }
 
     renderPrompt(prompt: PushPromptConfig) {
-        if ('requesting' === this.props.promptManagerState) {
+        if (
+            'requesting' === this.props.promptManagerState ||
+            'requesting-silent' === this.props.promptManagerState
+        ) {
             return null;
         }
 

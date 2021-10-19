@@ -29,7 +29,7 @@ function hashSubscription(ctx: Context, sub: PushSubscription): number {
     return cyrb53(`${ctx.apiKey}:${sub.endpoint}`);
 }
 
-const BLUR_EVENT_TIMEOUT_MILLIS = 2000;
+const BLUR_EVENT_TIMEOUT_MILLIS = 1000;
 
 export default class W3cPushManager implements PushOpsManager {
     async requestNotificationPermission(
