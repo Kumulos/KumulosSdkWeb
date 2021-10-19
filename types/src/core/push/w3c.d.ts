@@ -6,4 +6,5 @@ export default class W3cPushManager implements PushOpsManager {
     requestPermissionAndRegisterForPush(ctx: Context): Promise<import('.').PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
     handleAutoResubscription(ctx: Context): Promise<void>;
+    isNativePromptShown(): Promise<boolean>;
 }

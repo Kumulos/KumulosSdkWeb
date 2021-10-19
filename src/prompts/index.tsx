@@ -30,6 +30,7 @@ export type PromptManagerState =
     | 'loading'
     | 'ready'
     | 'requesting'
+    | 'requesting-silent'
     | 'postaction';
 
 // loading -> ready
@@ -94,7 +95,13 @@ export class PromptManager {
 
         this.currentlyRequestingPrompt = prompt;
 
-        this.setState('requesting');
+        this.pushOpsManager?.isNativePromptShown().then(isNativePromptShown => {
+            if (isNativePromptShown) {
+                this.setState('requesting');
+            } else {
+                this.setState('requesting-silent');
+            }
+        });
 
         this.subscriptionState = await this.pushOpsManager?.requestPermissionAndRegisterForPush(
             this.context
@@ -374,6 +381,7 @@ export class PromptManager {
                 this.setState('ready');
                 break;
             case 'requesting':
+            case 'requesting-silent':
                 this.render();
                 break;
             case 'ready':
