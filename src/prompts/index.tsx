@@ -138,11 +138,10 @@ export class PromptManager {
 
         this.hideAndSuppressPrompts(prompt);
 
-        await this.handlePromptActions(prompt);
-
-        await this.handleUserChannelSelection(channelSelections);
-
         if (this.subscriptionState === 'subscribed') {
+            await this.handlePromptActions(prompt);
+            await this.handleUserChannelSelection(channelSelections);
+
             this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
         }
     };
