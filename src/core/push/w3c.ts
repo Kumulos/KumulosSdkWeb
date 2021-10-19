@@ -1,6 +1,6 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
-import { base64UrlEncode, cyrb53 } from '../utils';
+import { base64UrlEncode, cyrb53, onDOMReady } from '../utils';
 import { get, set } from '../storage';
 
 function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
@@ -28,6 +28,8 @@ async function getActiveServiceWorkerReg(): Promise<ServiceWorkerRegistration> {
 function hashSubscription(ctx: Context, sub: PushSubscription): number {
     return cyrb53(`${ctx.apiKey}:${sub.endpoint}`);
 }
+
+const BLUR_EVENT_TIMEOUT_MILLIS = 2000;
 
 export default class W3cPushManager implements PushOpsManager {
     async requestNotificationPermission(
@@ -181,5 +183,31 @@ export default class W3cPushManager implements PushOpsManager {
         } catch (e) {
             console.error(e);
         }
+    }
+
+    isNativePromptShown(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            onDOMReady(() => {
+                let blurEventFired = false;
+
+                const checkForBlur = () => {
+                    if (blurEventFired) {
+                        return;
+                    }
+
+                    clearTimeout(cancelBlurTimeout);
+                    window.removeEventListener('blur', checkForBlur);
+                    blurEventFired = true;
+
+                    resolve(true);
+                };
+                window.addEventListener('blur', checkForBlur);
+
+                const cancelBlurTimeout = setTimeout(() => {
+                    window.removeEventListener('blur', checkForBlur);
+                    resolve(false);
+                }, BLUR_EVENT_TIMEOUT_MILLIS);
+            });
+        });
     }
 }

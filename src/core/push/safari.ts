@@ -138,4 +138,8 @@ export default class SafariPushManager implements PushOpsManager {
 
         return this.pushRegister(ctx);
     }
+
+    async isNativePromptShown(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
 }

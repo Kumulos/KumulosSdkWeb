@@ -26,6 +26,7 @@ export interface PushOpsManager {
     ): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
     handleAutoResubscription(ctx: Context): Promise<void>;
+    isNativePromptShown(): Promise<boolean>;
 }
 
 export interface KumulosPushNotification {
