@@ -188,7 +188,7 @@ export default class W3cPushManager implements PushOpsManager {
     isNativePromptShown(): Promise<boolean> {
         const browserName = getBrowserName();
 
-        if (!['edge', 'chrome'].includes(browserName)) {
+        if ('chrome' !== browserName) {
             return Promise.resolve(true);
         }
 
