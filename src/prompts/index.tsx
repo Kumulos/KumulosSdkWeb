@@ -90,7 +90,7 @@ export class PromptManager {
 
     private onRequestNativePrompt = async (prompt: PushPromptConfig) => {
         if ('requesting' === this.state || 'requesting-silent' === this.state) {
-            return null;
+            return;
         }
 
         this.currentlyRequestingPrompt = prompt;

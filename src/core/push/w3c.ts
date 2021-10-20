@@ -1,7 +1,9 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
-import { base64UrlEncode, cyrb53, onDOMReady, getBrowserName } from '../utils';
+import { base64UrlEncode, cyrb53, getBrowserName } from '../utils';
 import { get, set } from '../storage';
+
+const BLUR_EVENT_TIMEOUT_MILLIS = 2000;
 
 function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
     const existingSubKey = subscription.options.applicationServerKey;
@@ -28,8 +30,6 @@ async function getActiveServiceWorkerReg(): Promise<ServiceWorkerRegistration> {
 function hashSubscription(ctx: Context, sub: PushSubscription): number {
     return cyrb53(`${ctx.apiKey}:${sub.endpoint}`);
 }
-
-const BLUR_EVENT_TIMEOUT_MILLIS = 2000;
 
 export default class W3cPushManager implements PushOpsManager {
     async requestNotificationPermission(
