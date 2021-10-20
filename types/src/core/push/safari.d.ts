@@ -9,4 +9,5 @@ export default class SafariPushManager implements PushOpsManager {
     requestPermissionAndRegisterForPush(ctx: Context): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
     handleAutoResubscription(ctx: Context): Promise<void>;
+    isNativePromptShown(): Promise<boolean>;
 }

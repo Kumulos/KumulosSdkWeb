@@ -1,7 +1,7 @@
 import { Context, PushPromptConfig } from '../core';
 import Kumulos from '..';
 import RootFrame from '../core/root-frame';
-export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'postaction';
+export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;

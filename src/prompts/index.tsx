@@ -30,6 +30,7 @@ export type PromptManagerState =
     | 'loading'
     | 'ready'
     | 'requesting'
+    | 'requesting-silent'
     | 'postaction';
 
 // loading -> ready
@@ -88,13 +89,19 @@ export class PromptManager {
     };
 
     private onRequestNativePrompt = async (prompt: PushPromptConfig) => {
-        if ('requesting' === this.state) {
+        if ('requesting' === this.state || 'requesting-silent' === this.state) {
             return;
         }
 
         this.currentlyRequestingPrompt = prompt;
 
-        this.setState('requesting');
+        this.pushOpsManager?.isNativePromptShown().then(isNativePromptShown => {
+            if (isNativePromptShown) {
+                this.setState('requesting');
+            } else {
+                this.setState('requesting-silent');
+            }
+        });
 
         this.subscriptionState = await this.pushOpsManager?.requestPermissionAndRegisterForPush(
             this.context
@@ -131,11 +138,10 @@ export class PromptManager {
 
         this.hideAndSuppressPrompts(prompt);
 
-        await this.handlePromptActions(prompt);
-
-        await this.handleUserChannelSelection(channelSelections);
-
         if (this.subscriptionState === 'subscribed') {
+            await this.handlePromptActions(prompt);
+            await this.handleUserChannelSelection(channelSelections);
+
             this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
         }
     };
@@ -373,9 +379,6 @@ export class PromptManager {
                     .listChannels();
                 this.setState('ready');
                 break;
-            case 'requesting':
-                this.render();
-                break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
                 this.currentPostAction = undefined;
@@ -386,6 +389,8 @@ export class PromptManager {
                 this.render();
                 break;
             case 'postaction':
+            case 'requesting':
+            case 'requesting-silent':
                 this.render();
                 break;
         }

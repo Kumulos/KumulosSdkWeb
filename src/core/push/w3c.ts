@@ -1,7 +1,9 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
-import { base64UrlEncode, cyrb53 } from '../utils';
+import { base64UrlEncode, cyrb53, getBrowserName } from '../utils';
 import { get, set } from '../storage';
+
+const BLUR_EVENT_TIMEOUT_MILLIS = 2000;
 
 function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
     const existingSubKey = subscription.options.applicationServerKey;
@@ -181,5 +183,35 @@ export default class W3cPushManager implements PushOpsManager {
         } catch (e) {
             console.error(e);
         }
+    }
+
+    isNativePromptShown(): Promise<boolean> {
+        const browserName = getBrowserName();
+
+        if ('chrome' !== browserName) {
+            return Promise.resolve(true);
+        }
+
+        return new Promise(resolve => {
+            let blurEventFired = false;
+
+            const checkForBlur = () => {
+                if (blurEventFired) {
+                    return;
+                }
+
+                clearTimeout(cancelBlurTimeout);
+                window.removeEventListener('blur', checkForBlur);
+                blurEventFired = true;
+
+                resolve(true);
+            };
+            window.addEventListener('blur', checkForBlur);
+
+            const cancelBlurTimeout = setTimeout(() => {
+                window.removeEventListener('blur', checkForBlur);
+                resolve(false);
+            }, BLUR_EVENT_TIMEOUT_MILLIS);
+        });
     }
 }
