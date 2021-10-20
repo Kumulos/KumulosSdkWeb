@@ -89,8 +89,8 @@ export class PromptManager {
     };
 
     private onRequestNativePrompt = async (prompt: PushPromptConfig) => {
-        if ('requesting' === this.state) {
-            return;
+        if ('requesting' === this.state || 'requesting-silent' === this.state) {
+            return null;
         }
 
         this.currentlyRequestingPrompt = prompt;
@@ -379,10 +379,6 @@ export class PromptManager {
                     .listChannels();
                 this.setState('ready');
                 break;
-            case 'requesting':
-            case 'requesting-silent':
-                this.render();
-                break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
                 this.currentPostAction = undefined;
@@ -393,6 +389,8 @@ export class PromptManager {
                 this.render();
                 break;
             case 'postaction':
+            case 'requesting':
+            case 'requesting-silent':
                 this.render();
                 break;
         }

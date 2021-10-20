@@ -192,28 +192,26 @@ export default class W3cPushManager implements PushOpsManager {
             return Promise.resolve(true);
         }
 
-        return new Promise((resolve, reject) => {
-            onDOMReady(() => {
-                let blurEventFired = false;
+        return new Promise(resolve => {
+            let blurEventFired = false;
 
-                const checkForBlur = () => {
-                    if (blurEventFired) {
-                        return;
-                    }
+            const checkForBlur = () => {
+                if (blurEventFired) {
+                    return;
+                }
 
-                    clearTimeout(cancelBlurTimeout);
-                    window.removeEventListener('blur', checkForBlur);
-                    blurEventFired = true;
+                clearTimeout(cancelBlurTimeout);
+                window.removeEventListener('blur', checkForBlur);
+                blurEventFired = true;
 
-                    resolve(true);
-                };
-                window.addEventListener('blur', checkForBlur);
+                resolve(true);
+            };
+            window.addEventListener('blur', checkForBlur);
 
-                const cancelBlurTimeout = setTimeout(() => {
-                    window.removeEventListener('blur', checkForBlur);
-                    resolve(false);
-                }, BLUR_EVENT_TIMEOUT_MILLIS);
-            });
+            const cancelBlurTimeout = setTimeout(() => {
+                window.removeEventListener('blur', checkForBlur);
+                resolve(false);
+            }, BLUR_EVENT_TIMEOUT_MILLIS);
         });
     }
 }
