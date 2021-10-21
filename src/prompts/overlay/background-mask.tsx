@@ -4,6 +4,7 @@ interface BackgroundMaskProps {
     class?: string;
     blurClass?: string;
     style?: JSX.CSSProperties;
+    onClick?: () => void;
 }
 
 interface BackgroundMaskState {
@@ -59,7 +60,11 @@ export class BackgroundMask extends Component<
         }
 
         return (
-            <div style={style} class={classes.join(' ')}>
+            <div
+                style={style}
+                class={classes.join(' ')}
+                onClick={this.props.onClick}
+            >
                 {this.props.children}
             </div>
         );

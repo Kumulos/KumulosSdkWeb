@@ -10,6 +10,7 @@ interface OverlaySilentProps {
     promptState: PromptManagerState;
     prompt?: PushPromptConfig;
     subscriptionState: PushSubscriptionState;
+    onClick?: () => void;
 }
 
 export class OverlaySilent extends Component<OverlaySilentProps, never> {
@@ -35,6 +36,7 @@ export class OverlaySilent extends Component<OverlaySilentProps, never> {
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}
+                onClick={this.props.onClick}
             >
                 <p style={{ padding: 10, backgroundColor: '#ffffff' }}>
                     !!! CLICK THE BLOCKED PUSH PERMS ARROW AND TEXT HERE !!!

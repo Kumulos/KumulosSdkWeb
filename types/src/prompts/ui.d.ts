@@ -30,6 +30,7 @@ interface UiProps {
 }
 interface UiState {
     toastQueue: string[];
+    isOverlayHidden: boolean;
 }
 export default class Ui extends Component<UiProps, UiState> {
     constructor(props: UiProps);

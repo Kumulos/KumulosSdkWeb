@@ -79,6 +79,7 @@ interface UiProps {
 
 interface UiState {
     toastQueue: string[];
+    isOverlayHidden: boolean;
 }
 
 export default class Ui extends Component<UiProps, UiState> {
@@ -86,7 +87,8 @@ export default class Ui extends Component<UiProps, UiState> {
         super(props);
 
         this.state = {
-            toastQueue: []
+            toastQueue: [],
+            isOverlayHidden: false
         };
     }
 
@@ -125,11 +127,12 @@ export default class Ui extends Component<UiProps, UiState> {
                     />
                 )}
 
-                {!isMobile() && (
+                {!isMobile() && !this.state.isOverlayHidden && (
                     <OverlaySilent
                         promptState={this.props.promptManagerState}
                         prompt={this.props.currentlyRequestingPrompt}
                         subscriptionState={this.props.subscriptionState}
+                        onClick={() => this.setState({ isOverlayHidden: true })}
                     />
                 )}
 

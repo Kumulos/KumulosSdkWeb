@@ -6,6 +6,7 @@ interface OverlaySilentProps {
     promptState: PromptManagerState;
     prompt?: PushPromptConfig;
     subscriptionState: PushSubscriptionState;
+    onClick?: () => void;
 }
 export declare class OverlaySilent extends Component<OverlaySilentProps, never> {
     render(): h.JSX.Element | null;
