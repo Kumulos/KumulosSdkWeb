@@ -379,10 +379,6 @@ export class PromptManager {
                     .listChannels();
                 this.setState('ready');
                 break;
-            case 'requesting':
-            case 'requesting-silent':
-                this.render();
-                break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
                 this.currentPostAction = undefined;
@@ -393,6 +389,8 @@ export class PromptManager {
                 this.render();
                 break;
             case 'postaction':
+            case 'requesting':
+            case 'requesting-silent':
                 this.render();
                 break;
         }
