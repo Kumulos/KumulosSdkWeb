@@ -8,7 +8,14 @@ interface OverlaySilentProps {
     subscriptionState: PushSubscriptionState;
     onClick?: () => void;
 }
-export declare class OverlaySilent extends Component<OverlaySilentProps, never> {
+interface OverlaySilentState {
+    windowDimensions: {
+        width: number;
+        height: number;
+    };
+}
+export declare class OverlaySilent extends Component<OverlaySilentProps, OverlaySilentState> {
+    componentWillMount(): void;
     render(): h.JSX.Element | null;
 }
 export {};
