@@ -3,7 +3,6 @@ interface BackgroundMaskProps {
     class?: string;
     blurClass?: string;
     style?: JSX.CSSProperties;
-    onClick?: () => void;
 }
 interface BackgroundMaskState {
     blurClasses: string[];
