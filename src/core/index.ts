@@ -66,6 +66,12 @@ interface PromptOverlayConfig {
     };
 }
 
+interface PromptSilentOverlayConfig {
+    labels: {
+        body: string;
+    };
+}
+
 export interface ChannelDialogLabelsConfig {
     heading: string;
     confirmAction: string;
@@ -168,6 +174,7 @@ interface BasePromptConfig {
     trigger: PromptTrigger;
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
+    silentOverlay?: PromptOverlayConfig;
     actions?: PromptAction[];
 }
 

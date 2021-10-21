@@ -134,6 +134,7 @@ interface BasePromptConfig {
     trigger: PromptTrigger;
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
+    silentOverlay?: PromptOverlayConfig;
     actions?: PromptAction[];
 }
 interface WithImageUrl {
