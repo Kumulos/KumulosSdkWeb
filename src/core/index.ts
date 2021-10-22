@@ -617,3 +617,13 @@ export function getChannelDialogChannels(
                 selectionConfig.checkedUuids.includes(c.uuid)
         }));
 }
+
+export interface Dimensions {
+    width: number;
+    height: number;
+}
+
+export interface Point {
+    x: number;
+    y: number;
+}

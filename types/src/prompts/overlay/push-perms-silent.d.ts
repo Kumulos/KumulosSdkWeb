@@ -1,5 +1,5 @@
 import { Component, h } from 'preact';
-import { PushPromptConfig } from '../../core';
+import { PushPromptConfig, Dimensions } from '../../core';
 import { PromptManagerState } from '../index';
 import { PushSubscriptionState } from '../../core/push';
 interface OverlaySilentProps {
@@ -9,10 +9,7 @@ interface OverlaySilentProps {
     onClick?: () => void;
 }
 interface OverlaySilentState {
-    windowDimensions: {
-        width: number;
-        height: number;
-    };
+    windowDimensions: Dimensions;
 }
 export declare class OverlaySilent extends Component<OverlaySilentProps, OverlaySilentState> {
     componentWillMount(): void;

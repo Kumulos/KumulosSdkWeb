@@ -295,4 +295,12 @@ export interface ChannelListItem {
     checked: boolean;
 }
 export declare function getChannelDialogChannels(allChannels: Channel[], selectionConfig: MultiChannelSelectionConfig): ChannelListItem[];
+export interface Dimensions {
+    width: number;
+    height: number;
+}
+export interface Point {
+    x: number;
+    y: number;
+}
 export {};

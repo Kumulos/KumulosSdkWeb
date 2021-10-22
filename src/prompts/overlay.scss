@@ -83,6 +83,12 @@
         top: 0;
         z-index: 1;
     }
+
+    .kumulos-silent-overlay-content-text {
+        max-width: 500px;
+        text-align: center;
+        font: 1.3em helvetica, sans-serif;
+    }
 }
 
 .kumulos-overlay-chrome {
