@@ -14,5 +14,6 @@ interface OverlaySilentState {
 export declare class OverlaySilent extends Component<OverlaySilentProps, OverlaySilentState> {
     componentWillMount(): void;
     render(): h.JSX.Element | null;
+    private renderPointer;
 }
 export {};

@@ -15,6 +15,16 @@ const localStyles = {
     }
 };
 
+const POINTER_START_OFFSET: Point = {
+    x: 0,
+    y: 50
+};
+
+const POINTER_END_OFFSET: Point = {
+    x: -175,
+    y: 75
+};
+
 interface OverlaySilentProps {
     promptState: PromptManagerState;
     prompt?: PushPromptConfig;
@@ -38,7 +48,6 @@ export class OverlaySilent extends Component<
 
     render() {
         const { promptState, prompt, subscriptionState } = this.props;
-        const { windowDimensions } = this.state;
 
         if (
             !prompt ||
@@ -58,16 +67,6 @@ export class OverlaySilent extends Component<
             color
         };
 
-        const pointerStart: Point = {
-            x: windowDimensions.width / 2,
-            y: windowDimensions.height / 2 + 50
-        };
-
-        const pointerEnd: Point = {
-            x: windowDimensions.width - 200,
-            y: 75
-        };
-
         return (
             <BackgroundMask
                 blurClass="kumulos-overlay-blur"
@@ -75,17 +74,34 @@ export class OverlaySilent extends Component<
                 style={maskStyle}
                 onClick={this.props.onClick}
             >
-                <div class="kumulos-silent-overlay-indicator">
-                    <SvgPointer
-                        area={windowDimensions}
-                        start={pointerStart}
-                        end={pointerEnd}
-                        color={color}
-                    />
-                </div>
-
+                {this.renderPointer(color)}
                 <p class="kumulos-silent-overlay-content-text">{bodyLabel}</p>
             </BackgroundMask>
+        );
+    }
+
+    private renderPointer(color: string) {
+        const { windowDimensions } = this.state;
+
+        const pointerStart: Point = {
+            x: windowDimensions.width / 2 + POINTER_START_OFFSET.x,
+            y: windowDimensions.height / 2 + POINTER_START_OFFSET.y
+        };
+
+        const pointerEnd: Point = {
+            x: windowDimensions.width + POINTER_END_OFFSET.x,
+            y: POINTER_END_OFFSET.y
+        };
+
+        return (
+            <div class="kumulos-silent-overlay-indicator">
+                <SvgPointer
+                    area={windowDimensions}
+                    start={pointerStart}
+                    end={pointerEnd}
+                    color={color}
+                />
+            </div>
         );
     }
 }
