@@ -25,6 +25,11 @@ const POINTER_END_OFFSET: Point = {
     y: 75
 };
 
+const CONTROL_POINT_OFFSET: Point = {
+    x: 0,
+    y: 500
+};
+
 interface OverlaySilentProps {
     promptState: PromptManagerState;
     prompt?: PushPromptConfig;
@@ -93,12 +98,20 @@ export class OverlaySilent extends Component<
             y: POINTER_END_OFFSET.y
         };
 
+        const controlPoint: Point = {
+            x: pointerEnd.x + CONTROL_POINT_OFFSET.x,
+            y: pointerStart.y + CONTROL_POINT_OFFSET.y
+        };
+
         return (
             <div class="kumulos-silent-overlay-indicator">
                 <SvgPointer
                     area={windowDimensions}
-                    start={pointerStart}
-                    end={pointerEnd}
+                    quadCurvePoints={{
+                        p1: pointerStart,
+                        p2: controlPoint,
+                        p3: pointerEnd
+                    }}
                     color={color}
                 />
             </div>
