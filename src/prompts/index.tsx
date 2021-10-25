@@ -31,6 +31,7 @@ export type PromptManagerState =
     | 'ready'
     | 'requesting'
     | 'requesting-silent'
+    | 'requesting-silent-dismissed'
     | 'postaction';
 
 // loading -> ready
@@ -161,6 +162,11 @@ export class PromptManager {
         this.hidePrompt(prompt);
     };
 
+    private onDismissOverlay = (prompt: PushPromptConfig) => {
+        this.hidePrompt(prompt);
+        this.setState('requesting-silent-dismissed');
+    };
+
     private hideAndSuppressPrompts(prompt: PushPromptConfig) {
         const { subscriptionState } = this;
 
@@ -280,6 +286,7 @@ export class PromptManager {
                     onPromptAccepted={this.onPromptAccepted}
                     onPromptDeclined={this.onPromptDeclined}
                     onPostActionConfirm={this.onPostActionConfirm}
+                    onDismissOverlay={this.onDismissOverlay}
                     currentlyRequestingPrompt={this.currentlyRequestingPrompt}
                     currentPostAction={this.currentPostAction}
                 />
@@ -391,6 +398,7 @@ export class PromptManager {
             case 'postaction':
             case 'requesting':
             case 'requesting-silent':
+            case 'requesting-silent-dismissed':
                 this.render();
                 break;
         }

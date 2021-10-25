@@ -73,13 +73,13 @@ interface UiProps {
         prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
     ) => void;
+    onDismissOverlay: (prompt: PushPromptConfig) => void;
     currentlyRequestingPrompt?: PushPromptConfig;
     currentPostAction?: PromptAction;
 }
 
 interface UiState {
     toastQueue: string[];
-    isOverlayHidden: boolean;
 }
 
 export default class Ui extends Component<UiProps, UiState> {
@@ -87,8 +87,7 @@ export default class Ui extends Component<UiProps, UiState> {
         super(props);
 
         this.state = {
-            toastQueue: [],
-            isOverlayHidden: false
+            toastQueue: []
         };
     }
 
@@ -127,12 +126,12 @@ export default class Ui extends Component<UiProps, UiState> {
                     />
                 )}
 
-                {!isMobile() && !this.state.isOverlayHidden && (
+                {!isMobile() && (
                     <OverlaySilent
                         promptState={this.props.promptManagerState}
                         prompt={this.props.currentlyRequestingPrompt}
                         subscriptionState={this.props.subscriptionState}
-                        onClick={() => this.setState({ isOverlayHidden: true })}
+                        onDismiss={this.props.onDismissOverlay}
                     />
                 )}
 

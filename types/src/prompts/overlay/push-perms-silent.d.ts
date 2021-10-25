@@ -6,7 +6,7 @@ interface OverlaySilentProps {
     promptState: PromptManagerState;
     prompt?: PushPromptConfig;
     subscriptionState: PushSubscriptionState;
-    onClick?: () => void;
+    onDismiss?: (prompt: PushPromptConfig) => void;
 }
 interface OverlaySilentState {
     windowDimensions: Dimensions;
@@ -15,5 +15,6 @@ export declare class OverlaySilent extends Component<OverlaySilentProps, Overlay
     componentWillMount(): void;
     render(): h.JSX.Element | null;
     private renderPointer;
+    private onBackgroundMaskClick;
 }
 export {};

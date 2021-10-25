@@ -34,7 +34,7 @@ interface OverlaySilentProps {
     promptState: PromptManagerState;
     prompt?: PushPromptConfig;
     subscriptionState: PushSubscriptionState;
-    onClick?: () => void;
+    onDismiss?: (prompt: PushPromptConfig) => void;
 }
 
 interface OverlaySilentState {
@@ -77,7 +77,7 @@ export class OverlaySilent extends Component<
                 blurClass="kumulos-overlay-blur"
                 class={`kumulos-silent-overlay kumulos-silent-overlay-${getBrowserName()}`}
                 style={maskStyle}
-                onClick={this.props.onClick}
+                onClick={this.onBackgroundMaskClick}
             >
                 {this.renderPointer(color)}
                 <p class="kumulos-silent-overlay-content-text">{bodyLabel}</p>
@@ -117,4 +117,14 @@ export class OverlaySilent extends Component<
             </div>
         );
     }
+
+    private onBackgroundMaskClick = () => {
+        const { prompt, onDismiss } = this.props;
+
+        if (!prompt || !onDismiss) {
+            return;
+        }
+
+        onDismiss(prompt);
+    };
 }

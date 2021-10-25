@@ -25,12 +25,12 @@ interface UiProps {
     onPromptAccepted: (prompt: PushPromptConfig, channelSelections?: ChannelListItem[]) => void;
     onPromptDeclined: (prompt: PushPromptConfig) => void;
     onPostActionConfirm: (prompt: PushPromptConfig, channelSelections?: ChannelListItem[]) => void;
+    onDismissOverlay: (prompt: PushPromptConfig) => void;
     currentlyRequestingPrompt?: PushPromptConfig;
     currentPostAction?: PromptAction;
 }
 interface UiState {
     toastQueue: string[];
-    isOverlayHidden: boolean;
 }
 export default class Ui extends Component<UiProps, UiState> {
     constructor(props: UiProps);
