@@ -32,7 +32,8 @@
         display: flex;
         max-width: 38%;
         padding: 1em;
-        font: 14px helvetica, sans-serif;
+        font-size: 14px;
+        font-family: $defaultFont;
 
         * {
             margin: 0;
@@ -87,7 +88,8 @@
     .kumulos-silent-overlay-content-text {
         max-width: 500px;
         text-align: center;
-        font: 1.3em helvetica, sans-serif;
+        font-size: 1.3em;
+        font-family: $defaultFont;
     }
 }
 
