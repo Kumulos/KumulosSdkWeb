@@ -1,9 +1,8 @@
-.kumulos-overlay-blur > *:not(.kumulos-overlay):not(.kumulos-silent-overlay) {
+.kumulos-overlay-blur > *:not(.kumulos-overlay) {
     filter: blur(3px);
 }
 
-.kumulos-overlay,
-.kumulos-silent-overlay {
+.kumulos-overlay {
     box-sizing: border-box;
 
     *,

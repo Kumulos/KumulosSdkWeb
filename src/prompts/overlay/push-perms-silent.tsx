@@ -75,7 +75,7 @@ export class OverlaySilent extends Component<
         return (
             <BackgroundMask
                 blurClass="kumulos-overlay-blur"
-                class={`kumulos-silent-overlay kumulos-silent-overlay-${getBrowserName()}`}
+                class={`kumulos-overlay kumulos-overlay-${getBrowserName()}`}
                 style={maskStyle}
                 onClick={this.onBackgroundMaskClick}
             >
