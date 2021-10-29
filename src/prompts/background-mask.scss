@@ -3,7 +3,7 @@ body.kumulos-background-mask-blur {
 }
 
 .kumulos-background-mask-blur
-    > *:not(.kumulos-prompt):not(.kumulos-overlay):not(.kumulos-background-mask) {
+    > *:not(.kumulos-prompt):not(.kumulos-overlay):not(.kumulos-silent-overlay):not(.kumulos-background-mask) {
     filter: blur(3px);
 }
 

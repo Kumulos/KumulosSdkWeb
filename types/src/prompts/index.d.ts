@@ -1,7 +1,7 @@
 import { Context, PushPromptConfig } from '../core';
 import Kumulos from '..';
 import RootFrame from '../core/root-frame';
-export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'postaction';
+export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'requesting-silent-dismissed' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
     private readonly context;
@@ -25,6 +25,7 @@ export declare class PromptManager {
     private onPromptAccepted;
     private onPostActionConfirm;
     private onPromptDeclined;
+    private onDismissOverlay;
     private hideAndSuppressPrompts;
     private handlePromptActions;
     private handleChannelSubActions;

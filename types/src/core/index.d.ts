@@ -12,6 +12,11 @@ declare type Jsonish = string | number | boolean | null | {
 export declare type PropsObject = {
     [key: string]: Jsonish;
 };
+declare type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
+    [P1 in K1]: {
+        [P2 in K2]: T[K1][P2];
+    };
+};
 export declare enum EventType {
     MESSAGE_DELIVERED = "k.message.delivered",
     MESSAGE_OPENED = "k.message.opened",
@@ -51,6 +56,7 @@ interface PromptOverlayConfig {
         text: string;
     };
 }
+declare type PromptSilentOverlayConfig = NestedPick<PromptOverlayConfig, 'labels', 'body'> & NestedPick<PromptOverlayConfig, 'colors', 'text'>;
 export interface ChannelDialogLabelsConfig {
     heading: string;
     confirmAction: string;
@@ -134,6 +140,7 @@ interface BasePromptConfig {
     trigger: PromptTrigger;
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
+    silentOverlay?: PromptSilentOverlayConfig;
     actions?: PromptAction[];
 }
 interface WithImageUrl {
@@ -288,4 +295,12 @@ export interface ChannelListItem {
     checked: boolean;
 }
 export declare function getChannelDialogChannels(allChannels: Channel[], selectionConfig: MultiChannelSelectionConfig): ChannelListItem[];
+export interface Dimensions {
+    width: number;
+    height: number;
+}
+export interface Point {
+    x: number;
+    y: number;
+}
 export {};

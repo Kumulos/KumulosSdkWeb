@@ -2,7 +2,7 @@ import { authedFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.10.2';
+const SDK_VERSION = '1.11.0';
 const SDK_TYPE = 10;
 const EVENTS_BASE_URL = 'https://events.kumulos.com';
 export const PUSH_BASE_URL = 'https://push.kumulos.com';
@@ -23,6 +23,12 @@ type Jsonish =
     | undefined;
 
 export type PropsObject = { [key: string]: Jsonish };
+
+type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
+    [P1 in K1]: {
+        [P2 in K2]: T[K1][P2];
+    };
+};
 
 export enum EventType {
     MESSAGE_DELIVERED = 'k.message.delivered',
@@ -65,6 +71,13 @@ interface PromptOverlayConfig {
         text: string;
     };
 }
+
+type PromptSilentOverlayConfig = NestedPick<
+    PromptOverlayConfig,
+    'labels',
+    'body'
+> &
+    NestedPick<PromptOverlayConfig, 'colors', 'text'>;
 
 export interface ChannelDialogLabelsConfig {
     heading: string;
@@ -168,6 +181,7 @@ interface BasePromptConfig {
     trigger: PromptTrigger;
     position: PromptPosition;
     overlay?: PromptOverlayConfig;
+    silentOverlay?: PromptSilentOverlayConfig;
     actions?: PromptAction[];
 }
 
@@ -602,4 +616,14 @@ export function getChannelDialogChannels(
                 selectionConfig.checkedUuids === 'all' ||
                 selectionConfig.checkedUuids.includes(c.uuid)
         }));
+}
+
+export interface Dimensions {
+    width: number;
+    height: number;
+}
+
+export interface Point {
+    x: number;
+    y: number;
 }

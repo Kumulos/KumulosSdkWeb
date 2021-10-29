@@ -1,8 +1,9 @@
-.kumulos-overlay-blur > *:not(.kumulos-overlay) {
+.kumulos-overlay-blur > *:not(.kumulos-overlay):not(.kumulos-silent-overlay) {
     filter: blur(3px);
 }
 
-.kumulos-overlay {
+.kumulos-overlay,
+.kumulos-silent-overlay {
     box-sizing: border-box;
 
     *,
@@ -31,7 +32,8 @@
         display: flex;
         max-width: 38%;
         padding: 1em;
-        font: 14px helvetica, sans-serif;
+        font-size: 14px;
+        font-family: $defaultFont;
 
         * {
             margin: 0;
@@ -74,6 +76,20 @@
         p {
             margin: 0.5em 0;
         }
+    }
+
+    .kumulos-silent-overlay-indicator {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+    }
+
+    .kumulos-silent-overlay-content-text {
+        max-width: 500px;
+        text-align: center;
+        font-size: 1.3em;
+        font-family: $defaultFont;
     }
 }
 

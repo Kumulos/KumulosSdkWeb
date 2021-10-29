@@ -25,6 +25,7 @@ interface UiProps {
     onPromptAccepted: (prompt: PushPromptConfig, channelSelections?: ChannelListItem[]) => void;
     onPromptDeclined: (prompt: PushPromptConfig) => void;
     onPostActionConfirm: (prompt: PushPromptConfig, channelSelections?: ChannelListItem[]) => void;
+    onDismissOverlay: (prompt: PushPromptConfig) => void;
     currentlyRequestingPrompt?: PushPromptConfig;
     currentPostAction?: PromptAction;
 }
