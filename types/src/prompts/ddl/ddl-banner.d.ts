@@ -6,7 +6,9 @@ export interface DdlBannerProps {
     onCancel: (config: DdlBannerPromptConfig) => void;
     dimensions: (width: number, height: number) => void;
 }
-export declare class DdlBanner extends Component<DdlBannerProps, never> {
+export declare class DdlBanner extends Component<DdlBannerProps, {
+    showCopyToast: boolean;
+}> {
     private containerRef;
     constructor(props: DdlBannerProps);
     componentDidMount(): void;
