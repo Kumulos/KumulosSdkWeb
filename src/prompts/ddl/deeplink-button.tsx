@@ -1,13 +1,14 @@
 import { Component, h } from 'preact';
-import copy from 'clipboard-copy';
 import { DdlUiActions, UiActionType } from '../../core';
+
+import copy from 'clipboard-copy';
 
 interface DeeplinkButtonProps {
     style: h.JSX.CSSProperties;
     class: string;
     text: string;
     promptActions: DdlUiActions;
-    onAction: () => void;
+    onAction: (actionType: UiActionType) => void;
 }
 
 export default class DeeplinkButton extends Component<
@@ -22,7 +23,9 @@ export default class DeeplinkButton extends Component<
         switch (accept.type) {
             case UiActionType.DDL_OPEN_STORE:
                 copy(accept.deepLinkUrl)
-                    .then(this.props.onAction)
+                    .then(() =>
+                        this.props.onAction(UiActionType.DDL_OPEN_STORE)
+                    )
                     .catch(e => {
                         console.error(
                             'Unable to capture deeplink url for deferred app pickup',
@@ -31,7 +34,7 @@ export default class DeeplinkButton extends Component<
                     });
                 break;
             case UiActionType.DDL_OPEN_DEEPLINK:
-                this.props.onAction();
+                this.props.onAction(UiActionType.DDL_OPEN_STORE);
                 break;
             default:
                 return console.error(

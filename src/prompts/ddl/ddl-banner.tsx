@@ -1,7 +1,12 @@
-import { Component, h, createRef, RefObject } from 'preact';
-import { DdlBannerPromptConfig, PromptPosition } from '../../core';
-import DeeplinkButton from './deeplink-button';
+import { Component, RefObject, createRef, h } from 'preact';
+import {
+    DdlBannerPromptConfig,
+    PromptPosition,
+    UiActionType
+} from '../../core';
+
 import { AppRating } from '../../components/app-rating';
+import DeeplinkButton from './deeplink-button';
 
 const styles = {
     bannerIconStyle: {
@@ -23,6 +28,8 @@ const CLASSES = [
     'kumulos-safe-area-inset-pad-right'
 ];
 
+const SHOW_COPY_TOAST_DELAY = 1000;
+
 export interface DdlBannerProps {
     config: DdlBannerPromptConfig;
     onConfirm: (config: DdlBannerPromptConfig) => void;
@@ -30,13 +37,19 @@ export interface DdlBannerProps {
     dimensions: (width: number, height: number) => void;
 }
 
-export class DdlBanner extends Component<DdlBannerProps, never> {
+export class DdlBanner extends Component<
+    DdlBannerProps,
+    {
+        showCopyToast: boolean;
+    }
+> {
     private containerRef: RefObject<HTMLDivElement>;
 
     constructor(props: DdlBannerProps) {
         super(props);
 
         this.containerRef = createRef<HTMLDivElement>();
+        this.state = { showCopyToast: false };
     }
 
     componentDidMount() {
@@ -49,8 +62,23 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
         this.props.dimensions(clientWidth, clientHeight);
     }
 
-    private onConfirm = () => {
-        this.props.onConfirm(this.props.config);
+    private onConfirm = (actionType: UiActionType) => {
+        if (this.state.showCopyToast === true) {
+            return;
+        }
+
+        if (actionType === UiActionType.DDL_OPEN_DEEPLINK) {
+            this.props.onConfirm(this.props.config);
+            return;
+        }
+
+        if (actionType === UiActionType.DDL_OPEN_STORE) {
+            this.setState({ showCopyToast: true });
+            setTimeout(() => {
+                this.setState({ showCopyToast: false });
+                this.props.onConfirm(this.props.config);
+            }, SHOW_COPY_TOAST_DELAY);
+        }
     };
 
     private onCancel = () => {
@@ -58,9 +86,14 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
     };
 
     private getCssClasses(promptPosition: PromptPosition) {
-        const classes = [...CLASSES, `kumulos-prompt-position-${promptPosition}`];
+        const classes = [
+            ...CLASSES,
+            `kumulos-prompt-position-${promptPosition}`
+        ];
 
-        if ([PromptPosition.TOP, PromptPosition.BOTTOM].includes(promptPosition)) {
+        if (
+            [PromptPosition.TOP, PromptPosition.BOTTOM].includes(promptPosition)
+        ) {
             classes.push(`kumulos-safe-area-inset-pad-${promptPosition}`);
         }
 
@@ -70,13 +103,7 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
     render() {
         const { config } = this.props;
 
-        const {
-            position,
-            labels,
-            colors,
-            imageUrl,
-            appRating
-        } = config;
+        const { position, labels, colors, imageUrl, appRating } = config;
         const { heading, body, acceptAction } = labels;
         const {
             bg,
@@ -144,6 +171,10 @@ export class DdlBanner extends Component<DdlBannerProps, never> {
                         onAction={this.onConfirm}
                     />
                 </div>
+
+                {this.state.showCopyToast && (
+                    <div class="kumulos-toast">Link Copied</div>
+                )}
             </div>
         );
     }
