@@ -20,8 +20,7 @@ export declare enum SystemEventType {
     PUSH_REGISTERED = "k.push.deviceRegistered",
     INSTALL_TRACKED = "k.stats.installTracked",
     USER_ASSOCIATED = "k.stats.userAssociated",
-    USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared",
-    PAGE_VIEWED = "k.pageViewed"
+    USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared"
 }
 export declare enum PromptTypeName {
     BELL = "bell",

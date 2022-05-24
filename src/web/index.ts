@@ -62,8 +62,6 @@ function main() {
         executor(...q[i]);
     }
 
-    instance.trackEvent(SystemEventType.PAGE_VIEWED, getPageViewedProps());
-
     (window.Kumulos as any) = executor;
 }
 
