@@ -14,7 +14,7 @@ declare type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
         [P2 in K2]: T[K1][P2];
     };
 };
-export declare enum EventType {
+export declare enum SystemEventType {
     MESSAGE_DELIVERED = "k.message.delivered",
     MESSAGE_OPENED = "k.message.opened",
     PUSH_REGISTERED = "k.push.deviceRegistered",
@@ -293,7 +293,7 @@ export declare type KumulosEvent = {
     data?: PropsObject;
 };
 export declare type EventPayload = KumulosEvent[];
-export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response>;
+export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
 export declare function trackInstallDetails(ctx: Context): Promise<void>;
 export interface ChannelListItem {
     channel: Channel;

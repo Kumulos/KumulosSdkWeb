@@ -1,5 +1,5 @@
-import { EventType } from '../core';
 import Kumulos from '../index';
+import { SystemEventType } from '../core';
 import { getPageViewedProps } from './utils';
 import { isBrowserSupported } from '../core/utils';
 
@@ -62,7 +62,7 @@ function main() {
         executor(...q[i]);
     }
 
-    instance.trackEvent(EventType.PAGE_VIEWED, getPageViewedProps());
+    instance.trackEvent(SystemEventType.PAGE_VIEWED, getPageViewedProps());
 
     (window.Kumulos as any) = executor;
 }

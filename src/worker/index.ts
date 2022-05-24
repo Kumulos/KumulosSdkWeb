@@ -1,7 +1,7 @@
 import {
     Configuration,
     Context,
-    EventType,
+    SystemEventType,
     assertConfigValid,
     trackEvent
 } from '../core';
@@ -67,7 +67,7 @@ self.addEventListener('push', event => {
         }
 
         const messageData = data['k.message'];
-        const deliveryTracked = trackEvent(ctx, EventType.MESSAGE_DELIVERED, {
+        const deliveryTracked = trackEvent(ctx, SystemEventType.MESSAGE_DELIVERED, {
             type: messageData.type,
             id: messageData.data.id
         });
@@ -117,7 +117,7 @@ self.addEventListener('notificationclick', event => {
         notification.close();
 
         const messageData = data['k.message'];
-        const openTracked = trackEvent(ctx, EventType.MESSAGE_OPENED, {
+        const openTracked = trackEvent(ctx, SystemEventType.MESSAGE_OPENED, {
             type: messageData.type,
             id: messageData.data.id
         });

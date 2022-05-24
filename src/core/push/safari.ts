@@ -1,8 +1,8 @@
 import {
     Context,
-    EventType,
     PlatformConfig,
     Service,
+    SystemEventType,
     trackEvent
 } from '..';
 import { PushOpsManager, TokenType } from '.';
@@ -58,7 +58,7 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
+        await trackEvent(ctx, SystemEventType.PUSH_REGISTERED, {
             type: TokenType.SAFARI,
             token: perm.deviceToken,
             bundleId: cfg.safariPushId

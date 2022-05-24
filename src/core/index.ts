@@ -27,7 +27,7 @@ type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
     };
 };
 
-export enum EventType {
+export enum SystemEventType {
     MESSAGE_DELIVERED = 'k.message.delivered',
     MESSAGE_OPENED = 'k.message.opened',
     PUSH_REGISTERED = 'k.push.deviceRegistered',
@@ -502,13 +502,13 @@ export async function associateUser(
         attributes
     };
 
-    return trackEvent(ctx, EventType.USER_ASSOCIATED, props).then(_ => {});
+    return trackEvent(ctx, SystemEventType.USER_ASSOCIATED, props).then(_ => {});
 }
 
 export async function clearUserAssociation(ctx: Context): Promise<void> {
     const currentUserId = await getUserId();
 
-    trackEvent(ctx, EventType.USER_ASSOCIATION_CLEARED, {
+    trackEvent(ctx, SystemEventType.USER_ASSOCIATION_CLEARED, {
         oldUserIdentifier: currentUserId
     });
 
@@ -529,7 +529,7 @@ export async function trackEvent(
     ctx: Context,
     type: string,
     properties?: PropsObject
-): Promise<Response> {
+): Promise<Response | void> {
     const installId = await getInstallId();
     const userId = await getUserId();
 
@@ -543,14 +543,22 @@ export async function trackEvent(
         }
     ];
 
-    const url = `${ctx.urlForService(Service.EVENTS)}/v1/app-installs/${installId}/events`;
-
     ctx.broadcast('eventTracked', events);
 
+    if (!isSystemEvent(type)){
+        return Promise.resolve();
+    }
+
+    const url = `${ctx.urlForService(Service.EVENTS)}/v1/app-installs/${installId}/events`;
     return authedFetch(ctx, url, {
         method: 'POST',
         body: JSON.stringify(events)
     });
+
+}
+
+function isSystemEvent(type: string){
+    return (<any>Object).values(SystemEventType).includes(type);
 }
 
 export async function trackInstallDetails(ctx: Context): Promise<void> {
@@ -604,7 +612,7 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
         return Promise.reject(e);
     }
 
-    return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
+    return trackEvent(ctx, SystemEventType.INSTALL_TRACKED, payload)
         .then(() => set('detailsHash', hash))
         .then(() => void 0);
 }
