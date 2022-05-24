@@ -1,15 +1,11 @@
 import {
     Configuration,
     Context,
-    InstallId,
     PropsObject,
     SDKFeature,
     UserId,
     assertConfigValid,
     associateUser,
-    clearUserAssociation,
-    getInstallId,
-    getUserId,
     trackEvent,
     trackInstallDetails
 } from './core';
@@ -25,7 +21,6 @@ import getPushOpsManager, {
 } from './core/push';
 import { isMobile, registerServiceWorker } from './core/utils';
 
-import { ChannelSubscriptionManager } from './core/channels';
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
 import RootFrame from './core/root-frame';
@@ -41,7 +36,6 @@ export default class Kumulos {
     private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
     private readonly promptManager?: PromptManager;
     private readonly ddlManager?: DdlManager;
-    private channelSubscriptionManager?: ChannelSubscriptionManager;
     private readonly rootFrame: RootFrame;
 
     constructor(config: KumulosConfig) {
@@ -90,20 +84,8 @@ export default class Kumulos {
         }
     }
 
-    getInstallId(): Promise<InstallId> {
-        return getInstallId();
-    }
-
-    getCurrentUserIdentifier(): Promise<UserId> {
-        return getUserId();
-    }
-
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {
         return associateUser(this.context, identifier, attributes);
-    }
-
-    clearUserAssociation(): Promise<void> {
-        return clearUserAssociation(this.context);
     }
 
     trackEvent(type: string, properties?: PropsObject): Promise<void> {
@@ -125,16 +107,6 @@ export default class Kumulos {
             .then(() => {
                 return mgr.pushRegister(this.context);
             });
-    }
-
-    getChannelSubscriptionManager(): ChannelSubscriptionManager {
-        if (!this.channelSubscriptionManager) {
-            this.channelSubscriptionManager = new ChannelSubscriptionManager(
-                this.context
-            );
-        }
-
-        return this.channelSubscriptionManager;
     }
 
     private onWorkerMessage = (e: MessageEvent) => {
