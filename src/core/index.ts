@@ -464,6 +464,7 @@ function assertPushConfigValid(config: any) {
 }
 
 let installIdPromise: Promise<InstallId> | undefined = undefined;
+let installIdSettingPromise: Promise<void> | undefined = undefined;
 
 export function getInstallId(): Promise<InstallId> {
     if (installIdPromise) {
@@ -473,7 +474,7 @@ export function getInstallId(): Promise<InstallId> {
     installIdPromise = get<InstallId | undefined>('installId').then(
         installId => {
             if (!installId) {
-                return set('installId', uuidv4());
+                return setInstallId(uuidv4());
             }
 
             return installId;
@@ -481,6 +482,10 @@ export function getInstallId(): Promise<InstallId> {
     );
 
     return installIdPromise;
+}
+
+export function setInstallId(installId: InstallId) : Promise<InstallId>{
+    return set('installId', installId);
 }
 
 export function getUserId(): Promise<UserId> {

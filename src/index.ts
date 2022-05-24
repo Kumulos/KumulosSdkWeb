@@ -1,18 +1,23 @@
 import {
     Configuration,
     Context,
+    InstallId,
     PropsObject,
     SDKFeature,
     UserId,
     assertConfigValid,
     associateUser,
+    getInstallId,
+    getUserId,
+    setInstallId,
     trackEvent,
     trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
     getMostRecentlyOpenedPushPayload,
-    persistConfig
+    persistConfig,
+    set
 } from './core/storage';
 import getPushOpsManager, {
     KumulosPushNotification,
@@ -28,6 +33,8 @@ import RootFrame from './core/root-frame';
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
     onPushOpened?: (payload: KumulosPushNotification) => void;
+    installId: InstallId;
+    userId?: UserId;
 }
 
 export default class Kumulos {
@@ -44,7 +51,9 @@ export default class Kumulos {
         this.config = config;
         this.context = new Context(config);
 
+        this.maybePersistInstallIdAndUserId(config);
         persistConfig(config);
+
         trackInstallDetails(this.context);
 
         this.rootFrame = new RootFrame();
@@ -82,6 +91,28 @@ export default class Kumulos {
 
             this.ddlManager = new DdlManager(this.context, this.rootFrame);
         }
+    }
+
+    private async maybePersistInstallIdAndUserId(config: KumulosConfig) : Promise<void> {
+        await getInstallId()
+            .then(installId => {
+                if (installId !== config.installId){
+                    setInstallId(config.installId);
+                }
+            });
+
+        if (config.userId === undefined){
+            return Promise.resolve();
+        }
+
+        await getUserId()
+            .then(userId => {
+                if (userId !== config.userId){
+                    associateUser(this.context, config.userId!);
+                }
+            })
+
+        return Promise.resolve();
     }
 
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {

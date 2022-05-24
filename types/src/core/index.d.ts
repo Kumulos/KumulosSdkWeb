@@ -281,6 +281,7 @@ export declare class Context {
 }
 export declare function assertConfigValid(config: any): void;
 export declare function getInstallId(): Promise<InstallId>;
+export declare function setInstallId(installId: InstallId): Promise<InstallId>;
 export declare function getUserId(): Promise<UserId>;
 export declare function associateUser(ctx: Context, id: UserId, attributes?: PropsObject): Promise<void>;
 export declare function clearUserAssociation(ctx: Context): Promise<void>;
