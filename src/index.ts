@@ -3,6 +3,7 @@ import {
     Context,
     InstallId,
     PropsObject,
+    SDKFeature,
     UserId,
     assertConfigValid,
     associateUser,
@@ -10,8 +11,7 @@ import {
     getInstallId,
     getUserId,
     trackEvent,
-    trackInstallDetails,
-    SDKFeature
+    trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
@@ -23,12 +23,12 @@ import getPushOpsManager, {
     notificationFromPayload,
     trackOpenFromQuery
 } from './core/push';
+import { isMobile, registerServiceWorker } from './core/utils';
 
 import { ChannelSubscriptionManager } from './core/channels';
-import { PromptManager } from './prompts';
-import { registerServiceWorker, isMobile } from './core/utils';
-import RootFrame from './core/root-frame';
 import DdlManager from './prompts/ddl/manager';
+import { PromptManager } from './prompts';
+import RootFrame from './core/root-frame';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;

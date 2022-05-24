@@ -1,4 +1,4 @@
-import { Context, PUSH_BASE_URL, PropsObject, getInstallId } from '.';
+import { Context, PropsObject, Service, getInstallId } from '.';
 import { authedFetch, authedFetchJson } from './utils';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -30,7 +30,7 @@ export class ChannelSubscriptionManager {
         uuids: string[]
     ): Promise<Response> {
         return getInstallId().then(installId => {
-            const url = `${PUSH_BASE_URL}/v1/app-installs/${installId}/channels/subscriptions`;
+            const url = `${this.context.urlForService(Service.PUSH)}/v1/app-installs/${installId}/channels/subscriptions`;
             const params = {
                 uuids
             };
@@ -79,7 +79,7 @@ export class ChannelSubscriptionManager {
      */
     listChannels(): Promise<Channel[]> {
         return getInstallId().then(installId => {
-            const url = `${PUSH_BASE_URL}/v1/app-installs/${installId}/channels`;
+            const url = `${this.context.urlForService(Service.PUSH)}/v1/app-installs/${installId}/channels`;
             return authedFetchJson<Channel[]>(this.context, url);
         });
     }
@@ -101,7 +101,7 @@ export class ChannelSubscriptionManager {
         }
 
         return getInstallId().then(installId => {
-            const url = `${PUSH_BASE_URL}/v1/channels`;
+            const url = `${this.context.urlForService(Service.PUSH)}/v1/channels`;
 
             let params = {
                 uuid: channelSpec.uuid,

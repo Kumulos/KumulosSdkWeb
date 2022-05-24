@@ -5,10 +5,6 @@ import { Channel } from './channels';
 
 const SDK_VERSION = '1.11.1';
 const SDK_TYPE = 10;
-const EVENTS_BASE_URL = 'https://events.kumulos.com';
-export const PUSH_BASE_URL = 'https://push.kumulos.com';
-export const DDL_BASE_URL = 'https://links.kumulos.com';
-export const FP_CAPTURE_URL = 'https://pd.app.delivery';
 
 export type InstallId = string;
 export type UserId = string;
@@ -335,7 +331,14 @@ export enum SDKFeature {
     DDL = 'ddl'
 }
 
+export enum Service {
+    PUSH = 'push',
+    DDL = 'ddl',
+    EVENTS = 'events'
+}
+
 export interface Configuration {
+    region: string;
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
@@ -366,6 +369,7 @@ export class Context {
     readonly features: SDKFeature[];
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
+    private readonly urlMap: { [key in Service]: string };
 
     constructor(config: Configuration) {
         this.apiKey = config.apiKey;
@@ -378,6 +382,12 @@ export class Context {
         this.features = config.features ?? [SDKFeature.PUSH];
 
         this.subscribers = {};
+
+        this.urlMap = {
+            [Service.PUSH]: "https://push-" + config.region + ".kumulos.com",
+            [Service.EVENTS]: "https://events-" + config.region + ".kumulos.com",
+            [Service.DDL]: "https://links-" + config.region + ".kumulos.com",
+        };
     }
 
     subscribe(event: SdkEventType, handler: SdkEventHandler) {
@@ -408,6 +418,10 @@ export class Context {
     hasFeature(feature: SDKFeature) {
         return this.features.includes(feature);
     }
+
+    urlForService(service: Service) : string {
+        return this.urlMap[service];
+    }
 }
 
 export function assertConfigValid(config: any) {
@@ -426,7 +440,7 @@ export function assertConfigValid(config: any) {
 }
 
 function assertPushConfigValid(config: any) {
-    const requiredStringProps = ['apiKey', 'secretKey', 'vapidPublicKey'];
+    const requiredStringProps = ['region', 'apiKey', 'secretKey', 'vapidPublicKey'];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
             throw `Required configuration key '${prop}' must be non-empty string`;
@@ -529,7 +543,7 @@ export async function trackEvent(
         }
     ];
 
-    const url = `${EVENTS_BASE_URL}/v1/app-installs/${installId}/events`;
+    const url = `${ctx.urlForService(Service.EVENTS)}/v1/app-installs/${installId}/events`;
 
     ctx.broadcast('eventTracked', events);
 

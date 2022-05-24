@@ -1,8 +1,8 @@
 import {
     Context,
     EventType,
-    PUSH_BASE_URL,
     PlatformConfig,
+    Service,
     trackEvent
 } from '..';
 import { PushOpsManager, TokenType } from '.';
@@ -24,7 +24,7 @@ export default class SafariPushManager implements PushOpsManager {
     requestNotificationPermission(
         ctx: Context
     ): Promise<NotificationPermission> {
-        const svcUrl = `${PUSH_BASE_URL}/safari/${ctx.apiKey}`;
+        const svcUrl = `${ctx.urlForService(Service.PUSH)}/safari/${ctx.apiKey}`;
 
         const deferred = defer<NotificationPermission>();
 
