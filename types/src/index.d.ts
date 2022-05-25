@@ -3,8 +3,8 @@ import { KumulosPushNotification } from './core/push';
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
     onPushOpened?: (payload: KumulosPushNotification) => void;
-    installId: InstallId;
-    userId?: UserId;
+    originalVisitorId: InstallId;
+    customerId?: UserId;
 }
 export default class Kumulos {
     private readonly config;

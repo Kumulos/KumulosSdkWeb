@@ -384,9 +384,9 @@ export class Context {
         this.subscribers = {};
 
         this.urlMap = {
-            [Service.PUSH]: "https://push-" + config.region + ".kumulos.com",
-            [Service.EVENTS]: "https://events-" + config.region + ".kumulos.com",
-            [Service.DDL]: "https://links-" + config.region + ".kumulos.com",
+            [Service.PUSH]: `https://push-${config.region}.kumulos.com`,
+            [Service.EVENTS]: `https://events-${config.region}.kumulos.com`,
+            [Service.DDL]: `https://links-${config.region}.kumulos.com`,
         };
     }
 
