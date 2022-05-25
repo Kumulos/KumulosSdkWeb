@@ -76,3 +76,5 @@ To get started with development, simply clone this repo and open the project to 
 ## License
 
 This project is licensed under the MIT license with portions licensed under the Apache license, version 2.0. See our LICENSE file and individual source files for more information.
+
+bam
