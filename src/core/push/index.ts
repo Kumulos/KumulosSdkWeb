@@ -1,4 +1,4 @@
-import { Context, SystemEventType, trackEvent } from '..';
+import { Context, EventType, trackEvent } from '..';
 import { getBrowserName, parseQueryString } from '../utils';
 
 import SafariPushManager from './safari';
@@ -93,7 +93,7 @@ export function trackOpenFromQuery(ctx: Context) {
         return;
     }
 
-    trackEvent(ctx, SystemEventType.MESSAGE_OPENED, {
+    trackEvent(ctx, EventType.MESSAGE_OPENED, {
         type: MessageType.PUSH,
         id: Number(params['knid'])
     });

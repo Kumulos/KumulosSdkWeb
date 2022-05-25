@@ -1,4 +1,4 @@
-import { Context, SystemEventType, trackEvent } from '..';
+import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
 import { base64UrlEncode, cyrb53, getBrowserName } from '../utils';
 import { get, set } from '../storage';
@@ -85,7 +85,7 @@ export default class W3cPushManager implements PushOpsManager {
             return;
         }
 
-        await trackEvent(ctx, SystemEventType.PUSH_REGISTERED, {
+        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
             type: TokenType.W3C,
             token: sub
         });

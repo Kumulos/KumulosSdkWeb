@@ -27,7 +27,8 @@ type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
     };
 };
 
-export enum SystemEventType {
+//only system events
+export enum EventType {
     MESSAGE_DELIVERED = 'k.message.delivered',
     MESSAGE_OPENED = 'k.message.opened',
     PUSH_REGISTERED = 'k.push.deviceRegistered',
@@ -506,13 +507,13 @@ export async function associateUser(
         attributes
     };
 
-    return trackEvent(ctx, SystemEventType.USER_ASSOCIATED, props).then(_ => {});
+    return trackEvent(ctx, EventType.USER_ASSOCIATED, props).then(_ => {});
 }
 
 export async function clearUserAssociation(ctx: Context): Promise<void> {
     const currentUserId = await getUserId();
 
-    trackEvent(ctx, SystemEventType.USER_ASSOCIATION_CLEARED, {
+    trackEvent(ctx, EventType.USER_ASSOCIATION_CLEARED, {
         oldUserIdentifier: currentUserId
     });
 
@@ -562,7 +563,7 @@ export async function trackEvent(
 }
 
 function isSystemEvent(type: string){
-    return (<any>Object).values(SystemEventType).includes(type);
+    return (<any>Object).values(EventType).includes(type);
 }
 
 export async function trackInstallDetails(ctx: Context): Promise<void> {
@@ -616,7 +617,7 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
         return Promise.reject(e);
     }
 
-    return trackEvent(ctx, SystemEventType.INSTALL_TRACKED, payload)
+    return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
         .then(() => set('detailsHash', hash))
         .then(() => void 0);
 }
