@@ -5,9 +5,9 @@ name: CI
 
 on:
   push:
-    branches: [ optimobile-web ]
+    branches: [ master ]
   pull_request:
-    branches: [ optimobile-web ]
+    branches: [ master ]
 
 jobs:
   build:
