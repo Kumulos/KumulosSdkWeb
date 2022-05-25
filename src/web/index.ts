@@ -1,6 +1,4 @@
 import Kumulos from '../index';
-import { SystemEventType } from '../core';
-import { getPageViewedProps } from './utils';
 import { isBrowserSupported } from '../core/utils';
 
 type CmdFn = (k: Kumulos) => void;
