@@ -75,7 +75,7 @@ module.exports = [
         target: ['web', 'es5'],
         mode: environment,
         entry: {
-            'web-bundle': './src/web/index.ts'
+            'optimove-web-bundle': './src/web/index.ts'
         },
         devtool,
         module: moduleCfg,

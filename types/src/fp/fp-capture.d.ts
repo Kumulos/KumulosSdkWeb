@@ -1,5 +1,5 @@
-import { Component } from 'preact';
 import { FingerprintComponents } from './types';
+import { Component } from 'preact';
 declare enum CaptureState {
     IDLE = 0,
     CAPTURING = 1
