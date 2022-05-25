@@ -13,7 +13,10 @@ Start by adding the following snippet to your page template:
     Kumulos('init', {
         apiKey: 'YOUR_API_KEY',
         secretKey: 'YOUR_SECRET_KEY',
-        vapidPublicKey: 'YOUR_VAPID_KEY'
+        vapidPublicKey: 'YOUR_VAPID_KEY',
+        region: 'eu-central-1',
+        installId: 'original-visitor-1-id',
+        userId: 'optional-customer-1-id',
     });
 
     // Request notification permission and register for web push
@@ -46,7 +49,10 @@ import Kumulos from '@kumulos/web';
 const kumulosClient = new Kumulos({
     apiKey: 'YOUR_API_KEY',
     secretKey: 'YOUR_SECRET_KEY',
-    vapidPublicKey: 'YOUR_VAPID_KEY'
+    vapidPublicKey: 'YOUR_VAPID_KEY',
+    region: 'eu-central-1',
+    installId: 'original-visitor-1-id',
+    userId: 'optional-customer-1-id',
 });
 
 // Request notification permission and register for web push
