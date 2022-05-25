@@ -33,8 +33,8 @@ import RootFrame from './core/root-frame';
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
     onPushOpened?: (payload: KumulosPushNotification) => void;
-    installId: InstallId;
-    userId?: UserId;
+    originalVisitorId: InstallId;
+    customerId?: UserId;
 }
 
 export default class Kumulos {
@@ -96,19 +96,19 @@ export default class Kumulos {
     private async maybePersistInstallIdAndUserId(config: KumulosConfig) : Promise<void> {
         await getInstallId()
             .then(installId => {
-                if (installId !== config.installId){
-                    setInstallId(config.installId);
+                if (installId !== config.originalVisitorId){
+                    setInstallId(config.originalVisitorId);
                 }
             });
 
-        if (config.userId === undefined){
+        if (config.customerId === undefined){
             return Promise.resolve();
         }
 
         await getUserId()
             .then(userId => {
-                if (userId !== config.userId){
-                    associateUser(this.context, config.userId!);
+                if (userId !== config.customerId){
+                    associateUser(this.context, config.customerId!);
                 }
             })
 
