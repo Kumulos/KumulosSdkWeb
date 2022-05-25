@@ -465,7 +465,6 @@ function assertPushConfigValid(config: any) {
 }
 
 let installIdPromise: Promise<InstallId> | undefined = undefined;
-let installIdSettingPromise: Promise<void> | undefined = undefined;
 
 export function getInstallId(): Promise<InstallId> {
     if (installIdPromise) {
