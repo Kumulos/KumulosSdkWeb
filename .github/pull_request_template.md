@@ -23,7 +23,16 @@ Build:
 -   [ ] `npm run dist`
 -   [ ] Commit resulting `dist/` changes
 
-Release:
+Release (Optimove Web SDK):
+
+-   [ ] Squash and merge to optimobile-web
+-   [ ] Delete branch once merged
+-   [ ] Create tag from optimobile-web matching chosen version
+-   [ ] Fill out release notes
+-   [ ] Run `npm publish --access public`
+-   [ ] Publish `dist/worker.js` and `dist/optimove-web-bundle.js` to CDN (re-run `npm run dist` locally to update `optimove-web-bundle.js`)
+
+Release (Kumulos Web SDK):
 
 -   [ ] Squash and merge to master
 -   [ ] Delete branch once merged
