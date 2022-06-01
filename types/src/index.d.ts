@@ -13,8 +13,9 @@ export default class Kumulos {
     private readonly promptManager?;
     private readonly ddlManager?;
     private readonly rootFrame;
-    constructor(config: KumulosConfig);
-    private maybePersistInstallIdAndUserId;
+    static buildInstance(config: KumulosConfig): Promise<Kumulos>;
+    private constructor();
+    private static maybePersistInstallIdAndUserId;
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void>;
     trackEvent(type: string, properties?: PropsObject): Promise<void>;
     pushRegister(): Promise<void>;

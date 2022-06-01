@@ -12,7 +12,7 @@ interface Win extends Window {
 
 declare var window: Win;
 
-function main() {
+async function main() {
     if (!window.Kumulos?.q) {
         return;
     }
@@ -37,7 +37,7 @@ function main() {
         );
     }
 
-    const instance = new Kumulos(init[1]);
+    const instance = await Kumulos.buildInstance(init[1]);
     const executor = function(cmd: Cmd, ...args: any[]) {
         try {
             if (typeof cmd === 'function') {

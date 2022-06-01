@@ -485,7 +485,9 @@ export function getInstallId(): Promise<InstallId> {
 }
 
 export function setInstallId(installId: InstallId) : Promise<InstallId>{
-    return set('installId', installId);
+    installIdPromise = set('installId', installId);
+
+    return installIdPromise;
 }
 
 export function getUserId(): Promise<UserId> {
