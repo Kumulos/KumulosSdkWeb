@@ -51,8 +51,8 @@ const kumulosClient = new Kumulos({
     secretKey: 'YOUR_SECRET_KEY',
     vapidPublicKey: 'YOUR_VAPID_KEY',
     region: 'eu-central-1',
-    installId: 'original-visitor-1-id',
-    userId: 'optional-customer-1-id',
+    originalVisitorId: 'original-visitor-1-id',
+    customerId: 'optional-customer-1-id',
 });
 
 // Request notification permission and register for web push
