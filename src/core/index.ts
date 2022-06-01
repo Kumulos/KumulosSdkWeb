@@ -386,7 +386,7 @@ export class Context {
         this.urlMap = {
             [Service.PUSH]: `https://push-${config.region}.kumulos.com`,
             [Service.EVENTS]: `https://events-${config.region}.kumulos.com`,
-            [Service.DDL]: `https://links-${config.region}.kumulos.com`,
+            [Service.DDL]: `https://links-${config.region}.kumulos.com`
         };
     }
 
@@ -419,7 +419,7 @@ export class Context {
         return this.features.includes(feature);
     }
 
-    urlForService(service: Service) : string {
+    urlForService(service: Service): string {
         return this.urlMap[service];
     }
 }
@@ -440,7 +440,12 @@ export function assertConfigValid(config: any) {
 }
 
 function assertPushConfigValid(config: any) {
-    const requiredStringProps = ['region', 'apiKey', 'secretKey', 'vapidPublicKey'];
+    const requiredStringProps = [
+        'region',
+        'apiKey',
+        'secretKey',
+        'vapidPublicKey'
+    ];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
             throw `Required configuration key '${prop}' must be non-empty string`;
@@ -484,7 +489,7 @@ export function getInstallId(): Promise<InstallId> {
     return installIdPromise;
 }
 
-export function setInstallId(installId: InstallId) : Promise<InstallId>{
+export function setInstallId(installId: InstallId): Promise<InstallId> {
     installIdPromise = set('installId', installId);
 
     return installIdPromise;
@@ -551,19 +556,20 @@ export async function trackEvent(
 
     ctx.broadcast('eventTracked', events);
 
-    if (!isSystemEvent(type)){
+    if (!isSystemEvent(type)) {
         return Promise.resolve();
     }
 
-    const url = `${ctx.urlForService(Service.EVENTS)}/v1/app-installs/${installId}/events`;
+    const url = `${ctx.urlForService(
+        Service.EVENTS
+    )}/v1/app-installs/${installId}/events`;
     return authedFetch(ctx, url, {
         method: 'POST',
         body: JSON.stringify(events)
     });
-
 }
 
-function isSystemEvent(type: string){
+function isSystemEvent(type: string) {
     return (<any>Object).values(EventType).includes(type);
 }
 

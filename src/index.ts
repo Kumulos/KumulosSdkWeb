@@ -45,7 +45,7 @@ export default class Kumulos {
     private readonly ddlManager?: DdlManager;
     private readonly rootFrame: RootFrame;
 
-    public static async buildInstance(config: KumulosConfig){
+    public static async buildInstance(config: KumulosConfig) {
         assertConfigValid(config);
 
         const context = new Context(config);
@@ -55,7 +55,6 @@ export default class Kumulos {
     }
 
     private constructor(context: Context, config: KumulosConfig) {
-
         this.context = context;
         this.config = config;
 
@@ -100,24 +99,25 @@ export default class Kumulos {
         }
     }
 
-    private static async maybePersistInstallIdAndUserId(context: Context, config: KumulosConfig) : Promise<void> {
-        await getInstallId()
-            .then(installId => {
-                if (installId !== config.originalVisitorId){
-                    return setInstallId(config.originalVisitorId);
-                }
-            });
+    private static async maybePersistInstallIdAndUserId(
+        context: Context,
+        config: KumulosConfig
+    ): Promise<void> {
+        await getInstallId().then(installId => {
+            if (installId !== config.originalVisitorId) {
+                return setInstallId(config.originalVisitorId);
+            }
+        });
 
-        if (config.customerId === undefined){
+        if (config.customerId === undefined) {
             return;
         }
 
-        await getUserId()
-            .then(userId => {
-                if (userId !== config.customerId){
-                    return associateUser(context, config.customerId!);
-                }
-            })
+        await getUserId().then(userId => {
+            if (userId !== config.customerId) {
+                return associateUser(context, config.customerId!);
+            }
+        });
     }
 
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {

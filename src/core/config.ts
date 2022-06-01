@@ -72,7 +72,9 @@ export async function loadDdlConfig(
 
     try {
         return await loadConfig<DdlPromptConfig[]>(
-            `${ctx.urlForService(Service.DDL)}/v1/banners?webInstallId=${webInstallId}`,
+            `${ctx.urlForService(
+                Service.DDL
+            )}/v1/banners?webInstallId=${webInstallId}`,
             ConfigCacheType.DDL,
             ctx
         );

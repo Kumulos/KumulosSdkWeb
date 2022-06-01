@@ -8,7 +8,9 @@ export async function sendClickRequest(
     bannerUid: string,
     fingerprint: FingerprintComponents
 ): Promise<Response> {
-    const url = `${ctx.urlForService(Service.DDL)}/v1/banners/${bannerUid}/taps`;
+    const url = `${ctx.urlForService(
+        Service.DDL
+    )}/v1/banners/${bannerUid}/taps`;
     const webInstallId = await getInstallId();
 
     return authedFetch(ctx, url, {
