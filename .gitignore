@@ -3,4 +3,5 @@ node_modules
 dist/*
 !dist/index.js
 !dist/worker.js
+!dist/optimove-web-bundle.js
 *.spec.d.ts
