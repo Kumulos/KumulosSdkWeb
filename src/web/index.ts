@@ -26,14 +26,14 @@ async function main() {
 
     if (!isBrowserSupported(init[1].features)) {
         console.warn(
-            'Kumulos: this browser does not support all required features, aborting initialization...'
+            'Optimobile: this browser does not support all required features, aborting initialization...'
         );
         return;
     }
 
     if (location.protocol !== 'https:') {
         console.warn(
-            'Kumulos: this page is not served over HTTPS, some features may be unavailable...'
+            'Optimobile: this page is not served over HTTPS, some features may be unavailable...'
         );
     }
 
