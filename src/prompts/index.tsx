@@ -189,17 +189,18 @@ export class PromptManager {
     }
 
     private async handlePromptActions(prompt: PushPromptConfig) {
-        if (!prompt.actions) {
-            return;
-        }
+        // Note: no prompts with such action can be created from ui for optimove apps
+        // if (!prompt.actions) {
+        //     return;
+        // }
 
-        console.info('Will handle actions: ', prompt.actions);
+        // console.info('Will handle actions: ', prompt.actions);
 
-        const channelSubMgr = this.getChannelSubscriptionManager();
-        this.channels = await channelSubMgr.listChannels();
+        // const channelSubMgr = this.getChannelSubscriptionManager();
+        // this.channels = await channelSubMgr.listChannels();
 
-        await this.handleChannelSubActions(prompt);
-        await this.handleChannelPostActions(prompt);
+        // await this.handleChannelSubActions(prompt);
+        // await this.handleChannelPostActions(prompt);
     }
 
     private async handleChannelSubActions(
@@ -390,7 +391,8 @@ export class PromptManager {
                     this.context
                 );
                 await this.loadPrompts();
-                this.channels = await this.getChannelSubscriptionManager().listChannels();
+                // Note: channels irrelevant for optimove apps
+                //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
                 break;
             case 'ready':
@@ -425,22 +427,23 @@ export class PromptManager {
             this.prompts = { ...(this.platformConfig.prompts || {}) };
         }
 
-        for (let id in this.prompts) {
-            const hasChannelOp = Boolean(
-                this.prompts[id].actions?.filter(
-                    a => a.type === 'subscribeToChannel'
-                )?.length
-            );
+        //Note: no prompts with such action can be created from ui for optimove apps
+        // for (let id in this.prompts) {
+        //     const hasChannelOp = Boolean(
+        //         this.prompts[id].actions?.filter(
+        //             a => a.type === 'subscribeToChannel'
+        //         )?.length
+        //     );
 
-            if (hasChannelOp) {
-                try {
-                    this.channels = await this.getChannelSubscriptionManager().listChannels();
-                } catch (e) {
-                    // Noop
-                }
-                break;
-            }
-        }
+        //     if (hasChannelOp) {
+        //         try {
+        //             this.channels = await this.getChannelSubscriptionManager().listChannels();
+        //         } catch (e) {
+        //             // Noop
+        //         }
+        //         break;
+        //     }
+        // }
 
         return Promise.resolve();
     }
