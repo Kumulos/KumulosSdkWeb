@@ -27,7 +27,7 @@ Release (Optimove Web SDK):
 
 -   [ ] Squash and merge to optimobile-web
 -   [ ] Delete branch once merged
--   [ ] Publish `dist/worker.js` and `dist/optimove-web-bundle.js` to CDN (re-run `npm run dist` locally to update `optimove-web-bundle.js`)
+-   [ ] Publish `dist/optimove-worker.js` and `dist/optimove-web-bundle.js` to CDN (re-run `npm run dist` locally to update `optimove-web-bundle.js`)
 
 Release (Kumulos Web SDK):
 
