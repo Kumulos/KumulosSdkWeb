@@ -4,6 +4,8 @@ import { del, get, set } from './storage';
 import { Channel } from './channels';
 
 const SDK_TYPE = 104;
+// Backwards compatibility with optimove SDK not including version in Optimobile config
+const DEFAULT_SDK_VERSION = '2.0.17';
 
 export type InstallId = string;
 export type UserId = string;
@@ -574,8 +576,9 @@ function isSystemEvent(type: string) {
 
 export async function trackInstallDetails(
     ctx: Context,
-    sdkVersion: string
+    optionalSdkVersion?: string
 ): Promise<void> {
+    const sdkVersion = optionalSdkVersion || DEFAULT_SDK_VERSION;
     const payload = {
         app: {
             bundle: location.host,

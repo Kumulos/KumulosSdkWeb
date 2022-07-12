@@ -35,7 +35,7 @@ interface KumulosConfig extends Configuration {
     onPushOpened?: (payload: KumulosPushNotification) => void;
     originalVisitorId: InstallId;
     customerId?: UserId;
-    sdkVersion: string;
+    sdkVersion?: string;
 }
 
 export default class Kumulos {
