@@ -12,7 +12,7 @@ Prepare:
 
 -   [ ] Detail any breaking changes. Breaking changes require a new major version number
 
-Bump versions in:
+Bump versions in (Kumulos Web SDK only):
 
 -   [ ] package.json
 -   [ ] package-lock.json (run `npm install` after editing package.json)
