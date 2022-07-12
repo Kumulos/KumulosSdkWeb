@@ -3,8 +3,7 @@ import { del, get, set } from './storage';
 
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.11.1';
-const SDK_TYPE = 10;
+const SDK_TYPE = 104;
 
 export type InstallId = string;
 export type UserId = string;
@@ -573,7 +572,10 @@ function isSystemEvent(type: string) {
     return (<any>Object).values(EventType).includes(type);
 }
 
-export async function trackInstallDetails(ctx: Context): Promise<void> {
+export async function trackInstallDetails(
+    ctx: Context,
+    sdkVersion: string
+): Promise<void> {
     const payload = {
         app: {
             bundle: location.host,
@@ -582,7 +584,7 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
         },
         sdk: {
             id: SDK_TYPE,
-            version: SDK_VERSION
+            version: sdkVersion
         },
         runtime: {
             id: 8,
@@ -606,7 +608,7 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
     };
 
     const hashParts = [
-        SDK_VERSION,
+        sdkVersion,
         payload.app.bundle,
         payload.device.tz,
         payload.device.locale,
