@@ -294,7 +294,7 @@ export declare type KumulosEvent = {
 };
 export declare type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
-export declare function trackInstallDetails(ctx: Context): Promise<void>;
+export declare function trackInstallDetails(ctx: Context, optionalSdkVersion?: string): Promise<void>;
 export interface ChannelListItem {
     channel: Channel;
     checked: boolean;

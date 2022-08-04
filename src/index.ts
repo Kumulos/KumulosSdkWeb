@@ -35,6 +35,7 @@ interface KumulosConfig extends Configuration {
     onPushOpened?: (payload: KumulosPushNotification) => void;
     originalVisitorId: InstallId;
     customerId?: UserId;
+    sdkVersion?: string;
 }
 
 export default class Kumulos {
@@ -60,7 +61,7 @@ export default class Kumulos {
 
         persistConfig(config);
 
-        trackInstallDetails(this.context);
+        trackInstallDetails(this.context, config.sdkVersion);
 
         this.rootFrame = new RootFrame();
 
