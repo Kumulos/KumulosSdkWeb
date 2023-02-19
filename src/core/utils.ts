@@ -182,7 +182,9 @@ export function registerServiceWorker(
         );
     }
 
-    return navigator.serviceWorker.register(path).then(() => {
+    const updatedPath = new URL('some/worker.js', location.origin).href; 
+
+    return navigator.serviceWorker.register(updatedPath).then(() => {
         return navigator.serviceWorker.ready;
     });
 }
