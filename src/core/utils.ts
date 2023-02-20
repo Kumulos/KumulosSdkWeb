@@ -173,20 +173,18 @@ export function base64UrlEncode(buffer: ArrayBuffer): string {
     return urlVariant;
 }
 
-export function registerServiceWorker(
-    path: string
-): Promise<ServiceWorkerRegistration> {
+export async function registerServiceWorker(workerPath: string){
     if (!('serviceWorker' in navigator)) {
-        return Promise.reject(
-            'ServiceWorker is not supported in this browser, aborting...'
-        );
+        console.error('ServiceWorker is not supported in this browser, aborting...');
+        return;
     }
 
-    const updatedPath = new URL('some/worker.js', location.origin).href; 
-
-    return navigator.serviceWorker.register(updatedPath).then(() => {
-        return navigator.serviceWorker.ready;
-    });
+    const updatedPath = new URL(workerPath, location.origin).href; 
+    try {
+        await navigator.serviceWorker.register(updatedPath);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export function defer<T>() {

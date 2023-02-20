@@ -2,7 +2,7 @@ import { PushPayload } from '../core/push';
 export declare enum WorkerMessageType {
     KPushReceived = "KPushReceived"
 }
-export declare type WorkerMessage = {
+export type WorkerMessage = {
     type: WorkerMessageType.KPushReceived;
     data: PushPayload;
 };

@@ -1,4 +1,4 @@
-declare type Message<T, D = never> = {
+type Message<T, D = never> = {
     type: T;
 } | {
     type: T;
@@ -11,9 +11,9 @@ export declare enum ClientMessageType {
     READY = "READY",
     FINGERPRINT_GENERATED = "FINGERPRINT_GENERATED"
 }
-export declare type FingerprintComponents = Record<string, string>;
-export declare type HostMessage = Message<HostMessageType.REQUEST_FINGERPRINT>;
-export declare type ClientMessage = Message<ClientMessageType.READY> | Message<ClientMessageType.FINGERPRINT_GENERATED, {
+export type FingerprintComponents = Record<string, string>;
+export type HostMessage = Message<HostMessageType.REQUEST_FINGERPRINT>;
+export type ClientMessage = Message<ClientMessageType.READY> | Message<ClientMessageType.FINGERPRINT_GENERATED, {
     components: FingerprintComponents;
 }>;
 export {};

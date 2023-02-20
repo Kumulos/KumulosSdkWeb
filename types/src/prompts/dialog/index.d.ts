@@ -10,6 +10,6 @@ export declare class Dialog extends Component<PromptUiProps<AlertPromptConfig | 
     onRequestNativePrompt: () => void;
     onRequestCancel: () => void;
     onSelectedChannelChanged: (channelList: ChannelListItem[]) => void;
-    renderAlert: (uiContext?: UIContextState | undefined) => h.JSX.Element | null;
+    renderAlert: (uiContext?: UIContextState) => h.JSX.Element | null;
     render(): h.JSX.Element;
 }

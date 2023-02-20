@@ -1,15 +1,15 @@
 import { Channel } from './channels';
-export declare type InstallId = string;
-export declare type UserId = string;
-declare type Jsonish = string | number | boolean | null | {
+export type InstallId = string;
+export type UserId = string;
+type Jsonish = string | number | boolean | null | {
     [key: string]: Jsonish;
 } | {
     toJSON: () => any;
 } | Jsonish[] | undefined;
-export declare type PropsObject = {
+export type PropsObject = {
     [key: string]: Jsonish;
 };
-declare type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
+type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
     [P1 in K1]: {
         [P2 in K2]: T[K1][P2];
     };
@@ -28,9 +28,9 @@ export declare enum PromptTypeName {
     BANNER = "banner",
     DDL_BANNER = "ddl_banner"
 }
-export declare type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
-export declare type FilterValue = number | boolean | string | string[];
-export declare type PropFilter = [string, FilterOperator, FilterValue];
+export type FilterOperator = 'in' | 'IN' | '=' | '>' | '<' | '>=' | '<=';
+export type FilterValue = number | boolean | string | string[];
+export type PropFilter = [string, FilterOperator, FilterValue];
 interface PromptTrigger {
     event: string;
     afterSeconds?: number;
@@ -52,7 +52,7 @@ interface PromptOverlayConfig {
         text: string;
     };
 }
-declare type PromptSilentOverlayConfig = NestedPick<PromptOverlayConfig, 'labels', 'body'> & NestedPick<PromptOverlayConfig, 'colors', 'text'>;
+type PromptSilentOverlayConfig = NestedPick<PromptOverlayConfig, 'labels', 'body'> & NestedPick<PromptOverlayConfig, 'colors', 'text'>;
 export interface ChannelDialogLabelsConfig {
     heading: string;
     confirmAction: string;
@@ -98,7 +98,7 @@ interface RemindPromptAction {
     type: UiActionType.REMIND;
     delay: PromptReminderDelayConfig;
 }
-export declare type PromptAction = ChannelSubAction | UserChannelSelectInlineAction | UserChannelSelectDialogAction;
+export type PromptAction = ChannelSubAction | UserChannelSelectInlineAction | UserChannelSelectDialogAction;
 export declare enum ReminderTimeUnit {
     HOURS = "hours",
     DAYS = "days"
@@ -147,14 +147,14 @@ interface TooltipConfig {
         subscribe: string;
     };
 }
-declare type DialogLabelConfig = {
+type DialogLabelConfig = {
     heading: string;
     body: string;
     declineAction: string;
     acceptAction: string;
 };
-declare type NamedDialogLabelConfig<T extends PromptTypeName> = Record<T, DialogLabelConfig>;
-declare type DialogColorConfig = {
+type NamedDialogLabelConfig<T extends PromptTypeName> = Record<T, DialogLabelConfig>;
+type DialogColorConfig = {
     fg: string;
     bg: string;
     declineActionFg: string;
@@ -162,11 +162,11 @@ declare type DialogColorConfig = {
     acceptActionFg: string;
     acceptActionBg: string;
 };
-declare type NamedDialogColorConfig<T extends PromptTypeName> = Record<T, DialogColorConfig>;
+type NamedDialogColorConfig<T extends PromptTypeName> = Record<T, DialogColorConfig>;
 interface ToastMessage {
     thanksForSubscribing: string;
 }
-declare type BellLabelConfig = ToastMessage & TooltipConfig;
+type BellLabelConfig = ToastMessage & TooltipConfig;
 export interface BellColorConfig {
     bell: {
         fg: string;
@@ -179,8 +179,8 @@ export interface BellPromptConfig extends BasePromptConfig {
     colors?: BellColorConfig;
     position: PromptPosition.BOTTOM_LEFT | PromptPosition.BOTTOM_RIGHT;
 }
-declare type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> & ToastMessage;
-declare type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
+type AlertLabelConfig = NamedDialogLabelConfig<PromptTypeName.ALERT> & ToastMessage;
+type AlertColorConfig = NamedDialogColorConfig<PromptTypeName.ALERT>;
 export interface AlertPromptConfig extends BasePromptConfig, WithImageUrl, PromptUiActions {
     type: PromptTypeName.ALERT;
     labels: AlertLabelConfig;
@@ -188,8 +188,8 @@ export interface AlertPromptConfig extends BasePromptConfig, WithImageUrl, Promp
     position: PromptPosition.TOP | PromptPosition.CENTER;
     backgroundMask?: BackgroundMaskConfig;
 }
-declare type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> & ToastMessage;
-declare type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
+type BannerLabelConfig = NamedDialogLabelConfig<PromptTypeName.BANNER> & ToastMessage;
+type BannerColorConfig = NamedDialogColorConfig<PromptTypeName.BANNER>;
 export interface BannerPromptConfig extends BasePromptConfig, WithImageUrl, PromptUiActions {
     type: PromptTypeName.BANNER;
     labels: BannerLabelConfig;
@@ -201,19 +201,19 @@ export interface AppRating {
     rating: number;
     ratingCount: number;
 }
-declare type DdlDialogColorConfig = DialogColorConfig & {
+type DdlDialogColorConfig = DialogColorConfig & {
     ratingFg: string;
 };
-export declare type OpenStoreUiAction = {
+export type OpenStoreUiAction = {
     type: UiActionType.DDL_OPEN_STORE;
     url: string;
     deepLinkUrl: string;
 };
-declare type OpenDeepLinkUiAction = {
+type OpenDeepLinkUiAction = {
     type: UiActionType.DDL_OPEN_DEEPLINK;
     deepLinkUrl: string;
 };
-export declare type DdlUiActions = PromptUiActions & {
+export type DdlUiActions = PromptUiActions & {
     uiActions: {
         accept: OpenStoreUiAction | OpenDeepLinkUiAction;
     };
@@ -224,10 +224,10 @@ export interface DdlBannerPromptConfig extends BasePromptConfig, WithImageUrl, D
     colors: DdlDialogColorConfig;
     appRating?: AppRating;
 }
-export declare type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
-export declare type DdlPromptConfig = DdlBannerPromptConfig;
-export declare type PromptConfig = PushPromptConfig | DdlPromptConfig;
-export declare type PromptConfigs<T extends PromptConfig> = Record<string, T>;
+export type PushPromptConfig = BellPromptConfig | AlertPromptConfig | BannerPromptConfig;
+export type DdlPromptConfig = DdlBannerPromptConfig;
+export type PromptConfig = PushPromptConfig | DdlPromptConfig;
+export type PromptConfigs<T extends PromptConfig> = Record<string, T>;
 export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
@@ -253,15 +253,15 @@ export interface Configuration {
     autoResubscribe?: boolean;
     features?: SDKFeature[];
 }
-export declare type PromptReminder = {
+export type PromptReminder = {
     declinedOn: number;
 } | 'suppressed';
-declare type SdkEventType = 'eventTracked';
-export declare type SdkEvent<T = any> = {
+type SdkEventType = 'eventTracked';
+export type SdkEvent<T = any> = {
     type: SdkEventType;
     data: T;
 };
-declare type SdkEventHandler = (event: SdkEvent) => void;
+type SdkEventHandler = (event: SdkEvent) => void;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;
@@ -285,14 +285,14 @@ export declare function setInstallId(installId: InstallId): Promise<InstallId>;
 export declare function getUserId(): Promise<UserId>;
 export declare function associateUser(ctx: Context, id: UserId, attributes?: PropsObject): Promise<void>;
 export declare function clearUserAssociation(ctx: Context): Promise<void>;
-export declare type KumulosEvent = {
+export type KumulosEvent = {
     type: string;
     uuid: string;
     timestamp: number;
     userId: string;
     data?: PropsObject;
 };
-export declare type EventPayload = KumulosEvent[];
+export type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
 export declare function trackInstallDetails(ctx: Context, optionalSdkVersion?: string): Promise<void>;
 export interface ChannelListItem {
