@@ -53,7 +53,7 @@ export default class Kumulos {
 
         const kumulos = new Kumulos(context, config);
         kumulos.initialize();
-        
+
         return kumulos;
     }
 
@@ -86,11 +86,7 @@ export default class Kumulos {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
 
-        new PromptManager(
-            this,
-            this.context,
-            this.rootFrame
-        );
+        new PromptManager(this, this.context, this.rootFrame);
 
         this.maybeAddMessageEventListenerToSW();
         this.maybeFireOpenedHandler();

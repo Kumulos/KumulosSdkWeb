@@ -17,10 +17,14 @@ function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
     return subKey === vapidKey;
 }
 
-async function getActiveServiceWorkerReg(workerPath: string): Promise<ServiceWorkerRegistration> {
-    const pathWithOrigin = new URL(workerPath, location.origin).href; 
+async function getActiveServiceWorkerReg(
+    workerPath: string
+): Promise<ServiceWorkerRegistration> {
+    const pathWithOrigin = new URL(workerPath, location.origin).href;
 
-    const workerReg = await navigator.serviceWorker.getRegistration(pathWithOrigin);
+    const workerReg = await navigator.serviceWorker.getRegistration(
+        pathWithOrigin
+    );
 
     if (!workerReg) {
         return Promise.reject('No service worker registration');
@@ -59,8 +63,10 @@ export default class W3cPushManager implements PushOpsManager {
                 'Push notifications are not supported in this browser'
             );
         }
-        
-        const workerReg = await getActiveServiceWorkerReg(ctx.serviceWorkerPath);
+
+        const workerReg = await getActiveServiceWorkerReg(
+            ctx.serviceWorkerPath
+        );
         const existingSub = await workerReg.pushManager.getSubscription();
 
         if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
@@ -155,7 +161,9 @@ export default class W3cPushManager implements PushOpsManager {
             'pushExpiresAt'
         );
 
-        const workerReg = await getActiveServiceWorkerReg(ctx.serviceWorkerPath);
+        const workerReg = await getActiveServiceWorkerReg(
+            ctx.serviceWorkerPath
+        );
         const existingSub = await workerReg.pushManager.getSubscription();
 
         let existingSubHash = undefined;
