@@ -1,12 +1,24 @@
 import { Context, SDKFeature } from './index';
 
-type FeatureDependency = string | object | IDBFactory | PromiseConstructor | Notification | PushManager | ServiceWorkerContainer | SafariRemoteNotification;
+type FeatureDependency =
+    | string
+    | object
+    | IDBFactory
+    | PromiseConstructor
+    | Notification
+    | PushManager
+    | ServiceWorkerContainer
+    | SafariRemoteNotification;
 
-const CORE_FEATURE_DEPENDENCIES : FeatureDependency[] = [typeof Promise, typeof fetch, typeof indexedDB];
+const CORE_FEATURE_DEPENDENCIES: FeatureDependency[] = [
+    typeof Promise,
+    typeof fetch,
+    typeof indexedDB
+];
 
-const FEATURE_DEPENDENCY_CHECK : {[key in SDKFeature]: () => boolean} = {
-    'push': isBrowserSupportedForPush,
-    'ddl': isBrowserSupportedForDdl
+const FEATURE_DEPENDENCY_CHECK: { [key in SDKFeature]: () => boolean } = {
+    push: isBrowserSupportedForPush,
+    ddl: isBrowserSupportedForDdl
 };
 
 // See: https://stackoverflow.com/a/2117523
@@ -79,7 +91,8 @@ function isBrowserSupportedForDdl() {
 
 function checkRequired(coreDependencies: FeatureDependency[]) {
     return coreDependencies.reduce(
-        (supported: boolean, dependency: FeatureDependency) => supported && dependency !== 'undefined',
+        (supported: boolean, dependency: FeatureDependency) =>
+            supported && dependency !== 'undefined',
         true
     );
 }
@@ -173,13 +186,15 @@ export function base64UrlEncode(buffer: ArrayBuffer): string {
     return urlVariant;
 }
 
-export async function registerServiceWorker(workerPath: string){
+export async function registerServiceWorker(workerPath: string) {
     if (!('serviceWorker' in navigator)) {
-        console.error('ServiceWorker is not supported in this browser, aborting...');
+        console.error(
+            'ServiceWorker is not supported in this browser, aborting...'
+        );
         return;
     }
 
-    const updatedPath = new URL(workerPath, location.origin).href; 
+    const updatedPath = new URL(workerPath, location.origin).href;
     try {
         await navigator.serviceWorker.register(updatedPath);
     } catch (e) {
