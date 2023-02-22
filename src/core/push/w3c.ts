@@ -1,6 +1,6 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
-import { base64UrlEncode, cyrb53, getBrowserName } from '../utils';
+import { base64UrlEncode, cyrb53, getBrowserName, getFullUrl } from '../utils';
 import { get, set } from '../storage';
 
 const BLUR_EVENT_TIMEOUT_MILLIS = 1000;
@@ -20,10 +20,10 @@ function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
 async function getActiveServiceWorkerReg(
     workerPath: string
 ): Promise<ServiceWorkerRegistration> {
-    const pathWithOrigin = new URL(workerPath, location.origin).href;
+    const fullWorkerUrl = getFullUrl(workerPath);
 
     const workerReg = await navigator.serviceWorker.getRegistration(
-        pathWithOrigin
+        fullWorkerUrl
     );
 
     if (!workerReg) {

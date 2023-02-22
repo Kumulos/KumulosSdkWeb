@@ -194,12 +194,16 @@ export async function registerServiceWorker(workerPath: string) {
         return;
     }
 
-    const updatedPath = new URL(workerPath, location.origin).href;
+    const fullWorkerUrl = getFullUrl(workerPath);
     try {
-        await navigator.serviceWorker.register(updatedPath);
+        await navigator.serviceWorker.register(fullWorkerUrl);
     } catch (e) {
         console.error(e);
     }
+}
+
+export function getFullUrl(path: string) {
+    return new URL(path, location.origin).href;
 }
 
 export function defer<T>() {

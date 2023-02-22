@@ -93,12 +93,14 @@ export default class Kumulos {
     }
 
     private maybeAddMessageEventListenerToSW() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.addEventListener(
-                'message',
-                this.onWorkerMessage
-            );
+        if (!('serviceWorker' in navigator)) {
+            return;
         }
+
+        navigator.serviceWorker.addEventListener(
+            'message',
+            this.onWorkerMessage
+        );
     }
 
     private static async maybePersistInstallIdAndUserId(
