@@ -43,6 +43,7 @@ export default class Kumulos {
     private readonly context: Context;
     private readonly rootFrame: RootFrame;
 
+    private promptManager?: PromptManager;
     private ddlManager?: DdlManager;
 
     public static async buildInstance(config: KumulosConfig) {
@@ -86,7 +87,11 @@ export default class Kumulos {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
 
-        new PromptManager(this, this.context, this.rootFrame);
+        this.promptManager = new PromptManager(
+            this,
+            this.context,
+            this.rootFrame
+        );
 
         this.maybeAddMessageEventListenerToSW();
         this.maybeFireOpenedHandler();

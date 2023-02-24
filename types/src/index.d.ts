@@ -11,6 +11,7 @@ export default class Kumulos {
     private readonly config;
     private readonly context;
     private readonly rootFrame;
+    private promptManager?;
     private ddlManager?;
     static buildInstance(config: KumulosConfig): Promise<Kumulos>;
     private constructor();
