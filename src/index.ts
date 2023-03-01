@@ -41,10 +41,10 @@ interface KumulosConfig extends Configuration {
 export default class Kumulos {
     private readonly config: KumulosConfig;
     private readonly context: Context;
-    private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
-    private readonly promptManager?: PromptManager;
-    private readonly ddlManager?: DdlManager;
     private readonly rootFrame: RootFrame;
+
+    private promptManager?: PromptManager;
+    private ddlManager?: DdlManager;
 
     public static async buildInstance(config: KumulosConfig) {
         assertConfigValid(config);
@@ -52,40 +52,23 @@ export default class Kumulos {
         const context = new Context(config);
         await Kumulos.maybePersistInstallIdAndUserId(context, config);
 
-        return new Kumulos(context, config);
+        const kumulos = new Kumulos(context, config);
+        kumulos.initialize();
+
+        return kumulos;
     }
 
     private constructor(context: Context, config: KumulosConfig) {
         this.context = context;
         this.config = config;
-
-        persistConfig(config);
-
-        trackInstallDetails(this.context, config.sdkVersion);
-
         this.rootFrame = new RootFrame();
+    }
 
+    private initialize() {
+        persistConfig(this.config);
+        trackInstallDetails(this.context, this.config.sdkVersion);
         if (this.context.hasFeature(SDKFeature.PUSH)) {
-            trackOpenFromQuery(this.context);
-
-            this.serviceWorkerReg = registerServiceWorker(
-                this.context.serviceWorkerPath
-            );
-
-            this.promptManager = new PromptManager(
-                this,
-                this.context,
-                this.rootFrame
-            );
-
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.addEventListener(
-                    'message',
-                    this.onWorkerMessage
-                );
-            }
-
-            this.maybeFireOpenedHandler();
+            this.initializePushFeature();
         }
 
         if (this.context.hasFeature(SDKFeature.DDL)) {
@@ -98,6 +81,31 @@ export default class Kumulos {
 
             this.ddlManager = new DdlManager(this.context, this.rootFrame);
         }
+    }
+
+    private initializePushFeature() {
+        trackOpenFromQuery(this.context);
+        registerServiceWorker(this.context.serviceWorkerPath);
+
+        this.promptManager = new PromptManager(
+            this,
+            this.context,
+            this.rootFrame
+        );
+
+        this.maybeAddMessageEventListenerToSW();
+        this.maybeFireOpenedHandler();
+    }
+
+    private maybeAddMessageEventListenerToSW() {
+        if (!('serviceWorker' in navigator)) {
+            return;
+        }
+
+        navigator.serviceWorker.addEventListener(
+            'message',
+            this.onWorkerMessage
+        );
     }
 
     private static async maybePersistInstallIdAndUserId(

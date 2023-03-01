@@ -10,12 +10,14 @@ interface KumulosConfig extends Configuration {
 export default class Kumulos {
     private readonly config;
     private readonly context;
-    private readonly serviceWorkerReg?;
-    private readonly promptManager?;
-    private readonly ddlManager?;
     private readonly rootFrame;
+    private promptManager?;
+    private ddlManager?;
     static buildInstance(config: KumulosConfig): Promise<Kumulos>;
     private constructor();
+    private initialize;
+    private initializePushFeature;
+    private maybeAddMessageEventListenerToSW;
     private static maybePersistInstallIdAndUserId;
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void>;
     trackEvent(type: string, properties?: PropsObject): Promise<void>;
