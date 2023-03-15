@@ -122,24 +122,6 @@ export class PromptManager {
         this.setState('ready');
     };
 
-    private onRequestPostActionPrompt = async (
-        prompt: PushPromptConfig,
-        action: PromptAction
-    ) => {
-        if ('postaction' === this.state) {
-            return;
-        }
-
-        if ('userChannelSelectDialog' !== action.type) {
-            return;
-        }
-
-        this.currentlyRequestingPrompt = prompt;
-        this.currentPostAction = action;
-
-        this.setState('postaction');
-    };
-
     private onPromptAccepted = async (
         prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
