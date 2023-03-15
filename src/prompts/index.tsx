@@ -151,7 +151,6 @@ export class PromptManager {
         this.hideAndSuppressPrompts(prompt);
 
         if (this.subscriptionState === 'subscribed') {
-            await this.handlePromptActions(prompt);
             await this.handleUserChannelSelection(channelSelections);
 
             this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
@@ -186,74 +185,6 @@ export class PromptManager {
         if (subscriptionState !== 'unsubscribed') {
             this.activePrompts.forEach(p => this.hidePrompt(p));
         }
-    }
-
-    private async handlePromptActions(prompt: PushPromptConfig) {
-        // Note: no prompts with such action can be created from ui for optimove apps
-        // if (!prompt.actions) {
-        //     return;
-        // }
-
-        // console.info('Will handle actions: ', prompt.actions);
-
-        // const channelSubMgr = this.getChannelSubscriptionManager();
-        // this.channels = await channelSubMgr.listChannels();
-
-        // await this.handleChannelSubActions(prompt);
-        // await this.handleChannelPostActions(prompt);
-    }
-
-    private async handleChannelSubActions(
-        prompt: PushPromptConfig
-    ): Promise<void> {
-        if (undefined === prompt.actions) {
-            return;
-        }
-
-        const actions = prompt.actions.filter<ChannelSubAction>(
-            (action: PromptAction): action is ChannelSubAction =>
-                action.type === 'subscribeToChannel'
-        );
-
-        const uuidsToSubscribe = actions
-            .filter(action => {
-                const channeltoSub = this.channels.find(
-                    c => c.uuid === action.channelUuid && c.subscribed === false
-                );
-
-                if (undefined === channeltoSub) {
-                    console.info(
-                        `Unable to subscribe to channel '${action.channelUuid}' as it does not exist`
-                    );
-                    return false;
-                }
-
-                return true;
-            })
-            .map(action => action.channelUuid);
-
-        await this.getChannelSubscriptionManager().subscribe(uuidsToSubscribe);
-    }
-
-    private async handleChannelPostActions(
-        prompt: PushPromptConfig
-    ): Promise<void> {
-        if (undefined === prompt.actions) {
-            return;
-        }
-
-        // post actions only apply to `userChannelSelectDialog` actions
-        const actions = prompt.actions.filter<UserChannelSelectDialogAction>(
-            (action: PromptAction): action is UserChannelSelectDialogAction =>
-                action.type === 'userChannelSelectDialog'
-        );
-
-        if (!actions.length) {
-            return;
-        }
-
-        // currently only expecting 1 configured `userChannelSelectDialog` action
-        this.onRequestPostActionPrompt(prompt, actions[0]);
     }
 
     private async handleUserChannelSelection(
@@ -426,24 +357,6 @@ export class PromptManager {
         } else {
             this.prompts = { ...(this.platformConfig.prompts || {}) };
         }
-
-        //Note: no prompts with such action can be created from ui for optimove apps
-        // for (let id in this.prompts) {
-        //     const hasChannelOp = Boolean(
-        //         this.prompts[id].actions?.filter(
-        //             a => a.type === 'subscribeToChannel'
-        //         )?.length
-        //     );
-
-        //     if (hasChannelOp) {
-        //         try {
-        //             this.channels = await this.getChannelSubscriptionManager().listChannels();
-        //         } catch (e) {
-        //             // Noop
-        //         }
-        //         break;
-        //     }
-        // }
 
         return Promise.resolve();
     }
