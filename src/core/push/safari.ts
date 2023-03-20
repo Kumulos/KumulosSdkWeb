@@ -37,9 +37,6 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
-        // why again load platform config? does it change from the one received in the constructor?
-        // Does the ctx or some internal thing change?
-       // const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );
