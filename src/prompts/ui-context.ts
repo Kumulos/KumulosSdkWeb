@@ -7,4 +7,6 @@ export interface UIContextState {
     channelList: Channel[];
 }
 
+export const UndefinedStateUIContext = createContext<{} | undefined>(undefined);
+
 export const UIContext = createContext<UIContextState | undefined>(undefined);

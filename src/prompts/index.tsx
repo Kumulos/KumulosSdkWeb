@@ -1,15 +1,12 @@
-import { Channel, ChannelSubscriptionManager } from '../core/channels';
+import { ChannelSubscriptionManager } from '../core/channels';
 import {
     ChannelListItem,
-    ChannelSubAction,
     Context,
-    PlatformConfig,
     PromptAction,
     PromptConfig,
     PromptConfigs,
     PushPromptConfig,
-    SdkEvent,
-    UserChannelSelectDialogAction
+    SdkEvent
 } from '../core';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import getPushOpsManager, {
@@ -18,12 +15,10 @@ import getPushOpsManager, {
 } from '../core/push';
 import { h, render } from 'preact';
 
-import Kumulos from '..';
 import { PromptTriggerEventFilter } from './triggers';
-import { UIContext } from './ui-context';
+import { UndefinedStateUIContext } from './ui-context';
 import Ui from './ui';
 import { deferPromptActivation } from './utils';
-import { loadPlatformConfig } from '../core/config';
 import { maybePersistReminder } from './prompt-reminder';
 
 export type PromptManagerState =
@@ -41,34 +36,31 @@ export type PromptManagerState =
 // postaction -> ready
 
 export class PromptManager {
-    private readonly kumulosClient: Kumulos;
     private readonly context: Context;
     private readonly pushContainer: RootFrameContainer;
     private readonly triggerFilter: PromptTriggerEventFilter<PushPromptConfig>;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
-    private prompts: PromptConfigs<PushPromptConfig>;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
-    private channels: Channel[];
     private ui?: Ui;
-    private platformConfig?: PlatformConfig;
+    private publicKey?: string;
+    private prompts: PromptConfigs<PushPromptConfig>;
     private currentPostAction?: PromptAction;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
-    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
-        this.prompts = {};
+    constructor(ctx: Context, rootFrame: RootFrame, publicKey?: string, prompts?: PromptConfigs<PushPromptConfig>) {
+        this.publicKey = publicKey;
+        this.prompts = prompts ?? {};
         this.activePrompts = [];
-        this.channels = [];
         this.triggerFilter = new PromptTriggerEventFilter<PushPromptConfig>(
             ctx,
             this.onEventTracked
         );
 
         this.pushContainer = rootFrame.createContainer('push');
-        this.kumulosClient = client;
         this.context = ctx;
 
         this.setState('loading');
@@ -190,17 +182,12 @@ export class PromptManager {
     }
 
     private render() {
-        if (!this.subscriptionState || !this.state || !this.platformConfig) {
+        if (!this.subscriptionState || !this.state) {
             return;
         }
 
         render(
-            <UIContext.Provider
-                value={{
-                    platformConfig: this.platformConfig,
-                    channelList: this.channels
-                }}
-            >
+            <UndefinedStateUIContext.Provider value={{}}>
                 <Ui
                     ref={r => (this.ui = r)}
                     prompts={this.activePrompts}
@@ -213,7 +200,7 @@ export class PromptManager {
                     currentlyRequestingPrompt={this.currentlyRequestingPrompt}
                     currentPostAction={this.currentPostAction}
                 />
-            </UIContext.Provider>,
+            </UndefinedStateUIContext.Provider>,
             this.pushContainer.element
         );
     }
@@ -223,32 +210,16 @@ export class PromptManager {
 
         const matchedPrompts = await this.triggerFilter.filterPrompts(
             this.prompts,
-            prompt => {
-                return this.promptActionNeedsTaken(prompt);
+            _ => {
+                return this.promptActionNeedsTaken();
             }
         );
 
         this.activatePrompts(matchedPrompts);
     }
 
-    promptActionNeedsTaken(prompt: PushPromptConfig): boolean {
+    private promptActionNeedsTaken(): boolean {
         if (this.subscriptionState === 'unsubscribed') {
-            return true;
-        }
-
-        const channelsToSub =
-            prompt.actions
-                ?.filter(
-                    (action: PromptAction): action is ChannelSubAction =>
-                        action.type === 'subscribeToChannel'
-                )
-                .map(a => a.channelUuid) ?? [];
-        const needsToSub =
-            this.channels.filter(
-                c => channelsToSub.includes(c.uuid) && !c.subscribed
-            ).length > 0;
-
-        if (needsToSub) {
             return true;
         }
 
@@ -303,7 +274,7 @@ export class PromptManager {
                 this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
-                await this.loadPrompts();
+                this.loadPrompts();
                 // Note: channels irrelevant for optimove apps
                 //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
@@ -326,20 +297,16 @@ export class PromptManager {
         }
     }
 
-    private async loadPrompts(): Promise<void> {
-        this.platformConfig = await loadPlatformConfig(this.context);
-
-        if (!this.platformConfig.publicKey) {
+    private loadPrompts(): void {
+        if (!this.publicKey) {
             console.error('Failed to load prompts config');
             return;
         }
 
         if (this.context.pushPrompts !== 'auto') {
             this.prompts = { ...this.context.pushPrompts };
-        } else {
-            this.prompts = { ...(this.platformConfig.prompts || {}) };
         }
 
-        return Promise.resolve();
+        return;
     }
 }

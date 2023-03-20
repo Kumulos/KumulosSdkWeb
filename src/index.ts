@@ -11,7 +11,9 @@ import {
     getUserId,
     setInstallId,
     trackEvent,
-    trackInstallDetails
+    trackInstallDetails,
+    PlatformConfig,
+    Keys
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
@@ -29,6 +31,7 @@ import { isMobile, registerServiceWorker } from './core/utils';
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
 import RootFrame from './core/root-frame';
+import { loadPlatformConfig } from './core/config';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -40,6 +43,7 @@ interface KumulosConfig extends Configuration {
 
 export default class Kumulos {
     private readonly config: KumulosConfig;
+    private readonly platformConfig: PlatformConfig;
     private readonly context: Context;
     private readonly rootFrame: RootFrame;
 
@@ -50,17 +54,19 @@ export default class Kumulos {
         assertConfigValid(config);
 
         const context = new Context(config);
+        const platformConfigWithKeys = await loadPlatformConfig(context);
         await Kumulos.maybePersistInstallIdAndUserId(context, config);
+        const kumulos = new Kumulos(context, Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys.keys), platformConfigWithKeys.platformConfig);
 
-        const kumulos = new Kumulos(context, config);
         kumulos.initialize();
 
         return kumulos;
     }
 
-    private constructor(context: Context, config: KumulosConfig) {
+    private constructor(context: Context, config: KumulosConfig, platformConfig: PlatformConfig) {
         this.context = context;
         this.config = config;
+        this.platformConfig = platformConfig;
         this.rootFrame = new RootFrame();
     }
 
@@ -83,14 +89,14 @@ export default class Kumulos {
         }
     }
 
-    private initializePushFeature() {
+    private async initializePushFeature() {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
 
         this.promptManager = new PromptManager(
-            this,
             this.context,
-            this.rootFrame
+            this.rootFrame,
+            this.platformConfig.publicKey, this.platformConfig.prompts
         );
 
         this.maybeAddMessageEventListenerToSW();
@@ -127,6 +133,27 @@ export default class Kumulos {
                 return associateUser(context, config.customerId!);
             }
         });
+    }
+
+    private static mapConfigAndKeysToConfig(config: KumulosConfig, keys: Keys) {
+        const newConfig: KumulosConfig = {
+            region: config.region,
+            apiKey: keys.apiKey,
+            secretKey: keys.secretKey,
+            vapidPublicKey: config.vapidPublicKey,
+            serviceWorkerPath: config.serviceWorkerPath,
+            pushPrompts: config.pushPrompts,
+            autoResubscribe: config.autoResubscribe,
+            features: config.features,
+            onPushReceived: config.onPushReceived,
+            onPushOpened: config.onPushOpened,
+            originalVisitorId: config.originalVisitorId,
+            customerId: config.customerId,
+            sdkVersion: config.sdkVersion,
+            tenantId: config.tenantId
+        } 
+
+        return newConfig;
     }
 
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {

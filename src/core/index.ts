@@ -324,8 +324,19 @@ export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
     prompts?: PromptConfigs<PushPromptConfig>;
-    safariPushId?: string | null;
+    safariPushId?: string;
 }
+
+export interface Keys {
+    apiKey: string;
+    secretKey: string;
+}
+
+export interface PlatformConfigAndKeys {
+    keys: Keys;
+    platformConfig: PlatformConfig;
+}
+
 
 export enum SDKFeature {
     PUSH = 'push',
@@ -347,6 +358,7 @@ export interface Configuration {
     pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
     features?: SDKFeature[];
+    tenantId: number;
 }
 
 export type PromptReminder =
@@ -368,6 +380,7 @@ export class Context {
     readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
+    readonly tenantId: number;
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
     private readonly urlMap: { [key in Service]: string };
@@ -381,6 +394,7 @@ export class Context {
         this.pushPrompts = config.pushPrompts ?? 'auto';
         this.autoResubscribe = config.autoResubscribe ?? true;
         this.features = config.features ?? [SDKFeature.PUSH];
+        this.tenantId = config.tenantId
 
         this.subscribers = {};
 
