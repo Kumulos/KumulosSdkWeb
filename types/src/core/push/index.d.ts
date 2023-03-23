@@ -1,5 +1,5 @@
 import { Context } from '..';
-export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+export declare type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 export declare enum TokenType {
     W3C = 3,
     SAFARI = 4
