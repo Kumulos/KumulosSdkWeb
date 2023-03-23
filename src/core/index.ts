@@ -610,13 +610,26 @@ export async function trackInstallDetails(
         }
     };
 
+    let installId = '';
+    try {
+        installId = await getInstallId();
+    } catch (e) {
+        console.error('Failed to get install ID: ', e);
+        return Promise.reject(e);
+    }
+
     const hashParts = [
+        // Include install ID in hash to ensure install tracked events are sent
+        // to the server if install ID (original visitor ID) changes (e.g. if app
+        // clears local storage keys and ID is regenerated)
+        installId,
         sdkVersion,
         payload.app.bundle,
         payload.device.tz,
         payload.device.locale,
         payload.device.name
     ];
+
     const hash = cyrb53(hashParts.join('|'));
 
     try {
