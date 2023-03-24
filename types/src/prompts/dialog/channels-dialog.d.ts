@@ -12,6 +12,6 @@ export declare class ChannelsDialog extends Component<ChannelsDialogProps, Chann
     constructor(props: ChannelsDialogProps);
     onConfirm: () => void;
     onSelectedChannelChanged: (channelList: ChannelListItem[]) => void;
-    renderDialog: (uiContext?: UIContextState) => h.JSX.Element | null;
+    renderDialog: (uiContext?: UIContextState | undefined) => h.JSX.Element | null;
     render(): h.JSX.Element;
 }
