@@ -1,5 +1,5 @@
 import { Context, EventType, trackEvent } from '..';
-import { getBrowserName, parseQueryString } from '../utils';
+import { getBrowserName, getFullUrl, parseQueryString } from '../utils';
 
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
@@ -97,6 +97,22 @@ export function trackOpenFromQuery(ctx: Context) {
         type: MessageType.PUSH,
         id: Number(params['knid'])
     });
+}
+
+export async function registerServiceWorker(workerPath: string) {
+    if (!('serviceWorker' in navigator)) {
+        console.error(
+            'ServiceWorker is not supported in this browser, aborting...'
+        );
+        return;
+    }
+
+    const fullWorkerUrl = getFullUrl(workerPath);
+    try {
+        await navigator.serviceWorker.register(fullWorkerUrl);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export function notificationFromPayload(

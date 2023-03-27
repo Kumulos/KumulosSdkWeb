@@ -186,22 +186,6 @@ export function base64UrlEncode(buffer: ArrayBuffer): string {
     return urlVariant;
 }
 
-export async function registerServiceWorker(workerPath: string) {
-    if (!('serviceWorker' in navigator)) {
-        console.error(
-            'ServiceWorker is not supported in this browser, aborting...'
-        );
-        return;
-    }
-
-    const fullWorkerUrl = getFullUrl(workerPath);
-    try {
-        await navigator.serviceWorker.register(fullWorkerUrl);
-    } catch (e) {
-        console.error(e);
-    }
-}
-
 export function getFullUrl(path: string) {
     return new URL(path, location.origin).href;
 }
