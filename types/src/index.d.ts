@@ -17,6 +17,8 @@ export default class Kumulos {
     private constructor();
     private initialize;
     private initializePushFeature;
+    private observePermissionStatus;
+    private initializeDDLFeature;
     private maybeAddMessageEventListenerToSW;
     private static maybePersistInstallIdAndUserId;
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void>;
