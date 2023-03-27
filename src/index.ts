@@ -99,8 +99,6 @@ export default class Kumulos {
             const permissionStatus = event.target as PermissionStatus;
             const permissionState = permissionStatus.state;
 
-            console.debug('notifications permission state changed:', permissionState);
-
             if (permissionState === 'granted') {
                 const pushManager = await getPushOpsManager(this.context);
 
