@@ -95,7 +95,7 @@ export default class Kumulos {
     private async observePermissionStatus() {
         const permissionStatus = await navigator.permissions.query({name: 'notifications'});
 
-        permissionStatus.onchange = async (event) => {
+        permissionStatus.addEventListener('change', async (event) => {
             const permissionStatus = event.target as PermissionStatus;
             const permissionState = permissionStatus.state;
 
@@ -104,7 +104,7 @@ export default class Kumulos {
 
                 pushManager.pushRegister(this.context);
             }
-          };
+        });
     }
 
     private initializeDDLFeature(){
@@ -169,8 +169,6 @@ export default class Kumulos {
                 'Notification permission not granted'
             );
         }
-
-        return pushManager.pushRegister(this.context);
     }
 
     private onWorkerMessage = (e: MessageEvent) => {
