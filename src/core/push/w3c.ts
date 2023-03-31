@@ -38,6 +38,9 @@ function hashSubscription(ctx: Context, sub: PushSubscription): number {
 }
 
 export default class W3cPushManager implements PushOpsManager {
+
+    private registerInProgress: boolean = false;
+
     async requestNotificationPermission(
         ctx: Context
     ): Promise<NotificationPermission> {
@@ -79,7 +82,6 @@ export default class W3cPushManager implements PushOpsManager {
         });
 
         const endpointHash = hashSubscription(ctx, sub);
-        const expiry = sub.expirationTime;
 
         const existingEndpointHash = await get<number>('pushEndpointHash');
         const existingExpiry = await get<number | null | undefined>(
@@ -93,13 +95,30 @@ export default class W3cPushManager implements PushOpsManager {
             return;
         }
 
-        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
-            type: TokenType.W3C,
-            token: sub
-        });
 
-        await set('pushEndpointHash', endpointHash);
-        await set('pushExpiresAt', expiry);
+        await this.trackEventAndCache(ctx, sub, endpointHash);
+    }
+
+    private async trackEventAndCache(ctx: Context, pushSubscription: PushSubscription, endpointHash: number): Promise<void> {
+        if (this.registerInProgress) {
+            return;
+        }
+
+        this.registerInProgress = true;
+
+        try {
+            await trackEvent(ctx, EventType.PUSH_REGISTERED, {
+                type: TokenType.W3C,
+                token: pushSubscription
+            });
+    
+            await set('pushEndpointHash', endpointHash);
+            await set('pushExpiresAt', pushSubscription.expirationTime);
+        } catch (e) {
+            return Promise.reject(e);
+        } finally {
+            this.registerInProgress = false;
+        }
     }
 
     async requestPermissionAndRegisterForPush(
