@@ -12,7 +12,6 @@ function hashToken(ctx: Context, token: string): number {
 
 export default class SafariPushManager implements PushOpsManager {
     private readonly cfg: PlatformConfig;
-    private registerInProgress: boolean = false;
 
     constructor(cfg: PlatformConfig) {
         this.cfg = cfg;
@@ -56,29 +55,13 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        await this.trackEventAndCache(ctx, perm, cfg, tokenHash);
-    }
+        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
+            type: TokenType.SAFARI,
+            token: perm.deviceToken,
+            bundleId: cfg.safariPushId
+        });
 
-    private async trackEventAndCache(ctx: Context, perm: SafariRemoteNotificationPermission, cfg: PlatformConfig, tokenHash: number): Promise<void> {
-        if (this.registerInProgress) {
-            return;
-        }
-
-        this.registerInProgress = true;
-
-        try {
-            await trackEvent(ctx, EventType.PUSH_REGISTERED, {
-                type: TokenType.SAFARI,
-                token: perm.deviceToken,
-                bundleId: cfg.safariPushId
-            });
-    
-            await set('pushTokenHash', tokenHash);
-        } catch (e) {
-            return Promise.reject(e);
-        } finally {
-            this.registerInProgress = false;
-        }
+        await set('pushTokenHash', tokenHash);
     }
 
     async requestPermissionAndRegisterForPush(
