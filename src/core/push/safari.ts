@@ -12,6 +12,7 @@ function hashToken(ctx: Context, token: string): number {
 
 export default class SafariPushManager implements PushOpsManager {
     private readonly cfg: PlatformConfig;
+
     constructor(cfg: PlatformConfig) {
         this.cfg = cfg;
     }
