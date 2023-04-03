@@ -3,12 +3,9 @@ import { del, get, set } from './storage';
 
 import { Channel } from './channels';
 
-const SDK_VERSION = '1.11.1';
-const SDK_TYPE = 10;
-const EVENTS_BASE_URL = 'https://events.kumulos.com';
-export const PUSH_BASE_URL = 'https://push.kumulos.com';
-export const DDL_BASE_URL = 'https://links.kumulos.com';
-export const FP_CAPTURE_URL = 'https://pd.app.delivery';
+const SDK_TYPE = 104;
+// Backwards compatibility with optimove SDK not including version in Optimobile config
+const DEFAULT_SDK_VERSION = '2.0.17';
 
 export type InstallId = string;
 export type UserId = string;
@@ -31,14 +28,14 @@ type NestedPick<T, K1 extends keyof T, K2 extends keyof T[K1]> = {
     };
 };
 
+//only system events
 export enum EventType {
     MESSAGE_DELIVERED = 'k.message.delivered',
     MESSAGE_OPENED = 'k.message.opened',
     PUSH_REGISTERED = 'k.push.deviceRegistered',
     INSTALL_TRACKED = 'k.stats.installTracked',
     USER_ASSOCIATED = 'k.stats.userAssociated',
-    USER_ASSOCIATION_CLEARED = 'k.stats.userAssociationCleared',
-    PAGE_VIEWED = 'k.pageViewed'
+    USER_ASSOCIATION_CLEARED = 'k.stats.userAssociationCleared'
 }
 
 export enum PromptTypeName {
@@ -335,7 +332,14 @@ export enum SDKFeature {
     DDL = 'ddl'
 }
 
+export enum Service {
+    PUSH = 'push',
+    DDL = 'ddl',
+    EVENTS = 'events'
+}
+
 export interface Configuration {
+    region: string;
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
@@ -366,6 +370,7 @@ export class Context {
     readonly features: SDKFeature[];
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
+    private readonly urlMap: { [key in Service]: string };
 
     constructor(config: Configuration) {
         this.apiKey = config.apiKey;
@@ -378,6 +383,12 @@ export class Context {
         this.features = config.features ?? [SDKFeature.PUSH];
 
         this.subscribers = {};
+
+        this.urlMap = {
+            [Service.PUSH]: `https://push-${config.region}.kumulos.com`,
+            [Service.EVENTS]: `https://events-${config.region}.kumulos.com`,
+            [Service.DDL]: `https://links-${config.region}.kumulos.com`
+        };
     }
 
     subscribe(event: SdkEventType, handler: SdkEventHandler) {
@@ -408,6 +419,10 @@ export class Context {
     hasFeature(feature: SDKFeature) {
         return this.features.includes(feature);
     }
+
+    urlForService(service: Service): string {
+        return this.urlMap[service];
+    }
 }
 
 export function assertConfigValid(config: any) {
@@ -426,7 +441,12 @@ export function assertConfigValid(config: any) {
 }
 
 function assertPushConfigValid(config: any) {
-    const requiredStringProps = ['apiKey', 'secretKey', 'vapidPublicKey'];
+    const requiredStringProps = [
+        'region',
+        'apiKey',
+        'secretKey',
+        'vapidPublicKey'
+    ];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
             throw `Required configuration key '${prop}' must be non-empty string`;
@@ -460,12 +480,18 @@ export function getInstallId(): Promise<InstallId> {
     installIdPromise = get<InstallId | undefined>('installId').then(
         installId => {
             if (!installId) {
-                return set('installId', uuidv4());
+                return setInstallId(uuidv4());
             }
 
             return installId;
         }
     );
+
+    return installIdPromise;
+}
+
+export function setInstallId(installId: InstallId): Promise<InstallId> {
+    installIdPromise = set('installId', installId);
 
     return installIdPromise;
 }
@@ -515,7 +541,7 @@ export async function trackEvent(
     ctx: Context,
     type: string,
     properties?: PropsObject
-): Promise<Response> {
+): Promise<Response | void> {
     const installId = await getInstallId();
     const userId = await getUserId();
 
@@ -529,17 +555,30 @@ export async function trackEvent(
         }
     ];
 
-    const url = `${EVENTS_BASE_URL}/v1/app-installs/${installId}/events`;
-
     ctx.broadcast('eventTracked', events);
 
+    if (!isSystemEvent(type)) {
+        return Promise.resolve();
+    }
+
+    const url = `${ctx.urlForService(
+        Service.EVENTS
+    )}/v1/app-installs/${installId}/events`;
     return authedFetch(ctx, url, {
         method: 'POST',
         body: JSON.stringify(events)
     });
 }
 
-export async function trackInstallDetails(ctx: Context): Promise<void> {
+function isSystemEvent(type: string) {
+    return (<any>Object).values(EventType).includes(type);
+}
+
+export async function trackInstallDetails(
+    ctx: Context,
+    optionalSdkVersion?: string
+): Promise<void> {
+    const sdkVersion = optionalSdkVersion || DEFAULT_SDK_VERSION;
     const payload = {
         app: {
             bundle: location.host,
@@ -548,7 +587,7 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
         },
         sdk: {
             id: SDK_TYPE,
-            version: SDK_VERSION
+            version: sdkVersion
         },
         runtime: {
             id: 8,
@@ -571,13 +610,26 @@ export async function trackInstallDetails(ctx: Context): Promise<void> {
         }
     };
 
+    let installId = '';
+    try {
+        installId = await getInstallId();
+    } catch (e) {
+        console.error('Failed to get install ID: ', e);
+        return Promise.reject(e);
+    }
+
     const hashParts = [
-        SDK_VERSION,
+        // Include install ID in hash to ensure install tracked events are sent
+        // to the server if install ID (original visitor ID) changes (e.g. if app
+        // clears local storage keys and ID is regenerated)
+        installId,
+        sdkVersion,
         payload.app.bundle,
         payload.device.tz,
         payload.device.locale,
         payload.device.name
     ];
+
     const hash = cyrb53(hashParts.join('|'));
 
     try {

@@ -1,30 +1,30 @@
+import { Channel, ChannelSubscriptionManager } from '../core/channels';
 import {
-    Context,
-    SdkEvent,
-    PlatformConfig,
-    ChannelSubAction,
-    PromptAction,
-    UserChannelSelectDialogAction,
     ChannelListItem,
-    PushPromptConfig,
+    ChannelSubAction,
+    Context,
+    PlatformConfig,
+    PromptAction,
+    PromptConfig,
     PromptConfigs,
-    PromptConfig
+    PushPromptConfig,
+    SdkEvent,
+    UserChannelSelectDialogAction
 } from '../core';
+import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import getPushOpsManager, {
     PushOpsManager,
     PushSubscriptionState
 } from '../core/push';
 import { h, render } from 'preact';
 
-import { Channel } from '../core/channels';
 import Kumulos from '..';
-import Ui from './ui';
 import { PromptTriggerEventFilter } from './triggers';
 import { UIContext } from './ui-context';
-import { loadPlatformConfig } from '../core/config';
-import RootFrame, { RootFrameContainer } from '../core/root-frame';
-import { maybePersistReminder } from './prompt-reminder';
+import Ui from './ui';
 import { deferPromptActivation } from './utils';
+import { loadPlatformConfig } from '../core/config';
+import { maybePersistReminder } from './prompt-reminder';
 
 export type PromptManagerState =
     | 'loading'
@@ -56,6 +56,7 @@ export class PromptManager {
     private ui?: Ui;
     private platformConfig?: PlatformConfig;
     private currentPostAction?: PromptAction;
+    private channelSubscriptionManager?: ChannelSubscriptionManager;
 
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
         this.prompts = {};
@@ -71,6 +72,16 @@ export class PromptManager {
         this.context = ctx;
 
         this.setState('loading');
+    }
+
+    private getChannelSubscriptionManager(): ChannelSubscriptionManager {
+        if (!this.channelSubscriptionManager) {
+            this.channelSubscriptionManager = new ChannelSubscriptionManager(
+                this.context
+            );
+        }
+
+        return this.channelSubscriptionManager;
     }
 
     private onEventTracked = (e: SdkEvent) => {
@@ -178,17 +189,18 @@ export class PromptManager {
     }
 
     private async handlePromptActions(prompt: PushPromptConfig) {
-        if (!prompt.actions) {
-            return;
-        }
+        // Note: no prompts with such action can be created from ui for optimove apps
+        // if (!prompt.actions) {
+        //     return;
+        // }
 
-        console.info('Will handle actions: ', prompt.actions);
+        // console.info('Will handle actions: ', prompt.actions);
 
-        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
-        this.channels = await channelSubMgr.listChannels();
+        // const channelSubMgr = this.getChannelSubscriptionManager();
+        // this.channels = await channelSubMgr.listChannels();
 
-        await this.handleChannelSubActions(prompt);
-        await this.handleChannelPostActions(prompt);
+        // await this.handleChannelSubActions(prompt);
+        // await this.handleChannelPostActions(prompt);
     }
 
     private async handleChannelSubActions(
@@ -220,9 +232,7 @@ export class PromptManager {
             })
             .map(action => action.channelUuid);
 
-        await this.kumulosClient
-            .getChannelSubscriptionManager()
-            .subscribe(uuidsToSubscribe);
+        await this.getChannelSubscriptionManager().subscribe(uuidsToSubscribe);
     }
 
     private async handleChannelPostActions(
@@ -253,7 +263,7 @@ export class PromptManager {
             return;
         }
 
-        const channelSubMgr = this.kumulosClient.getChannelSubscriptionManager();
+        const channelSubMgr = this.getChannelSubscriptionManager();
 
         const unsubscribes = channelSelections
             .filter(cs => !cs.checked)
@@ -381,9 +391,8 @@ export class PromptManager {
                     this.context
                 );
                 await this.loadPrompts();
-                this.channels = await this.kumulosClient
-                    .getChannelSubscriptionManager()
-                    .listChannels();
+                // Note: channels irrelevant for optimove apps
+                //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
                 break;
             case 'ready':
@@ -418,24 +427,23 @@ export class PromptManager {
             this.prompts = { ...(this.platformConfig.prompts || {}) };
         }
 
-        for (let id in this.prompts) {
-            const hasChannelOp = Boolean(
-                this.prompts[id].actions?.filter(
-                    a => a.type === 'subscribeToChannel'
-                )?.length
-            );
+        //Note: no prompts with such action can be created from ui for optimove apps
+        // for (let id in this.prompts) {
+        //     const hasChannelOp = Boolean(
+        //         this.prompts[id].actions?.filter(
+        //             a => a.type === 'subscribeToChannel'
+        //         )?.length
+        //     );
 
-            if (hasChannelOp) {
-                try {
-                    this.channels = await this.kumulosClient
-                        .getChannelSubscriptionManager()
-                        .listChannels();
-                } catch (e) {
-                    // Noop
-                }
-                break;
-            }
-        }
+        //     if (hasChannelOp) {
+        //         try {
+        //             this.channels = await this.getChannelSubscriptionManager().listChannels();
+        //         } catch (e) {
+        //             // Noop
+        //         }
+        //         break;
+        //     }
+        // }
 
         return Promise.resolve();
     }

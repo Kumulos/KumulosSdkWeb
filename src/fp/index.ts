@@ -1,13 +1,16 @@
-import { DDL_BASE_URL, Context, getInstallId } from '../core';
-import { authedFetch } from '../core/utils';
+import { Context, Service, getInstallId } from '../core';
+
 import { FingerprintComponents } from './types';
+import { authedFetch } from '../core/utils';
 
 export async function sendClickRequest(
     ctx: Context,
     bannerUid: string,
     fingerprint: FingerprintComponents
 ): Promise<Response> {
-    const url = `${DDL_BASE_URL}/v1/banners/${bannerUid}/taps`;
+    const url = `${ctx.urlForService(
+        Service.DDL
+    )}/v1/banners/${bannerUid}/taps`;
     const webInstallId = await getInstallId();
 
     return authedFetch(ctx, url, {

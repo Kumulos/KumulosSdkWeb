@@ -1,6 +1,4 @@
-import { EventType } from '../core';
 import Kumulos from '../index';
-import { getPageViewedProps } from './utils';
 import { isBrowserSupported } from '../core/utils';
 
 type CmdFn = (k: Kumulos) => void;
@@ -14,7 +12,7 @@ interface Win extends Window {
 
 declare var window: Win;
 
-function main() {
+async function main() {
     if (!window.Kumulos?.q) {
         return;
     }
@@ -28,18 +26,18 @@ function main() {
 
     if (!isBrowserSupported(init[1].features)) {
         console.warn(
-            'Kumulos: this browser does not support all required features, aborting initialization...'
+            'Optimobile: this browser does not support all required features, aborting initialization...'
         );
         return;
     }
 
     if (location.protocol !== 'https:') {
         console.warn(
-            'Kumulos: this page is not served over HTTPS, some features may be unavailable...'
+            'Optimobile: this page is not served over HTTPS, some features may be unavailable...'
         );
     }
 
-    const instance = new Kumulos(init[1]);
+    const instance = await Kumulos.buildInstance(init[1]);
     const executor = function(cmd: Cmd, ...args: any[]) {
         try {
             if (typeof cmd === 'function') {
@@ -61,8 +59,6 @@ function main() {
 
         executor(...q[i]);
     }
-
-    instance.trackEvent(EventType.PAGE_VIEWED, getPageViewedProps());
 
     (window.Kumulos as any) = executor;
 }

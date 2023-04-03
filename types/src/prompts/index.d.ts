@@ -1,6 +1,6 @@
 import { Context, PushPromptConfig } from '../core';
-import Kumulos from '..';
 import RootFrame from '../core/root-frame';
+import Kumulos from '..';
 export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'requesting-silent-dismissed' | 'postaction';
 export declare class PromptManager {
     private readonly kumulosClient;
@@ -17,7 +17,9 @@ export declare class PromptManager {
     private ui?;
     private platformConfig?;
     private currentPostAction?;
+    private channelSubscriptionManager?;
     constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame);
+    private getChannelSubscriptionManager;
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;

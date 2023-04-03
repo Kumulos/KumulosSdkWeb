@@ -63,7 +63,7 @@ module.exports = [
         target: ['webworker', 'es5'],
         mode: environment,
         entry: {
-            worker: './src/worker/index.ts'
+            'optimove-worker': './src/worker/index.ts'
         },
         devtool,
         module: moduleCfg,
@@ -75,7 +75,7 @@ module.exports = [
         target: ['web', 'es5'],
         mode: environment,
         entry: {
-            'web-bundle': './src/web/index.ts'
+            'optimove-web-bundle': './src/web/index.ts'
         },
         devtool,
         module: moduleCfg,

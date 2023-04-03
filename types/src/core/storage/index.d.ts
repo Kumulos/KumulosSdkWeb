@@ -1,4 +1,4 @@
-import { Configuration, Context, PromptReminder, DdlPromptConfig } from '../index';
+import { Configuration, Context, DdlPromptConfig, PromptReminder } from '../index';
 import { PushPayload } from '../push';
 export declare function get<T>(key: IDBValidKey): Promise<T>;
 export declare function set<T extends any>(key: IDBValidKey, value: T): Promise<T>;

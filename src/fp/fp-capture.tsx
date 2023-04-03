@@ -1,12 +1,14 @@
-import { Component, h, createRef, RefObject } from 'preact';
-import { createPortal } from 'preact/compat';
 import {
     ClientMessageType,
+    FingerprintComponents,
     HostMessage,
-    HostMessageType,
-    FingerprintComponents
+    HostMessageType
 } from './types';
-import { FP_CAPTURE_URL } from '../core';
+import { Component, RefObject, createRef, h } from 'preact';
+
+import { createPortal } from 'preact/compat';
+
+const FP_CAPTURE_URL = 'https://pd.app.delivery';
 
 enum CaptureState {
     IDLE,

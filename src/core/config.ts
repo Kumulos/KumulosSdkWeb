@@ -1,9 +1,8 @@
 import {
     Context,
-    PUSH_BASE_URL,
-    PlatformConfig,
     DdlPromptConfig,
-    DDL_BASE_URL,
+    PlatformConfig,
+    Service,
     getInstallId
 } from '.';
 import { get, set } from './storage';
@@ -59,7 +58,7 @@ export async function loadPlatformConfig(
 ): Promise<PlatformConfig> {
     return (
         (await loadConfig<PlatformConfig>(
-            `${PUSH_BASE_URL}/v1/web/config`,
+            `${ctx.urlForService(Service.PUSH)}/v1/web/config`,
             ConfigCacheType.PLATFORM,
             ctx
         )) ?? {}
@@ -73,7 +72,9 @@ export async function loadDdlConfig(
 
     try {
         return await loadConfig<DdlPromptConfig[]>(
-            `${DDL_BASE_URL}/v1/banners?webInstallId=${webInstallId}`,
+            `${ctx.urlForService(
+                Service.DDL
+            )}/v1/banners?webInstallId=${webInstallId}`,
             ConfigCacheType.DDL,
             ctx
         );

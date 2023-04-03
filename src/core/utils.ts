@@ -1,12 +1,24 @@
 import { Context, SDKFeature } from './index';
 
-type FeatureDependency = string | object | IDBFactory | PromiseConstructor | Notification | PushManager | ServiceWorkerContainer | SafariRemoteNotification;
+type FeatureDependency =
+    | string
+    | object
+    | IDBFactory
+    | PromiseConstructor
+    | Notification
+    | PushManager
+    | ServiceWorkerContainer
+    | SafariRemoteNotification;
 
-const CORE_FEATURE_DEPENDENCIES : FeatureDependency[] = [typeof Promise, typeof fetch, typeof indexedDB];
+const CORE_FEATURE_DEPENDENCIES: FeatureDependency[] = [
+    typeof Promise,
+    typeof fetch,
+    typeof indexedDB
+];
 
-const FEATURE_DEPENDENCY_CHECK : {[key in SDKFeature]: () => boolean} = {
-    'push': isBrowserSupportedForPush,
-    'ddl': isBrowserSupportedForDdl
+const FEATURE_DEPENDENCY_CHECK: { [key in SDKFeature]: () => boolean } = {
+    push: isBrowserSupportedForPush,
+    ddl: isBrowserSupportedForDdl
 };
 
 // See: https://stackoverflow.com/a/2117523
@@ -79,7 +91,8 @@ function isBrowserSupportedForDdl() {
 
 function checkRequired(coreDependencies: FeatureDependency[]) {
     return coreDependencies.reduce(
-        (supported: boolean, dependency: FeatureDependency) => supported && dependency !== 'undefined',
+        (supported: boolean, dependency: FeatureDependency) =>
+            supported && dependency !== 'undefined',
         true
     );
 }
@@ -173,18 +186,8 @@ export function base64UrlEncode(buffer: ArrayBuffer): string {
     return urlVariant;
 }
 
-export function registerServiceWorker(
-    path: string
-): Promise<ServiceWorkerRegistration> {
-    if (!('serviceWorker' in navigator)) {
-        return Promise.reject(
-            'ServiceWorker is not supported in this browser, aborting...'
-        );
-    }
-
-    return navigator.serviceWorker.register(path).then(() => {
-        return navigator.serviceWorker.ready;
-    });
+export function getFullUrl(path: string) {
+    return new URL(path, location.origin).href;
 }
 
 export function defer<T>() {

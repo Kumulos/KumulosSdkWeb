@@ -1,7 +1,4 @@
 import { Channel } from './channels';
-export declare const PUSH_BASE_URL = "https://push.kumulos.com";
-export declare const DDL_BASE_URL = "https://links.kumulos.com";
-export declare const FP_CAPTURE_URL = "https://pd.app.delivery";
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -23,8 +20,7 @@ export declare enum EventType {
     PUSH_REGISTERED = "k.push.deviceRegistered",
     INSTALL_TRACKED = "k.stats.installTracked",
     USER_ASSOCIATED = "k.stats.userAssociated",
-    USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared",
-    PAGE_VIEWED = "k.pageViewed"
+    USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared"
 }
 export declare enum PromptTypeName {
     BELL = "bell",
@@ -242,7 +238,13 @@ export declare enum SDKFeature {
     PUSH = "push",
     DDL = "ddl"
 }
+export declare enum Service {
+    PUSH = "push",
+    DDL = "ddl",
+    EVENTS = "events"
+}
 export interface Configuration {
+    region: string;
     apiKey: string;
     secretKey: string;
     vapidPublicKey: string;
@@ -270,13 +272,16 @@ export declare class Context {
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
     private readonly subscribers;
+    private readonly urlMap;
     constructor(config: Configuration);
     subscribe(event: SdkEventType, handler: SdkEventHandler): void;
     broadcast(event: SdkEventType, data: any): void;
     hasFeature(feature: SDKFeature): boolean;
+    urlForService(service: Service): string;
 }
 export declare function assertConfigValid(config: any): void;
 export declare function getInstallId(): Promise<InstallId>;
+export declare function setInstallId(installId: InstallId): Promise<InstallId>;
 export declare function getUserId(): Promise<UserId>;
 export declare function associateUser(ctx: Context, id: UserId, attributes?: PropsObject): Promise<void>;
 export declare function clearUserAssociation(ctx: Context): Promise<void>;
@@ -288,8 +293,8 @@ export declare type KumulosEvent = {
     data?: PropsObject;
 };
 export declare type EventPayload = KumulosEvent[];
-export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response>;
-export declare function trackInstallDetails(ctx: Context): Promise<void>;
+export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
+export declare function trackInstallDetails(ctx: Context, optionalSdkVersion?: string): Promise<void>;
 export interface ChannelListItem {
     channel: Channel;
     checked: boolean;

@@ -1,10 +1,4 @@
-import {
-    Context,
-    EventType,
-    PUSH_BASE_URL,
-    PlatformConfig,
-    trackEvent
-} from '..';
+import { Context, EventType, PlatformConfig, Service, trackEvent } from '..';
 import { PushOpsManager, TokenType } from '.';
 import { cyrb53, defer } from '../utils';
 import { get, set } from '../storage';
@@ -18,13 +12,16 @@ function hashToken(ctx: Context, token: string): number {
 
 export default class SafariPushManager implements PushOpsManager {
     private readonly cfg: PlatformConfig;
+
     constructor(cfg: PlatformConfig) {
         this.cfg = cfg;
     }
     requestNotificationPermission(
         ctx: Context
     ): Promise<NotificationPermission> {
-        const svcUrl = `${PUSH_BASE_URL}/safari/${ctx.apiKey}`;
+        const svcUrl = `${ctx.urlForService(Service.PUSH)}/safari/${
+            ctx.apiKey
+        }`;
 
         const deferred = defer<NotificationPermission>();
 

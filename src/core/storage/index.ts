@@ -1,8 +1,8 @@
 import {
     Configuration,
     Context,
-    PromptReminder,
-    DdlPromptConfig
+    DdlPromptConfig,
+    PromptReminder
 } from '../index';
 import {
     Store,
@@ -29,6 +29,7 @@ export function del(key: IDBValidKey): Promise<void> {
 
 export function persistConfig(config: Configuration): Promise<Configuration> {
     return set<Configuration>('config', {
+        region: config.region,
         apiKey: config.apiKey,
         secretKey: config.secretKey,
         vapidPublicKey: config.vapidPublicKey,

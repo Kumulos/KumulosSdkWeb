@@ -3,107 +3,156 @@ import {
     Context,
     InstallId,
     PropsObject,
+    SDKFeature,
     UserId,
     assertConfigValid,
     associateUser,
-    clearUserAssociation,
     getInstallId,
     getUserId,
+    setInstallId,
     trackEvent,
-    trackInstallDetails,
-    SDKFeature
+    trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import {
     getMostRecentlyOpenedPushPayload,
-    persistConfig
+    persistConfig,
+    set
 } from './core/storage';
 import getPushOpsManager, {
     KumulosPushNotification,
     notificationFromPayload,
+    registerServiceWorker,
     trackOpenFromQuery
 } from './core/push';
+import { isMobile } from './core/utils';
 
-import { ChannelSubscriptionManager } from './core/channels';
-import { PromptManager } from './prompts';
-import { registerServiceWorker, isMobile } from './core/utils';
-import RootFrame from './core/root-frame';
 import DdlManager from './prompts/ddl/manager';
+import { PromptManager } from './prompts';
+import RootFrame from './core/root-frame';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
     onPushOpened?: (payload: KumulosPushNotification) => void;
+    originalVisitorId: InstallId;
+    customerId?: UserId;
+    sdkVersion?: string;
 }
 
 export default class Kumulos {
     private readonly config: KumulosConfig;
     private readonly context: Context;
-    private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
-    private readonly promptManager?: PromptManager;
-    private readonly ddlManager?: DdlManager;
-    private channelSubscriptionManager?: ChannelSubscriptionManager;
     private readonly rootFrame: RootFrame;
 
-    constructor(config: KumulosConfig) {
+    private promptManager?: PromptManager;
+    private ddlManager?: DdlManager;
+
+    public static async buildInstance(config: KumulosConfig) {
         assertConfigValid(config);
 
+        const context = new Context(config);
+        await Kumulos.maybePersistInstallIdAndUserId(context, config);
+
+        const kumulos = new Kumulos(context, config);
+        kumulos.initialize();
+
+        return kumulos;
+    }
+
+    private constructor(context: Context, config: KumulosConfig) {
+        this.context = context;
         this.config = config;
-        this.context = new Context(config);
-
-        persistConfig(config);
-        trackInstallDetails(this.context);
-
         this.rootFrame = new RootFrame();
+    }
 
+    private initialize() {
+        persistConfig(this.config);
+        trackInstallDetails(this.context, this.config.sdkVersion);
         if (this.context.hasFeature(SDKFeature.PUSH)) {
-            trackOpenFromQuery(this.context);
-
-            this.serviceWorkerReg = registerServiceWorker(
-                this.context.serviceWorkerPath
-            );
-
-            this.promptManager = new PromptManager(
-                this,
-                this.context,
-                this.rootFrame
-            );
-
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.addEventListener(
-                    'message',
-                    this.onWorkerMessage
-                );
-            }
-
-            this.maybeFireOpenedHandler();
+            this.initializePushFeature();
         }
 
         if (this.context.hasFeature(SDKFeature.DDL)) {
-            if (!isMobile()) {
-                console.info(
-                    'DdlManager: DDL feature support only available on mobile devices.'
-                );
-                return;
-            }
-
-            this.ddlManager = new DdlManager(this.context, this.rootFrame);
+            this.initializeDDLFeature();
         }
     }
 
-    getInstallId(): Promise<InstallId> {
-        return getInstallId();
+    private initializePushFeature() {
+        trackOpenFromQuery(this.context);
+        registerServiceWorker(this.context.serviceWorkerPath);
+        this.observePermissionStatus();
+
+        this.promptManager = new PromptManager(
+            this,
+            this.context,
+            this.rootFrame
+        );
+
+        this.maybeAddMessageEventListenerToSW();
+        this.maybeFireOpenedHandler();
     }
 
-    getCurrentUserIdentifier(): Promise<UserId> {
-        return getUserId();
+    private async observePermissionStatus() {
+        const permissionStatus = await navigator.permissions.query({name: 'notifications'});
+
+        permissionStatus.addEventListener('change', async (event) => {
+            const permissionStatus = event.target as PermissionStatus;
+            const permissionState = permissionStatus.state;
+
+            if (permissionState === 'granted') {
+                const pushManager = await getPushOpsManager(this.context);
+
+                pushManager.pushRegister(this.context);
+            }
+        });
+    }
+
+    private initializeDDLFeature(){
+        if (!isMobile()) {
+            console.info(
+                'DdlManager: DDL feature support only available on mobile devices.'
+            );
+            return;
+        }
+
+        this.ddlManager = new DdlManager(this.context, this.rootFrame);
+    }
+
+
+    private maybeAddMessageEventListenerToSW() {
+        if (!('serviceWorker' in navigator)) {
+            return;
+        }
+
+        navigator.serviceWorker.addEventListener(
+            'message',
+            this.onWorkerMessage
+        );
+    }
+
+    private static async maybePersistInstallIdAndUserId(
+        context: Context,
+        config: KumulosConfig
+    ): Promise<void> {
+        await getInstallId().then(installId => {
+            if (installId !== config.originalVisitorId) {
+                return setInstallId(config.originalVisitorId);
+            }
+        });
+
+        if (config.customerId === undefined) {
+            return;
+        }
+
+        await getUserId().then(userId => {
+            if (userId !== config.customerId) {
+                return associateUser(context, config.customerId!);
+            }
+        });
     }
 
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {
         return associateUser(this.context, identifier, attributes);
-    }
-
-    clearUserAssociation(): Promise<void> {
-        return clearUserAssociation(this.context);
     }
 
     trackEvent(type: string, properties?: PropsObject): Promise<void> {
@@ -111,30 +160,15 @@ export default class Kumulos {
     }
 
     async pushRegister(): Promise<void> {
-        const mgr = await getPushOpsManager(this.context);
+        const pushManager = await getPushOpsManager(this.context);
 
-        return mgr
-            .requestNotificationPermission(this.context)
-            .then(perm => {
-                if ('granted' !== perm) {
-                    return Promise.reject(
-                        'Notification permission not granted'
-                    );
-                }
-            })
-            .then(() => {
-                return mgr.pushRegister(this.context);
-            });
-    }
+        const permission  = await pushManager.requestNotificationPermission(this.context);
 
-    getChannelSubscriptionManager(): ChannelSubscriptionManager {
-        if (!this.channelSubscriptionManager) {
-            this.channelSubscriptionManager = new ChannelSubscriptionManager(
-                this.context
+        if (permission !== 'granted') {
+            return Promise.reject(
+                'Notification permission not granted'
             );
         }
-
-        return this.channelSubscriptionManager;
     }
 
     private onWorkerMessage = (e: MessageEvent) => {
