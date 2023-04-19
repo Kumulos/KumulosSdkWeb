@@ -1,5 +1,5 @@
 import { Context } from '..';
-export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+export declare type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
 export declare enum TokenType {
     W3C = 3,
     SAFARI = 4
@@ -44,4 +44,5 @@ export interface PushPayload {
 }
 export default function getPushOpsManager(ctx: Context): Promise<PushOpsManager>;
 export declare function trackOpenFromQuery(ctx: Context): void;
+export declare function registerServiceWorker(workerPath: string): Promise<void>;
 export declare function notificationFromPayload(payload: PushPayload): KumulosPushNotification;

@@ -9,6 +9,7 @@ interface KumulosConfig extends Configuration {
 }
 export default class Kumulos {
     private readonly config;
+    private readonly platformConfig;
     private readonly context;
     private readonly rootFrame;
     private promptManager?;
@@ -17,8 +18,11 @@ export default class Kumulos {
     private constructor();
     private initialize;
     private initializePushFeature;
+    private observePermissionStatus;
+    private initializeDDLFeature;
     private maybeAddMessageEventListenerToSW;
     private static maybePersistInstallIdAndUserId;
+    private static mapConfigAndKeysToConfig;
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void>;
     trackEvent(type: string, properties?: PropsObject): Promise<void>;
     pushRegister(): Promise<void>;

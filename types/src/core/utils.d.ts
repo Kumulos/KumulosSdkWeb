@@ -10,10 +10,9 @@ export declare class AuthedFetchError extends Error {
 }
 export declare function authedFetchJson<T>(ctx: Context, url: RequestInfo, options?: RequestInit): Promise<T>;
 export declare function base64UrlEncode(buffer: ArrayBuffer): string;
-export declare function registerServiceWorker(workerPath: string): Promise<void>;
 export declare function getFullUrl(path: string): string;
 export declare function defer<T>(): {
-    resolve: (value?: T | PromiseLike<T>) => void;
+    resolve: (value?: T | PromiseLike<T> | undefined) => void;
     reject: (reason?: any) => void;
     promise: Promise<T>;
 };

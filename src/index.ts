@@ -24,9 +24,10 @@ import {
 import getPushOpsManager, {
     KumulosPushNotification,
     notificationFromPayload,
+    registerServiceWorker,
     trackOpenFromQuery
 } from './core/push';
-import { isMobile, registerServiceWorker } from './core/utils';
+import { isMobile } from './core/utils';
 
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
@@ -78,20 +79,14 @@ export default class Kumulos {
         }
 
         if (this.context.hasFeature(SDKFeature.DDL)) {
-            if (!isMobile()) {
-                console.info(
-                    'DdlManager: DDL feature support only available on mobile devices.'
-                );
-                return;
-            }
-
-            this.ddlManager = new DdlManager(this.context, this.rootFrame);
+            this.initializeDDLFeature();
         }
     }
 
     private async initializePushFeature() {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
+        this.observePermissionStatus();
 
         this.promptManager = new PromptManager(
             this.context,
@@ -102,6 +97,33 @@ export default class Kumulos {
         this.maybeAddMessageEventListenerToSW();
         this.maybeFireOpenedHandler();
     }
+
+    private async observePermissionStatus() {
+        const permissionStatus = await navigator.permissions.query({name: 'notifications'});
+
+        permissionStatus.addEventListener('change', async (event) => {
+            const permissionStatus = event.target as PermissionStatus;
+            const permissionState = permissionStatus.state;
+
+            if (permissionState === 'granted') {
+                const pushManager = await getPushOpsManager(this.context);
+
+                pushManager.pushRegister(this.context);
+            }
+        });
+    }
+
+    private initializeDDLFeature(){
+        if (!isMobile()) {
+            console.info(
+                'DdlManager: DDL feature support only available on mobile devices.'
+            );
+            return;
+        }
+
+        this.ddlManager = new DdlManager(this.context, this.rootFrame);
+    }
+
 
     private maybeAddMessageEventListenerToSW() {
         if (!('serviceWorker' in navigator)) {
@@ -165,20 +187,15 @@ export default class Kumulos {
     }
 
     async pushRegister(): Promise<void> {
-        const mgr = await getPushOpsManager(this.context);
+        const pushManager = await getPushOpsManager(this.context);
 
-        return mgr
-            .requestNotificationPermission(this.context)
-            .then(perm => {
-                if ('granted' !== perm) {
-                    return Promise.reject(
-                        'Notification permission not granted'
-                    );
-                }
-            })
-            .then(() => {
-                return mgr.pushRegister(this.context);
-            });
+        const permission  = await pushManager.requestNotificationPermission(this.context);
+
+        if (permission !== 'granted') {
+            return Promise.reject(
+                'Notification permission not granted'
+            );
+        }
     }
 
     private onWorkerMessage = (e: MessageEvent) => {
