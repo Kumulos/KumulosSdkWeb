@@ -38,7 +38,6 @@ interface KumulosConfig extends Configuration {
 export default class Kumulos {
     private readonly config: KumulosConfig;
     private readonly context: Context;
-    private readonly serviceWorkerReg?: Promise<ServiceWorkerRegistration>;
     private readonly promptManager?: PromptManager;
     private readonly ddlManager?: DdlManager;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
@@ -58,7 +57,7 @@ export default class Kumulos {
         if (this.context.hasFeature(SDKFeature.PUSH)) {
             trackOpenFromQuery(this.context);
 
-            this.serviceWorkerReg = registerServiceWorker(
+            registerServiceWorker(
                 this.context.serviceWorkerPath
             );
 

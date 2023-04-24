@@ -1,6 +1,6 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
-import { base64UrlEncode, cyrb53, getBrowserName } from '../utils';
+import { base64UrlEncode, cyrb53, getBrowserName, getFullUrl } from '../utils';
 import { get, set } from '../storage';
 
 const BLUR_EVENT_TIMEOUT_MILLIS = 1000;
@@ -17,14 +17,20 @@ function hasSameKey(vapidKey: string, subscription: PushSubscription): boolean {
     return subKey === vapidKey;
 }
 
-async function getActiveServiceWorkerReg(): Promise<ServiceWorkerRegistration> {
-    const workerReg = await navigator.serviceWorker.getRegistration();
+async function getActiveServiceWorkerReg(
+    workerPath: string
+): Promise<ServiceWorkerRegistration> {
+    const fullWorkerUrl = getFullUrl(workerPath);
+
+    const workerReg = await navigator.serviceWorker.getRegistration(
+        fullWorkerUrl
+    );
 
     if (!workerReg) {
         return Promise.reject('No service worker registration');
     }
 
-    return navigator.serviceWorker.ready;
+    return workerReg;
 }
 
 function hashSubscription(ctx: Context, sub: PushSubscription): number {
@@ -58,7 +64,9 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
-        const workerReg = await getActiveServiceWorkerReg();
+        const workerReg = await getActiveServiceWorkerReg(
+            ctx.serviceWorkerPath
+        );
         const existingSub = await workerReg.pushManager.getSubscription();
 
         if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
@@ -123,7 +131,7 @@ export default class W3cPushManager implements PushOpsManager {
             return 'blocked';
         }
 
-        const reg = await getActiveServiceWorkerReg();
+        const reg = await getActiveServiceWorkerReg(ctx.serviceWorkerPath);
         const sub = await reg?.pushManager.getSubscription();
 
         if (sub && perm === 'granted' && hasSameKey(ctx.vapidPublicKey, sub)) {
@@ -153,7 +161,9 @@ export default class W3cPushManager implements PushOpsManager {
             'pushExpiresAt'
         );
 
-        const workerReg = await getActiveServiceWorkerReg();
+        const workerReg = await getActiveServiceWorkerReg(
+            ctx.serviceWorkerPath
+        );
         const existingSub = await workerReg.pushManager.getSubscription();
 
         let existingSubHash = undefined;

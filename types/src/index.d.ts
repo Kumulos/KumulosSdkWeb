@@ -8,7 +8,6 @@ interface KumulosConfig extends Configuration {
 export default class Kumulos {
     private readonly config;
     private readonly context;
-    private readonly serviceWorkerReg?;
     private readonly promptManager?;
     private readonly ddlManager?;
     private channelSubscriptionManager?;
