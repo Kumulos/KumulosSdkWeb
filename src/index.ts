@@ -57,7 +57,7 @@ export default class Kumulos {
         const context = new Context(config);
         const platformConfigWithKeys = await loadPlatformConfig(context);
         await Kumulos.maybePersistInstallIdAndUserId(context, config);
-        const kumulos = new Kumulos(context, Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys.keys), platformConfigWithKeys.platformConfig);
+        const kumulos = new Kumulos(context, Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys), platformConfigWithKeys);
 
         kumulos.initialize();
 

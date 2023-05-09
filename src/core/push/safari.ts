@@ -1,4 +1,4 @@
-import { Context, EventType, PlatformConfig, Service, trackEvent } from '..';
+import { Context, EventType, Service, trackEvent } from '..';
 import { PushOpsManager, TokenType } from '.';
 import { cyrb53, defer } from '../utils';
 import { get, set } from '../storage';

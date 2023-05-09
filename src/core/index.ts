@@ -332,10 +332,7 @@ export interface Keys {
     secretKey: string;
 }
 
-export interface PlatformConfigAndKeys {
-    keys: Keys;
-    platformConfig: PlatformConfig;
-}
+export type PlatformConfigAndKeys = Keys & PlatformConfig;
 
 
 export enum SDKFeature {

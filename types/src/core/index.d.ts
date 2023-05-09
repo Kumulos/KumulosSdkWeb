@@ -238,10 +238,7 @@ export interface Keys {
     apiKey: string;
     secretKey: string;
 }
-export interface PlatformConfigAndKeys {
-    keys: Keys;
-    platformConfig: PlatformConfig;
-}
+export declare type PlatformConfigAndKeys = Keys & PlatformConfig;
 export declare enum SDKFeature {
     PUSH = "push",
     DDL = "ddl"

@@ -1,10 +1,9 @@
 import {
     Context,
     DdlPromptConfig,
-    PlatformConfig,
+    PlatformConfigAndKeys,
     Service,
-    getInstallId,
-    PlatformConfigAndKeys
+    getInstallId
 } from '.';
 import { get, set } from './storage';
 
@@ -59,7 +58,7 @@ export async function loadPlatformConfig(
 ): Promise<PlatformConfigAndKeys> {
     return (
         (await loadConfig<PlatformConfigAndKeys>(
-            `${ctx.urlForService(Service.PUSH)}/v1/web/config&tenantId=${ctx.tenantId}`,
+            `${ctx.urlForService(Service.PUSH)}/v2/web/config&tenantId=${ctx.tenantId}`,
             ConfigCacheType.PLATFORM,
             ctx
         )) ?? {}
