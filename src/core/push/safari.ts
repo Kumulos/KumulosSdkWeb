@@ -39,6 +39,8 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
+        console.log('Called into push register safari');
+
         const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             cfg.safariPushId as string

@@ -70,9 +70,15 @@ export default function getPushOpsManager(
     const browser = getBrowserName();
 
     if (browser === 'safari') {
-        manager = loadPlatformConfig(ctx).then(
-            cfg => new SafariPushManager(cfg)
-        );
+        if ('PushManager' in window) {
+            console.log('using W3C Push Manager');
+            manager = Promise.resolve(new W3cPushManager());
+        }
+        else {
+            manager = loadPlatformConfig(ctx).then(
+                cfg => new SafariPushManager(cfg)
+            );
+        }
     } else {
         manager = Promise.resolve(new W3cPushManager());
     }
@@ -108,6 +114,7 @@ export async function registerServiceWorker(workerPath: string) {
     }
 
     const fullWorkerUrl = getFullUrl(workerPath);
+    console.log('Full worker URL: ' + fullWorkerUrl)
     try {
         await navigator.serviceWorker.register(fullWorkerUrl);
     } catch (e) {

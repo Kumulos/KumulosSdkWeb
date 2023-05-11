@@ -71,7 +71,20 @@ function isBrowserSupportedForPush() {
     const browser = getBrowserName();
 
     if ('safari' === browser) {
-        coreDependencies.push(typeof window.safari?.pushNotification);
+        if ('PushManager' in window) {
+            console.log('using Service Worker and Push Manager');
+
+            coreDependencies.push(
+                ...[
+                    typeof Notification,
+                    typeof navigator.serviceWorker,
+                    typeof PushManager
+                ]
+            );
+        } else {
+            console.log('using legacy Safari Push Notifications');
+            coreDependencies.push(typeof window.safari?.pushNotification);
+        }
     } else {
         coreDependencies.push(
             ...[
