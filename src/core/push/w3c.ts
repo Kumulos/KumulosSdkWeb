@@ -53,6 +53,8 @@ export default class W3cPushManager implements PushOpsManager {
         try {
             const result = await Notification.requestPermission();
 
+            console.log('W3C manager permission returned: ' + result);
+
             return result;
         } catch (e) {
             console.error(e);
@@ -136,7 +138,10 @@ export default class W3cPushManager implements PushOpsManager {
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<import('.').PushSubscriptionState> {
+        console.log('Called into requestPermissionAndRegisterForPush');
         const perm = await this.requestNotificationPermission(ctx);
+
+        console.log('Perm: ' + perm);
 
         switch (perm) {
             case 'default':

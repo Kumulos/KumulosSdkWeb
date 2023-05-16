@@ -14,6 +14,7 @@ import {
     trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
+import { getBrowserName, isMobile } from './core/utils';
 import {
     getMostRecentlyOpenedPushPayload,
     persistConfig,
@@ -25,7 +26,6 @@ import getPushOpsManager, {
     registerServiceWorker,
     trackOpenFromQuery
 } from './core/push';
-import { isMobile } from './core/utils';
 
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
@@ -161,13 +161,18 @@ export default class Kumulos {
 
     async pushRegister(): Promise<void> {
         const pushManager = await getPushOpsManager(this.context);
-
         const permission  = await pushManager.requestNotificationPermission(this.context);
 
         if (permission !== 'granted') {
             return Promise.reject(
                 'Notification permission not granted'
             );
+        }
+        
+        let browser = getBrowserName();
+
+        if (browser === 'safari') {
+            pushManager.pushRegister(this.context);
         }
     }
 
