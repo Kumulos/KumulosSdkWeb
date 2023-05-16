@@ -75,6 +75,7 @@ export default function getPushOpsManager(
             manager = Promise.resolve(new W3cPushManager());
         }
         else {
+            console.log('using Safari Push Manager');
             manager = loadPlatformConfig(ctx).then(
                 cfg => new SafariPushManager(cfg)
             );
