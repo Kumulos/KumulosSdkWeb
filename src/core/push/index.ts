@@ -115,7 +115,6 @@ export async function registerServiceWorker(workerPath: string) {
     }
 
     const fullWorkerUrl = getFullUrl(workerPath);
-    console.log('Full worker URL: ' + fullWorkerUrl)
     try {
         await navigator.serviceWorker.register(fullWorkerUrl);
     } catch (e) {

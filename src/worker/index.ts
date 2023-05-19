@@ -48,6 +48,8 @@ self.addEventListener('activate', event => {
     event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener('fetch', () => console.log('fetch'));
+
 self.addEventListener('push', event => {
     const workCompleted = withContext(ctx => {
         if (!event.data) {

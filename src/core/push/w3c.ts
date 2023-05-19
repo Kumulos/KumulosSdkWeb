@@ -53,8 +53,6 @@ export default class W3cPushManager implements PushOpsManager {
         try {
             const result = await Notification.requestPermission();
 
-            console.log('W3C manager permission returned: ' + result);
-
             return result;
         } catch (e) {
             console.error(e);
@@ -63,8 +61,6 @@ export default class W3cPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
-        console.log('Called into push register W3C');
-
         if (!('PushManager' in window)) {
             return Promise.reject(
                 'Push notifications are not supported in this browser'
@@ -75,11 +71,7 @@ export default class W3cPushManager implements PushOpsManager {
             ctx.serviceWorkerPath
         );
 
-        console.log('Active service worker reg: ' + workerReg);
-
         const existingSub = await workerReg.pushManager.getSubscription();
-
-        console.log('Existing sub:  ' + existingSub);
 
         if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
             await existingSub?.unsubscribe();
@@ -89,8 +81,6 @@ export default class W3cPushManager implements PushOpsManager {
             applicationServerKey: ctx.vapidPublicKey,
             userVisibleOnly: true
         });
-
-        console.log('Subscription: ' + sub);
 
         const endpointHash = hashSubscription(ctx, sub);
 
