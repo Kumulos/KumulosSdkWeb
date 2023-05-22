@@ -172,10 +172,10 @@ export default class Kumulos {
         //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1    
         let browser = getBrowserName();
 
-        if (browser === 'safari') {
+        if (browser === 'safari' && 'PushManager' in window) {
             pushManager.pushRegister(this.context);
         }
-    }
+    }git 
 
     private onWorkerMessage = (e: MessageEvent) => {
         if (e.origin !== location.origin) {
