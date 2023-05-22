@@ -93,9 +93,6 @@ export default class W3cPushManager implements PushOpsManager {
             existingEndpointHash === endpointHash &&
             (!existingExpiry || existingExpiry > Date.now())
         ) {
-            console.log('Endpoint Hash: ' + endpointHash);
-            console.log('existing expiry ' + existingExpiry);
-
             return;
         }
 
@@ -128,10 +125,7 @@ export default class W3cPushManager implements PushOpsManager {
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<import('.').PushSubscriptionState> {
-        console.log('Called into requestPermissionAndRegisterForPush');
         const perm = await this.requestNotificationPermission(ctx);
-
-        console.log('Perm: ' + perm);
 
         switch (perm) {
             case 'default':

@@ -72,8 +72,6 @@ function isBrowserSupportedForPush() {
 
     if ('safari' === browser) {
         if ('PushManager' in window) {
-            console.log('using Service Worker and Push Manager');
-
             coreDependencies.push(
                 ...[
                     typeof Notification,
@@ -82,7 +80,6 @@ function isBrowserSupportedForPush() {
                 ]
             );
         } else {
-            console.log('using legacy Safari Push Notifications');
             coreDependencies.push(typeof window.safari?.pushNotification);
         }
     } else {
