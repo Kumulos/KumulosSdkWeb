@@ -69,15 +69,10 @@ export default function getPushOpsManager(
 
     const browser = getBrowserName();
 
-    if (browser === 'safari') {
-        if ('PushManager' in window) {
-            manager = Promise.resolve(new W3cPushManager());
-        }
-        else {
-            manager = loadPlatformConfig(ctx).then(
-                cfg => new SafariPushManager(cfg)
-            );
-        }
+    if (browser === 'safari' && !('PushManager' in window)) {
+        manager = loadPlatformConfig(ctx).then(
+            cfg => new SafariPushManager(cfg)
+        );
     } else {
         manager = Promise.resolve(new W3cPushManager());
     }
