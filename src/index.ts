@@ -80,7 +80,10 @@ export default class Kumulos {
     private initializePushFeature() {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
-        this.observePermissionStatus();
+        
+        if (navigator.permissions){
+            this.observePermissionStatus();
+        }
 
         this.promptManager = new PromptManager(
             this,
@@ -172,7 +175,7 @@ export default class Kumulos {
         //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1    
         const browser = getBrowserName();
 
-        if (browser === 'safari' && 'PushManager' in window) {
+        if (browser === 'safari') {
             pushManager.pushRegister(this.context);
         }
     }
