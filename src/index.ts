@@ -172,7 +172,8 @@ export default class Kumulos {
             );
         }
 
-        //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1    
+        //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1
+        // it also supports the legacy safari push notification implementation, which can not rely on the permission change event handler
         const browser = getBrowserName();
 
         if (browser === 'safari') {
