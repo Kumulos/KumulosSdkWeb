@@ -176,7 +176,7 @@ export default class Kumulos {
         // it also supports the legacy safari push notification implementation, which can not rely on the permission change event handler
         const browser = getBrowserName();
 
-        if (browser === 'safari') {
+        if (browser === 'safari' || !navigator.permissions) {
             pushManager.pushRegister(this.context);
         }
     }
