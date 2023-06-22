@@ -67,7 +67,7 @@ export default function getPushOpsManager(
 
     const browser = getBrowserName();
 
-    if (browser === 'safari') {
+    if (browser === 'safari' && !('PushManager' in window)) {
         manager = Promise.resolve(new SafariPushManager(ctx.safariPushId));
     } else {
         manager = Promise.resolve(new W3cPushManager());

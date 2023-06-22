@@ -70,7 +70,7 @@ function isBrowserSupportedForPush() {
     const coreDependencies = [...CORE_FEATURE_DEPENDENCIES];
     const browser = getBrowserName();
 
-    if ('safari' === browser) {
+    if ('safari' === browser && !('PushManager' in window)) {
         coreDependencies.push(typeof window.safari?.pushNotification);
     } else {
         coreDependencies.push(

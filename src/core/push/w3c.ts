@@ -70,6 +70,7 @@ export default class W3cPushManager implements PushOpsManager {
         const workerReg = await getActiveServiceWorkerReg(
             ctx.serviceWorkerPath
         );
+
         const existingSub = await workerReg.pushManager.getSubscription();
 
         if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
