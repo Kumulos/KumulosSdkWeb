@@ -54,7 +54,7 @@ export default class Kumulos {
     public static async buildInstance(config: KumulosConfig) {
         assertConfigValid(config);
 
-        const platformConfigWithKeys = await loadPlatformAndKeysConfig(`https://push-${config.region}.kumulos.com/v2/web/config?tenantId=593`);
+        const platformConfigWithKeys = await loadPlatformAndKeysConfig(`https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}`);
         const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys.keys);
 
         const context = new Context(newManipulatedConfig);
