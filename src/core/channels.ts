@@ -1,5 +1,5 @@
 import { Context, PropsObject, Service, getInstallId } from '.';
-import { authedFetch, authedFetchJson } from './utils';
+import { performFetch, performJsonFetch } from './utils';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -42,7 +42,7 @@ export class ChannelSubscriptionManager {
                 body: JSON.stringify(params)
             };
 
-            return authedFetch(this.context, url, options);
+            return performFetch(url, this.context.authHeader, options);
         });
     }
 
@@ -84,7 +84,7 @@ export class ChannelSubscriptionManager {
             const url = `${this.context.urlForService(
                 Service.PUSH
             )}/v1/app-installs/${installId}/channels`;
-            return authedFetchJson<Channel[]>(this.context, url);
+            return performJsonFetch<Channel[]>(url, this.context.authHeader);
         });
     }
 
@@ -126,7 +126,7 @@ export class ChannelSubscriptionManager {
                 body: JSON.stringify(params)
             };
 
-            return authedFetchJson<Channel>(this.context, url, options);
+            return performJsonFetch<Channel>(url, this.context.authHeader, options);
         });
     }
 }

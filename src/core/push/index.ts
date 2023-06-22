@@ -1,5 +1,4 @@
 import { Context, EventType, trackEvent } from '..';
-import { loadPlatformConfig } from '../config';
 import { getBrowserName, getFullUrl, parseQueryString } from '../utils';
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
@@ -69,9 +68,7 @@ export default function getPushOpsManager(
     const browser = getBrowserName();
 
     if (browser === 'safari') {
-        manager = loadPlatformConfig(ctx).then(
-            cfg => new SafariPushManager(cfg.safariPushId)
-        );
+        manager = Promise.resolve(new SafariPushManager(ctx.safariPushId));
     } else {
         manager = Promise.resolve(new W3cPushManager());
     }

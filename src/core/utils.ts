@@ -1,4 +1,4 @@
-import { Context, SDKFeature } from './index';
+import { SDKFeature } from './index';
 
 type FeatureDependency =
     | string
@@ -135,9 +135,9 @@ export function escapeRegExp(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function authedFetch(
-    ctx: Context,
+export function performFetch(
     url: RequestInfo,
+    authHeader?: string,
     options: RequestInit = { method: 'GET' }
 ): Promise<Response> {
     const existingHeaders = options.headers ?? {};
@@ -145,27 +145,28 @@ export function authedFetch(
     options.headers = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: ctx.authHeader,
+        ...(authHeader ? { Authorization: authHeader } : {}),
         ...existingHeaders
     };
 
     return fetch(url, options);
 }
 
-export class AuthedFetchError extends Error {
+export class FetchError extends Error {
     constructor(statusCode: number, statusText: string) {
-        super(`authed fetch failed: ${statusCode}, ${statusText}`);
+        super(`fetch failed: ${statusCode}, ${statusText}`);
     }
 }
 
-export function authedFetchJson<T>(
-    ctx: Context,
+
+export function performJsonFetch<T>(
     url: RequestInfo,
+    authHeader?: string,
     options?: RequestInit
 ): Promise<T> {
-    return authedFetch(ctx, url, options).then(r => {
+    return performFetch(url, authHeader, options).then(r => {
         if (!r.ok) {
-            throw new AuthedFetchError(r.status, r.statusText);
+            throw new FetchError(r.status, r.statusText);
         }
 
         return r.json();

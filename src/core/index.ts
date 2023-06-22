@@ -1,4 +1,4 @@
-import { authedFetch, cyrb53, uuidv4 } from './utils';
+import { performFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
 import { Channel } from './channels';
@@ -332,7 +332,9 @@ export interface Keys {
     secretKey: string;
 }
 
-export type PlatformConfigAndKeys = Keys & PlatformConfig;
+export type PlatformConfigAndKeys =  PlatformConfig & {
+    keys: Keys
+};
 
 
 export enum SDKFeature {
@@ -378,6 +380,7 @@ export class Context {
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
     readonly tenantId: number;
+    readonly safariPushId?: string;
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
     private readonly urlMap: { [key in Service]: string };
@@ -454,9 +457,6 @@ export function assertConfigValid(config: any) {
 function assertPushConfigValid(config: any) {
     const requiredStringProps = [
         'region',
-        'apiKey',
-        'secretKey',
-        'vapidPublicKey'
     ];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
@@ -575,7 +575,7 @@ export async function trackEvent(
     const url = `${ctx.urlForService(
         Service.EVENTS
     )}/v1/app-installs/${installId}/events`;
-    return authedFetch(ctx, url, {
+    return performFetch(url, ctx.authHeader, {
         method: 'POST',
         body: JSON.stringify(events)
     });

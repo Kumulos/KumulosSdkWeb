@@ -238,7 +238,9 @@ export interface Keys {
     apiKey: string;
     secretKey: string;
 }
-export declare type PlatformConfigAndKeys = Keys & PlatformConfig;
+export declare type PlatformConfigAndKeys = PlatformConfig & {
+    keys: Keys;
+};
 export declare enum SDKFeature {
     PUSH = "push",
     DDL = "ddl"
@@ -278,6 +280,7 @@ export declare class Context {
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
     readonly tenantId: number;
+    readonly safariPushId?: string;
     private readonly subscribers;
     private readonly urlMap;
     constructor(config: Configuration);

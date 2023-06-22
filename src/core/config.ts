@@ -7,7 +7,7 @@ import {
 } from '.';
 import { get, set } from './storage';
 
-import { authedFetchJson } from './utils';
+import { performJsonFetch } from './utils';
 
 const getCacheKeys = (key: string) => ({
     CONFIG_CACHE_KEY: `${key}Config`,
@@ -24,7 +24,7 @@ enum ConfigCacheType {
 async function loadConfig<TConfigType>(
     url: string,
     cacheKey: string,
-    ctx: Context
+    authHeader?: string
 ): Promise<TConfigType> {
     const cacheKeys = getCacheKeys(cacheKey);
     let config = await get<TConfigType>(cacheKeys.CONFIG_CACHE_KEY);
@@ -37,7 +37,8 @@ async function loadConfig<TConfigType>(
         console.info('Config never synced/stale, syncing now...');
 
         try {
-            config = await authedFetchJson<TConfigType>(ctx, url);
+            config = await performJsonFetch<TConfigType>(url, authHeader);
+            
             updatedRemoteConfig = true;
         } catch (e) {
             console.warn(e);
@@ -53,14 +54,11 @@ async function loadConfig<TConfigType>(
     return config;
 }
 
-export async function loadPlatformConfig(
-    ctx: Context
-): Promise<PlatformConfigAndKeys> {
+export async function loadPlatformAndKeysConfig(url: string): Promise<PlatformConfigAndKeys> {
     return (
         (await loadConfig<PlatformConfigAndKeys>(
-            `${ctx.urlForService(Service.PUSH)}/v2/web/config&tenantId=${ctx.tenantId}`,
-            ConfigCacheType.PLATFORM,
-            ctx
+            url,
+            ConfigCacheType.PLATFORM
         )) ?? {}
     );
 }
@@ -76,7 +74,7 @@ export async function loadDdlConfig(
                 Service.DDL
             )}/v1/banners?webInstallId=${webInstallId}`,
             ConfigCacheType.DDL,
-            ctx
+            ctx.authHeader
         );
     } catch (err) {
         console.warn(

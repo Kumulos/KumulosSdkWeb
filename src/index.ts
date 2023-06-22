@@ -32,7 +32,7 @@ import { isMobile } from './core/utils';
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
 import RootFrame from './core/root-frame';
-import { loadPlatformConfig } from './core/config';
+import { loadPlatformAndKeysConfig } from './core/config';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -54,10 +54,12 @@ export default class Kumulos {
     public static async buildInstance(config: KumulosConfig) {
         assertConfigValid(config);
 
-        const context = new Context(config);
-        const platformConfigWithKeys = await loadPlatformConfig(context);
-        await Kumulos.maybePersistInstallIdAndUserId(context, config);
-        const kumulos = new Kumulos(context, Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys), platformConfigWithKeys);
+        const platformConfigWithKeys = await loadPlatformAndKeysConfig(`https://push-${config.region}.kumulos.com/v2/web/config?tenantId=593`);
+        const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys.keys);
+
+        const context = new Context(newManipulatedConfig);
+        await Kumulos.maybePersistInstallIdAndUserId(context, newManipulatedConfig);
+        const kumulos = new Kumulos(context, newManipulatedConfig, platformConfigWithKeys);
 
         kumulos.initialize();
 
