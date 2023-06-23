@@ -1,14 +1,12 @@
-import { Component, h } from 'preact';
-import { PromptUiProps } from '../ui';
 import {
     AlertPromptConfig,
     BannerPromptConfig,
-    PromptTypeName,
-    getChannelDialogChannels,
-    ChannelListItem
+    ChannelListItem,
+    PromptTypeName
 } from '../../core';
-import { UIContext, UIContextState } from '../ui-context';
-import { ChannelsList } from './channels-list';
+import { Component, h } from 'preact';
+
+import { PromptUiProps } from '../ui';
 
 const styles = {
     iconStyle: {
@@ -51,11 +49,7 @@ export class Dialog extends Component<
         });
     };
 
-    renderAlert = (uiContext?: UIContextState) => {
-        if (undefined === uiContext) {
-            return null;
-        }
-
+    render() {
         const config = this.props.config;
         const classes = `kumulos-prompt kumulos-prompt-${this.props.promptManagerState} kumulos-${config.type}-container kumulos-prompt-position-${config.position}`;
 
@@ -109,20 +103,7 @@ export class Dialog extends Component<
                     <div className={`kumulos-${config.type}-header`}>
                         <h1>{heading}</h1>
                     </div>
-                    <div className={`kumulos-${config.type}-body`}>
-                        {body}
-                        {this.props.action && (
-                            <ChannelsList
-                                channelList={getChannelDialogChannels(
-                                    uiContext.channelList,
-                                    this.props.action.channels
-                                )}
-                                onChannelSelectionChanged={
-                                    this.onSelectedChannelChanged
-                                }
-                            />
-                        )}
-                    </div>
+                    <div className={`kumulos-${config.type}-body`}>{body}</div>
                 </div>
 
                 <div className={`kumulos-${config.type}-actions`}>
@@ -145,9 +126,5 @@ export class Dialog extends Component<
                 </div>
             </div>
         );
-    };
-
-    render() {
-        return <UIContext.Consumer>{this.renderAlert}</UIContext.Consumer>;
     }
 }

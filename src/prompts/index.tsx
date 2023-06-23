@@ -1,4 +1,3 @@
-import { ChannelSubscriptionManager } from '../core/channels';
 import {
     ChannelListItem,
     Context,
@@ -15,8 +14,8 @@ import getPushOpsManager, {
 } from '../core/push';
 import { h, render } from 'preact';
 
+import { ChannelSubscriptionManager } from '../core/channels';
 import { PromptTriggerEventFilter } from './triggers';
-import { UndefinedStateUIContext } from './ui-context';
 import Ui from './ui';
 import { deferPromptActivation } from './utils';
 import { maybePersistReminder } from './prompt-reminder';
@@ -51,7 +50,12 @@ export class PromptManager {
     private currentPostAction?: PromptAction;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
-    constructor(ctx: Context, rootFrame: RootFrame, publicKey?: string, prompts?: PromptConfigs<PushPromptConfig>) {
+    constructor(
+        ctx: Context,
+        rootFrame: RootFrame,
+        publicKey?: string,
+        prompts?: PromptConfigs<PushPromptConfig>
+    ) {
         this.publicKey = publicKey;
         this.prompts = prompts ?? {};
         this.activePrompts = [];
@@ -187,20 +191,18 @@ export class PromptManager {
         }
 
         render(
-            <UndefinedStateUIContext.Provider value={{}}>
-                <Ui
-                    ref={r => (this.ui = r)}
-                    prompts={this.activePrompts}
-                    subscriptionState={this.subscriptionState}
-                    promptManagerState={this.state}
-                    onPromptAccepted={this.onPromptAccepted}
-                    onPromptDeclined={this.onPromptDeclined}
-                    onPostActionConfirm={this.onPostActionConfirm}
-                    onDismissOverlay={this.onDismissOverlay}
-                    currentlyRequestingPrompt={this.currentlyRequestingPrompt}
-                    currentPostAction={this.currentPostAction}
-                />
-            </UndefinedStateUIContext.Provider>,
+            <Ui
+                ref={r => (this.ui = r)}
+                prompts={this.activePrompts}
+                subscriptionState={this.subscriptionState}
+                promptManagerState={this.state}
+                onPromptAccepted={this.onPromptAccepted}
+                onPromptDeclined={this.onPromptDeclined}
+                onPostActionConfirm={this.onPostActionConfirm}
+                onDismissOverlay={this.onDismissOverlay}
+                currentlyRequestingPrompt={this.currentlyRequestingPrompt}
+                currentPostAction={this.currentPostAction}
+            />,
             this.pushContainer.element
         );
     }
