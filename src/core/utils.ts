@@ -158,7 +158,6 @@ export class FetchError extends Error {
     }
 }
 
-
 export function performJsonFetch<T>(
     url: RequestInfo,
     authHeader?: string,

@@ -38,7 +38,7 @@ async function loadConfig<TConfigType>(
 
         try {
             config = await performJsonFetch<TConfigType>(url, authHeader);
-            
+
             updatedRemoteConfig = true;
         } catch (e) {
             console.warn(e);
@@ -54,7 +54,9 @@ async function loadConfig<TConfigType>(
     return config;
 }
 
-export async function loadPlatformAndKeysConfig(url: string): Promise<PlatformConfigAndKeys> {
+export async function loadPlatformAndKeysConfig(
+    url: string
+): Promise<PlatformConfigAndKeys> {
     return (
         (await loadConfig<PlatformConfigAndKeys>(
             url,

@@ -126,7 +126,11 @@ export class ChannelSubscriptionManager {
                 body: JSON.stringify(params)
             };
 
-            return performJsonFetch<Channel>(url, this.context.authHeader, options);
+            return performJsonFetch<Channel>(
+                url,
+                this.context.authHeader,
+                options
+            );
         });
     }
 }

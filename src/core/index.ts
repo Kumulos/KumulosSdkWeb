@@ -332,10 +332,9 @@ export interface Keys {
     secretKey: string;
 }
 
-export type PlatformConfigAndKeys =  PlatformConfig & {
-    keys: Keys
+export type PlatformConfigAndKeys = PlatformConfig & {
+    keys: Keys;
 };
-
 
 export enum SDKFeature {
     PUSH = 'push',
@@ -434,7 +433,10 @@ export class Context {
     }
 }
 
-export function assertConfigValid(config: any, tenantIdRequired: boolean = false) {
+export function assertConfigValid(
+    config: any,
+    tenantIdRequired: boolean = false
+) {
     if (typeof config !== 'object') {
         throw 'Config must be an object';
     }
@@ -443,25 +445,28 @@ export function assertConfigValid(config: any, tenantIdRequired: boolean = false
         Array.isArray(config.features) && config.features.length
             ? config.features
             : undefined;
-    // if (tenantIdRequired && !config.tenantId) {
-    //     throw 'tenantId is missing';        
-    // }
-    
+
+    if (tenantIdRequired && !config.tenantId) {
+        throw 'tenantId is missing';
+    }
+
     if (!features || features.includes(SDKFeature.PUSH)) {
         return assertPushConfigValid(config);
     }
 }
 
-export function assertKeys(platformConfigWithKeys: PlatformConfigAndKeys){
-    if (!platformConfigWithKeys.keys || !platformConfigWithKeys.keys.apiKey || !platformConfigWithKeys.keys.secretKey) {
+export function assertKeys(platformConfigWithKeys: PlatformConfigAndKeys) {
+    if (
+        !platformConfigWithKeys.keys ||
+        !platformConfigWithKeys.keys.apiKey ||
+        !platformConfigWithKeys.keys.secretKey
+    ) {
         throw 'Keys are missing';
     }
 }
 
 function assertPushConfigValid(config: any) {
-    const requiredStringProps = [
-        'region',
-    ];
+    const requiredStringProps = ['region'];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
             throw `Required configuration key '${prop}' must be non-empty string`;

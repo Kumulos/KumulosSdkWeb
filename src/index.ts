@@ -54,21 +54,37 @@ export default class Kumulos {
     public static async buildInstance(config: KumulosConfig) {
         assertConfigValid(config, true);
 
-        const platformConfigWithKeys = await loadPlatformAndKeysConfig(`https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}`);
-        
+        const platformConfigWithKeys = await loadPlatformAndKeysConfig(
+            `https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}`
+        );
+
         assertKeys(platformConfigWithKeys);
-        const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys.keys);
+        const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(
+            config,
+            platformConfigWithKeys.keys
+        );
 
         const context = new Context(newManipulatedConfig);
-        await Kumulos.maybePersistInstallIdAndUserId(context, newManipulatedConfig);
-        const kumulos = new Kumulos(context, newManipulatedConfig, platformConfigWithKeys);
+        await Kumulos.maybePersistInstallIdAndUserId(
+            context,
+            newManipulatedConfig
+        );
+        const kumulos = new Kumulos(
+            context,
+            newManipulatedConfig,
+            platformConfigWithKeys
+        );
 
         kumulos.initialize();
 
         return kumulos;
     }
 
-    private constructor(context: Context, config: KumulosConfig, platformConfig: PlatformConfig) {
+    private constructor(
+        context: Context,
+        config: KumulosConfig,
+        platformConfig: PlatformConfig
+    ) {
         this.context = context;
         this.config = config;
         this.platformConfig = platformConfig;
@@ -90,14 +106,14 @@ export default class Kumulos {
     private async initializePushFeature() {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
-        
-        if (navigator.permissions){
+
+        if (navigator.permissions) {
             this.observePermissionStatus();
         }
 
         this.promptManager = new PromptManager(
             this.context,
-            this.rootFrame, 
+            this.rootFrame,
             this.platformConfig.prompts
         );
 
@@ -106,9 +122,11 @@ export default class Kumulos {
     }
 
     private async observePermissionStatus() {
-        const permissionStatus = await navigator.permissions.query({name: 'notifications'});
+        const permissionStatus = await navigator.permissions.query({
+            name: 'notifications'
+        });
 
-        permissionStatus.addEventListener('change', async (event) => {
+        permissionStatus.addEventListener('change', async event => {
             const permissionStatus = event.target as PermissionStatus;
             const permissionState = permissionStatus.state;
 
@@ -120,7 +138,7 @@ export default class Kumulos {
         });
     }
 
-    private initializeDDLFeature(){
+    private initializeDDLFeature() {
         if (!isMobile()) {
             console.info(
                 'DdlManager: DDL feature support only available on mobile devices.'
@@ -130,7 +148,6 @@ export default class Kumulos {
 
         this.ddlManager = new DdlManager(this.context, this.rootFrame);
     }
-
 
     private maybeAddMessageEventListenerToSW() {
         if (!('serviceWorker' in navigator)) {
@@ -164,7 +181,10 @@ export default class Kumulos {
         });
     }
 
-    private static mapConfigAndKeysToConfig(config: KumulosConfig, keys: Keys): KumulosConfig {
+    private static mapConfigAndKeysToConfig(
+        config: KumulosConfig,
+        keys: Keys
+    ): KumulosConfig {
         const newConfig: KumulosConfig = {
             region: config.region,
             apiKey: keys.apiKey,
@@ -179,7 +199,7 @@ export default class Kumulos {
             customerId: config.customerId,
             sdkVersion: config.sdkVersion,
             tenantId: config.tenantId
-        } 
+        };
 
         return newConfig;
     }
@@ -194,12 +214,12 @@ export default class Kumulos {
 
     async pushRegister(): Promise<void> {
         const pushManager = await getPushOpsManager(this.context);
-        const permission  = await pushManager.requestNotificationPermission(this.context);
+        const permission = await pushManager.requestNotificationPermission(
+            this.context
+        );
 
         if (permission !== 'granted') {
-            return Promise.reject(
-                'Notification permission not granted'
-            );
+            return Promise.reject('Notification permission not granted');
         }
 
         //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1
