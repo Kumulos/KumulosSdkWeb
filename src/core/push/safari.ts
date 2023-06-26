@@ -107,7 +107,6 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        //const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );

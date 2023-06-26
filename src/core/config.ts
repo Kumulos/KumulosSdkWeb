@@ -17,7 +17,7 @@ const getCacheKeys = (key: string) => ({
 const MAX_CACHE_AGE_MS = 1 * 60 * 60 * 1000;
 
 enum ConfigCacheType {
-    PLATFORM = 'platform_v2',
+    PLATFORM = 'platformV2',
     DDL = 'ddl'
 }
 
