@@ -12,6 +12,7 @@ function hashToken(ctx: Context, token: string): number {
 
 export default class SafariPushManager implements PushOpsManager {
     private readonly cfg: PlatformConfig;
+    private registerInProgress: boolean = false;
 
     constructor(cfg: PlatformConfig) {
         this.cfg = cfg;
@@ -39,29 +40,41 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
-        const cfg = await loadPlatformConfig(ctx);
-        const perm = window.safari?.pushNotification.permission(
-            cfg.safariPushId as string
-        );
-
-        if (!perm || !perm.deviceToken) {
+        if (this.registerInProgress) {
             return;
         }
 
-        const existingTokenHash = await get<number>('pushTokenHash');
-        const tokenHash = hashToken(ctx, perm.deviceToken);
+        this.registerInProgress = true;
 
-        if (existingTokenHash === tokenHash) {
-            return;
+        try {
+            const cfg = await loadPlatformConfig(ctx);
+            const perm = window.safari?.pushNotification.permission(
+                cfg.safariPushId as string
+            );
+
+            if (!perm || !perm.deviceToken) {
+                return;
+            }
+
+            const existingTokenHash = await get<number>('pushTokenHash');
+            const tokenHash = hashToken(ctx, perm.deviceToken);
+
+            if (existingTokenHash === tokenHash) {
+                return;
+            }
+
+            await trackEvent(ctx, EventType.PUSH_REGISTERED, {
+                type: TokenType.SAFARI,
+                token: perm.deviceToken,
+                bundleId: cfg.safariPushId
+            });
+
+            await set('pushTokenHash', tokenHash);
+        } catch (e) {
+            throw e;
+        } finally {
+            this.registerInProgress = false
         }
-
-        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
-            type: TokenType.SAFARI,
-            token: perm.deviceToken,
-            bundleId: cfg.safariPushId
-        });
-
-        await set('pushTokenHash', tokenHash);
     }
 
     async requestPermissionAndRegisterForPush(

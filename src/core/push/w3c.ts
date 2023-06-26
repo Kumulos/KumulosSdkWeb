@@ -67,40 +67,6 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
-        const workerReg = await getActiveServiceWorkerReg(
-            ctx.serviceWorkerPath
-        );
-
-        const existingSub = await workerReg.pushManager.getSubscription();
-
-        if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
-            await existingSub?.unsubscribe();
-        }
-
-        const sub = await workerReg.pushManager.subscribe({
-            applicationServerKey: ctx.vapidPublicKey,
-            userVisibleOnly: true
-        });
-
-        const endpointHash = hashSubscription(ctx, sub);
-
-        const existingEndpointHash = await get<number>('pushEndpointHash');
-        const existingExpiry = await get<number | null | undefined>(
-            'pushExpiresAt'
-        );
-
-        if (
-            existingEndpointHash === endpointHash &&
-            (!existingExpiry || existingExpiry > Date.now())
-        ) {
-            return;
-        }
-
-
-        await this.trackEventAndCache(ctx, sub, endpointHash);
-    }
-
-    private async trackEventAndCache(ctx: Context, pushSubscription: PushSubscription, endpointHash: number): Promise<void> {
         if (this.registerInProgress) {
             return;
         }
@@ -108,18 +74,52 @@ export default class W3cPushManager implements PushOpsManager {
         this.registerInProgress = true;
 
         try {
-            await trackEvent(ctx, EventType.PUSH_REGISTERED, {
-                type: TokenType.W3C,
-                token: pushSubscription
+            const workerReg = await getActiveServiceWorkerReg(
+                ctx.serviceWorkerPath
+            );
+
+            const existingSub = await workerReg.pushManager.getSubscription();
+
+            if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
+                await existingSub?.unsubscribe();
+            }
+
+            const sub = await workerReg.pushManager.subscribe({
+                applicationServerKey: ctx.vapidPublicKey,
+                userVisibleOnly: true
             });
-    
-            await set('pushEndpointHash', endpointHash);
-            await set('pushExpiresAt', pushSubscription.expirationTime);
+
+            const endpointHash = hashSubscription(ctx, sub);
+
+            const existingEndpointHash = await get<number>('pushEndpointHash');
+            const existingExpiry = await get<number | null | undefined>(
+                'pushExpiresAt'
+            );
+
+            if (
+                existingEndpointHash === endpointHash &&
+                (!existingExpiry || existingExpiry > Date.now())
+            ) {
+                return;
+            }
+
+
+            await this.trackEventAndCache(ctx, sub, endpointHash);
         } catch (e) {
-            return Promise.reject(e);
+            throw e;
         } finally {
             this.registerInProgress = false;
         }
+    }
+
+    private async trackEventAndCache(ctx: Context, pushSubscription: PushSubscription, endpointHash: number): Promise<void> {
+        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
+            type: TokenType.W3C,
+            token: pushSubscription
+        });
+
+        await set('pushEndpointHash', endpointHash);
+        await set('pushExpiresAt', pushSubscription.expirationTime);
     }
 
     async requestPermissionAndRegisterForPush(
