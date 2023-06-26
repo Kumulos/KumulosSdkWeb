@@ -45,7 +45,6 @@ export class PromptManager {
     private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
     private ui?: Ui;
-    private publicKey?: string;
     private prompts: PromptConfigs<PushPromptConfig>;
     private currentPostAction?: PromptAction;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
@@ -53,10 +52,8 @@ export class PromptManager {
     constructor(
         ctx: Context,
         rootFrame: RootFrame,
-        publicKey?: string,
         prompts?: PromptConfigs<PushPromptConfig>
     ) {
-        this.publicKey = publicKey;
         this.prompts = prompts ?? {};
         this.activePrompts = [];
         this.triggerFilter = new PromptTriggerEventFilter<PushPromptConfig>(
@@ -276,7 +273,6 @@ export class PromptManager {
                 this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
-                this.loadPrompts();
                 // Note: channels irrelevant for optimove apps
                 //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
@@ -297,18 +293,5 @@ export class PromptManager {
                 this.render();
                 break;
         }
-    }
-
-    private loadPrompts(): void {
-        if (!this.publicKey) {
-            console.error('Failed to load prompts config');
-            return;
-        }
-
-        if (this.context.pushPrompts !== 'auto') {
-            this.prompts = { ...this.context.pushPrompts };
-        }
-
-        return;
     }
 }

@@ -11,11 +11,10 @@ export declare class PromptManager {
     private currentlyRequestingPrompt?;
     private pushOpsManager?;
     private ui?;
-    private publicKey?;
     private prompts;
     private currentPostAction?;
     private channelSubscriptionManager?;
-    constructor(ctx: Context, rootFrame: RootFrame, publicKey?: string, prompts?: PromptConfigs<PushPromptConfig>);
+    constructor(ctx: Context, rootFrame: RootFrame, prompts?: PromptConfigs<PushPromptConfig>);
     private getChannelSubscriptionManager;
     private onEventTracked;
     private activateDeferredPrompt;
@@ -34,5 +33,4 @@ export declare class PromptManager {
     private activatePrompts;
     private setState;
     private onEnter;
-    private loadPrompts;
 }

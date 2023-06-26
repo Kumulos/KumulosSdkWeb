@@ -256,7 +256,6 @@ export interface Configuration {
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?: string;
-    pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
     features?: SDKFeature[];
     tenantId: number;
@@ -276,10 +275,8 @@ export declare class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
-    readonly tenantId: number;
     readonly safariPushId?: string;
     private readonly subscribers;
     private readonly urlMap;
@@ -289,7 +286,8 @@ export declare class Context {
     hasFeature(feature: SDKFeature): boolean;
     urlForService(service: Service): string;
 }
-export declare function assertConfigValid(config: any): void;
+export declare function assertConfigValid(config: any, tenantIdRequired?: boolean): void;
+export declare function assertKeys(platformConfigWithKeys: PlatformConfigAndKeys): void;
 export declare function getInstallId(): Promise<InstallId>;
 export declare function setInstallId(installId: InstallId): Promise<InstallId>;
 export declare function getUserId(): Promise<UserId>;

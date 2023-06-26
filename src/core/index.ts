@@ -354,7 +354,6 @@ export interface Configuration {
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?: string;
-    pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
     features?: SDKFeature[];
     tenantId: number;
@@ -376,10 +375,8 @@ export class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
-    readonly tenantId: number;
     readonly safariPushId?: string;
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
@@ -391,10 +388,8 @@ export class Context {
         this.vapidPublicKey = config.vapidPublicKey;
         this.authHeader = `Basic ${btoa(`${this.apiKey}:${this.secretKey}`)}`;
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
-        this.pushPrompts = config.pushPrompts ?? 'auto';
         this.autoResubscribe = config.autoResubscribe ?? true;
         this.features = config.features ?? [SDKFeature.PUSH];
-        this.tenantId = config.tenantId
 
         this.subscribers = {};
 
@@ -439,7 +434,7 @@ export class Context {
     }
 }
 
-export function assertConfigValid(config: any) {
+export function assertConfigValid(config: any, tenantIdRequired: boolean = false) {
     if (typeof config !== 'object') {
         throw 'Config must be an object';
     }
@@ -448,9 +443,18 @@ export function assertConfigValid(config: any) {
         Array.isArray(config.features) && config.features.length
             ? config.features
             : undefined;
-
+    // if (tenantIdRequired && !config.tenantId) {
+    //     throw 'tenantId is missing';        
+    // }
+    
     if (!features || features.includes(SDKFeature.PUSH)) {
         return assertPushConfigValid(config);
+    }
+}
+
+export function assertKeys(platformConfigWithKeys: PlatformConfigAndKeys){
+    if (!platformConfigWithKeys.keys || !platformConfigWithKeys.keys.apiKey || !platformConfigWithKeys.keys.secretKey) {
+        throw 'Keys are missing';
     }
 }
 

@@ -13,14 +13,14 @@ import {
     trackEvent,
     trackInstallDetails,
     PlatformConfig,
-    Keys
+    Keys,
+    assertKeys
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import { getBrowserName, isMobile } from './core/utils';
 import {
     getMostRecentlyOpenedPushPayload,
-    persistConfig,
-    set
+    persistConfig
 } from './core/storage';
 import getPushOpsManager, {
     KumulosPushNotification,
@@ -52,9 +52,11 @@ export default class Kumulos {
     private ddlManager?: DdlManager;
 
     public static async buildInstance(config: KumulosConfig) {
-        assertConfigValid(config);
+        assertConfigValid(config, true);
 
         const platformConfigWithKeys = await loadPlatformAndKeysConfig(`https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}`);
+        
+        assertKeys(platformConfigWithKeys);
         const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(config, platformConfigWithKeys.keys);
 
         const context = new Context(newManipulatedConfig);
@@ -95,8 +97,8 @@ export default class Kumulos {
 
         this.promptManager = new PromptManager(
             this.context,
-            this.rootFrame,
-            this.platformConfig.publicKey, this.platformConfig.prompts
+            this.rootFrame, 
+            this.platformConfig.prompts
         );
 
         this.maybeAddMessageEventListenerToSW();
@@ -162,14 +164,13 @@ export default class Kumulos {
         });
     }
 
-    private static mapConfigAndKeysToConfig(config: KumulosConfig, keys: Keys) {
+    private static mapConfigAndKeysToConfig(config: KumulosConfig, keys: Keys): KumulosConfig {
         const newConfig: KumulosConfig = {
             region: config.region,
             apiKey: keys.apiKey,
             secretKey: keys.secretKey,
             vapidPublicKey: config.vapidPublicKey,
             serviceWorkerPath: config.serviceWorkerPath,
-            pushPrompts: config.pushPrompts,
             autoResubscribe: config.autoResubscribe,
             features: config.features,
             onPushReceived: config.onPushReceived,

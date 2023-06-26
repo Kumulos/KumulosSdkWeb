@@ -84,7 +84,6 @@ export default class SafariPushManager implements PushOpsManager {
     async getCurrentSubscriptionState(
         ctx: Context
     ): Promise<PushSubscriptionState> {
-        //const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );
