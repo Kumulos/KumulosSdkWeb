@@ -38,7 +38,7 @@ function hashSubscription(ctx: Context, sub: PushSubscription): number {
 }
 
 export default class W3cPushManager implements PushOpsManager {
-    private registerInProgress: boolean = false;
+    private pushRegisterLock: Promise<void> = Promise.resolve();
 
     async requestNotificationPermission(
         ctx: Context
@@ -60,54 +60,50 @@ export default class W3cPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
+        const result = this.pushRegisterLock.then(() =>
+            this.pushRegisterSync(ctx)
+        );
+        this.pushRegisterLock = result.catch(() => {});
+        return result;
+    }
+
+    private async pushRegisterSync(ctx: Context): Promise<void> {
         if (!('PushManager' in window)) {
             return Promise.reject(
                 'Push notifications are not supported in this browser'
             );
         }
 
-        if (this.registerInProgress) {
+        const workerReg = await getActiveServiceWorkerReg(
+            ctx.serviceWorkerPath
+        );
+
+        const existingSub = await workerReg.pushManager.getSubscription();
+
+        if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
+            await existingSub?.unsubscribe();
+        }
+
+        const sub = await workerReg.pushManager.subscribe({
+            applicationServerKey: ctx.vapidPublicKey,
+            userVisibleOnly: true
+        });
+
+        const endpointHash = hashSubscription(ctx, sub);
+
+        const existingEndpointHash = await get<number>('pushEndpointHash');
+        const existingExpiry = await get<number | null | undefined>(
+            'pushExpiresAt'
+        );
+
+        if (
+            existingEndpointHash === endpointHash &&
+            (!existingExpiry || existingExpiry > Date.now())
+        ) {
             return;
         }
 
-        this.registerInProgress = true;
-
-        try {
-            const workerReg = await getActiveServiceWorkerReg(
-                ctx.serviceWorkerPath
-            );
-
-            const existingSub = await workerReg.pushManager.getSubscription();
-
-            if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
-                await existingSub?.unsubscribe();
-            }
-
-            const sub = await workerReg.pushManager.subscribe({
-                applicationServerKey: ctx.vapidPublicKey,
-                userVisibleOnly: true
-            });
-
-            const endpointHash = hashSubscription(ctx, sub);
-
-            const existingEndpointHash = await get<number>('pushEndpointHash');
-            const existingExpiry = await get<number | null | undefined>(
-                'pushExpiresAt'
-            );
-
-            if (
-                existingEndpointHash === endpointHash &&
-                (!existingExpiry || existingExpiry > Date.now())
-            ) {
-                return;
-            }
-
-            await this.trackEventAndCache(ctx, sub, endpointHash);
-        } catch (e) {
-            throw e;
-        } finally {
-            this.registerInProgress = false;
-        }
+        await this.trackEventAndCache(ctx, sub, endpointHash);
     }
 
     private async trackEventAndCache(

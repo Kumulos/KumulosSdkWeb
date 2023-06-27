@@ -1,9 +1,10 @@
 import { Context } from '..';
 import { PushOpsManager, PushSubscriptionState } from '.';
 export default class W3cPushManager implements PushOpsManager {
-    private registerInProgress;
+    private pushRegisterLock;
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    private pushRegisterSync;
     private trackEventAndCache;
     requestPermissionAndRegisterForPush(ctx: Context): Promise<import('.').PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
