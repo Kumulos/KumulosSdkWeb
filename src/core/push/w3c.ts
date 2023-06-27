@@ -38,7 +38,6 @@ function hashSubscription(ctx: Context, sub: PushSubscription): number {
 }
 
 export default class W3cPushManager implements PushOpsManager {
-
     private registerInProgress: boolean = false;
 
     async requestNotificationPermission(
@@ -103,7 +102,6 @@ export default class W3cPushManager implements PushOpsManager {
                 return;
             }
 
-
             await this.trackEventAndCache(ctx, sub, endpointHash);
         } catch (e) {
             throw e;
@@ -112,7 +110,11 @@ export default class W3cPushManager implements PushOpsManager {
         }
     }
 
-    private async trackEventAndCache(ctx: Context, pushSubscription: PushSubscription, endpointHash: number): Promise<void> {
+    private async trackEventAndCache(
+        ctx: Context,
+        pushSubscription: PushSubscription,
+        endpointHash: number
+    ): Promise<void> {
         await trackEvent(ctx, EventType.PUSH_REGISTERED, {
             type: TokenType.W3C,
             token: pushSubscription

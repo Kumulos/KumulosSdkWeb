@@ -73,7 +73,7 @@ export default class SafariPushManager implements PushOpsManager {
         } catch (e) {
             throw e;
         } finally {
-            this.registerInProgress = false
+            this.registerInProgress = false;
         }
     }
 
