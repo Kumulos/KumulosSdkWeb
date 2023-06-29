@@ -38,8 +38,7 @@ function hashSubscription(ctx: Context, sub: PushSubscription): number {
 }
 
 export default class W3cPushManager implements PushOpsManager {
-
-    private registerInProgress: boolean = false;
+    private pushRegisterLock: Promise<void> = Promise.resolve();
 
     async requestNotificationPermission(
         ctx: Context
@@ -61,6 +60,14 @@ export default class W3cPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
+        const result = this.pushRegisterLock.then(() =>
+            this.pushRegisterSync(ctx)
+        );
+        this.pushRegisterLock = result.catch(() => {});
+        return result;
+    }
+
+    private async pushRegisterSync(ctx: Context): Promise<void> {
         if (!('PushManager' in window)) {
             return Promise.reject(
                 'Push notifications are not supported in this browser'
@@ -96,30 +103,21 @@ export default class W3cPushManager implements PushOpsManager {
             return;
         }
 
-
         await this.trackEventAndCache(ctx, sub, endpointHash);
     }
 
-    private async trackEventAndCache(ctx: Context, pushSubscription: PushSubscription, endpointHash: number): Promise<void> {
-        if (this.registerInProgress) {
-            return;
-        }
+    private async trackEventAndCache(
+        ctx: Context,
+        pushSubscription: PushSubscription,
+        endpointHash: number
+    ): Promise<void> {
+        await trackEvent(ctx, EventType.PUSH_REGISTERED, {
+            type: TokenType.W3C,
+            token: pushSubscription
+        });
 
-        this.registerInProgress = true;
-
-        try {
-            await trackEvent(ctx, EventType.PUSH_REGISTERED, {
-                type: TokenType.W3C,
-                token: pushSubscription
-            });
-    
-            await set('pushEndpointHash', endpointHash);
-            await set('pushExpiresAt', pushSubscription.expirationTime);
-        } catch (e) {
-            return Promise.reject(e);
-        } finally {
-            this.registerInProgress = false;
-        }
+        await set('pushEndpointHash', endpointHash);
+        await set('pushExpiresAt', pushSubscription.expirationTime);
     }
 
     async requestPermissionAndRegisterForPush(

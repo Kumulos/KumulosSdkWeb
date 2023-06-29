@@ -12,6 +12,7 @@ function hashToken(ctx: Context, token: string): number {
 
 export default class SafariPushManager implements PushOpsManager {
     private readonly cfg: PlatformConfig;
+    private pushRegisterLock: Promise<void> = Promise.resolve();
 
     constructor(cfg: PlatformConfig) {
         this.cfg = cfg;
@@ -39,6 +40,14 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushRegister(ctx: Context): Promise<void> {
+        const result = this.pushRegisterLock.then(() =>
+            this.pushRegisterSync(ctx)
+        );
+        this.pushRegisterLock = result.catch(() => {});
+        return result;
+    }
+
+    private async pushRegisterSync(ctx: Context): Promise<void> {
         const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
             cfg.safariPushId as string
