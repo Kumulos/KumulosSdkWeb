@@ -459,7 +459,8 @@ export function assertKeys(platformConfigWithKeys: PlatformConfigAndKeys) {
     if (
         !platformConfigWithKeys.keys ||
         !platformConfigWithKeys.keys.apiKey ||
-        !platformConfigWithKeys.keys.secretKey
+        !platformConfigWithKeys.keys.secretKey ||
+        !platformConfigWithKeys.publicKey
     ) {
         throw 'Keys are missing';
     }

@@ -61,7 +61,8 @@ export default class Kumulos {
         assertKeys(platformConfigWithKeys);
         const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(
             config,
-            platformConfigWithKeys.keys
+            platformConfigWithKeys.keys,
+            platformConfigWithKeys.publicKey
         );
 
         const context = new Context(newManipulatedConfig);
@@ -183,13 +184,14 @@ export default class Kumulos {
 
     private static mapConfigAndKeysToConfig(
         config: KumulosConfig,
-        keys: Keys
+        keys: Keys,
+        vapidPublicKey: string
     ): KumulosConfig {
         const newConfig: KumulosConfig = {
             region: config.region,
             apiKey: keys.apiKey,
             secretKey: keys.secretKey,
-            vapidPublicKey: config.vapidPublicKey,
+            vapidPublicKey: vapidPublicKey,
             serviceWorkerPath: config.serviceWorkerPath,
             autoResubscribe: config.autoResubscribe,
             features: config.features,
