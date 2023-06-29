@@ -7,7 +7,7 @@ export default class SafariPushManager implements PushOpsManager {
     constructor(cfg: PlatformConfig);
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
-    pushRegisterSync(ctx: Context): Promise<void>;
+    private pushRegisterSync;
     requestPermissionAndRegisterForPush(ctx: Context): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
     handleAutoResubscription(ctx: Context): Promise<void>;
