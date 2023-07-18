@@ -1,10 +1,10 @@
-import { Context, PlatformConfig } from '..';
+import { Context } from '..';
 import { PushOpsManager } from '.';
 import { PushSubscriptionState } from '../push';
 export default class SafariPushManager implements PushOpsManager {
-    private readonly cfg;
+    private readonly safariPushId?;
     private pushRegisterLock;
-    constructor(cfg: PlatformConfig);
+    constructor(safariPushId?: string);
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
     private pushRegisterSync;

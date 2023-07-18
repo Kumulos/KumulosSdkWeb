@@ -1,13 +1,13 @@
 import {
     Context,
     DdlPromptConfig,
-    PlatformConfig,
+    PlatformConfigAndKeys,
     Service,
     getInstallId
 } from '.';
 import { get, set } from './storage';
 
-import { authedFetchJson } from './utils';
+import { performJsonFetch } from './utils';
 
 const getCacheKeys = (key: string) => ({
     CONFIG_CACHE_KEY: `${key}Config`,
@@ -17,14 +17,14 @@ const getCacheKeys = (key: string) => ({
 const MAX_CACHE_AGE_MS = 1 * 60 * 60 * 1000;
 
 enum ConfigCacheType {
-    PLATFORM = 'platform',
+    PLATFORM = 'platformV2',
     DDL = 'ddl'
 }
 
 async function loadConfig<TConfigType>(
     url: string,
     cacheKey: string,
-    ctx: Context
+    authHeader?: string
 ): Promise<TConfigType> {
     const cacheKeys = getCacheKeys(cacheKey);
     let config = await get<TConfigType>(cacheKeys.CONFIG_CACHE_KEY);
@@ -37,7 +37,8 @@ async function loadConfig<TConfigType>(
         console.info('Config never synced/stale, syncing now...');
 
         try {
-            config = await authedFetchJson<TConfigType>(ctx, url);
+            config = await performJsonFetch<TConfigType>(url, authHeader);
+
             updatedRemoteConfig = true;
         } catch (e) {
             console.warn(e);
@@ -53,14 +54,13 @@ async function loadConfig<TConfigType>(
     return config;
 }
 
-export async function loadPlatformConfig(
-    ctx: Context
-): Promise<PlatformConfig> {
+export async function loadPlatformAndKeysConfig(
+    url: string
+): Promise<PlatformConfigAndKeys> {
     return (
-        (await loadConfig<PlatformConfig>(
-            `${ctx.urlForService(Service.PUSH)}/v1/web/config`,
-            ConfigCacheType.PLATFORM,
-            ctx
+        (await loadConfig<PlatformConfigAndKeys>(
+            url,
+            ConfigCacheType.PLATFORM
         )) ?? {}
     );
 }
@@ -76,7 +76,7 @@ export async function loadDdlConfig(
                 Service.DDL
             )}/v1/banners?webInstallId=${webInstallId}`,
             ConfigCacheType.DDL,
-            ctx
+            ctx.authHeader
         );
     } catch (err) {
         console.warn(

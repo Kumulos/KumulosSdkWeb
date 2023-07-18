@@ -1,6 +1,6 @@
-import { createContext } from 'preact';
-import { PlatformConfig } from '../core';
 import { Channel } from '../core/channels';
+import { PlatformConfig } from '../core';
+import { createContext } from 'preact';
 
 export interface UIContextState {
     platformConfig: PlatformConfig;

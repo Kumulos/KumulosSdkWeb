@@ -1,7 +1,7 @@
 import { Context, Service, getInstallId } from '../core';
 
 import { FingerprintComponents } from './types';
-import { authedFetch } from '../core/utils';
+import { performFetch } from '../core/utils';
 
 export async function sendClickRequest(
     ctx: Context,
@@ -13,7 +13,7 @@ export async function sendClickRequest(
     )}/v1/banners/${bannerUid}/taps`;
     const webInstallId = await getInstallId();
 
-    return authedFetch(ctx, url, {
+    return performFetch(url, ctx.authHeader, {
         method: 'POST',
         body: JSON.stringify({
             webInstallId,

@@ -1,4 +1,4 @@
-import { authedFetch, cyrb53, uuidv4 } from './utils';
+import { performFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
 import { Channel } from './channels';
@@ -324,8 +324,17 @@ export interface PlatformConfig {
     publicKey: string;
     iconUrl?: string;
     prompts?: PromptConfigs<PushPromptConfig>;
-    safariPushId?: string | null;
+    safariPushId?: string;
 }
+
+export interface Keys {
+    apiKey: string;
+    secretKey: string;
+}
+
+export type PlatformConfigAndKeys = PlatformConfig & {
+    keys: Keys;
+};
 
 export enum SDKFeature {
     PUSH = 'push',
@@ -344,9 +353,9 @@ export interface Configuration {
     secretKey: string;
     vapidPublicKey: string;
     serviceWorkerPath?: string;
-    pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     autoResubscribe?: boolean;
     features?: SDKFeature[];
+    tenantId: number;
 }
 
 export type PromptReminder =
@@ -365,9 +374,9 @@ export class Context {
     readonly vapidPublicKey: string;
     readonly authHeader: string;
     readonly serviceWorkerPath: string;
-    readonly pushPrompts: PromptConfigs<PushPromptConfig> | 'auto';
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
+    readonly safariPushId?: string;
 
     private readonly subscribers: { [key: string]: SdkEventHandler[] };
     private readonly urlMap: { [key in Service]: string };
@@ -378,7 +387,6 @@ export class Context {
         this.vapidPublicKey = config.vapidPublicKey;
         this.authHeader = `Basic ${btoa(`${this.apiKey}:${this.secretKey}`)}`;
         this.serviceWorkerPath = config.serviceWorkerPath ?? '/worker.js';
-        this.pushPrompts = config.pushPrompts ?? 'auto';
         this.autoResubscribe = config.autoResubscribe ?? true;
         this.features = config.features ?? [SDKFeature.PUSH];
 
@@ -425,7 +433,10 @@ export class Context {
     }
 }
 
-export function assertConfigValid(config: any) {
+export function assertConfigValid(
+    config: any,
+    tenantIdRequired: boolean = false
+) {
     if (typeof config !== 'object') {
         throw 'Config must be an object';
     }
@@ -435,18 +446,28 @@ export function assertConfigValid(config: any) {
             ? config.features
             : undefined;
 
+    if (tenantIdRequired && !config.tenantId) {
+        throw 'tenantId is missing';
+    }
+
     if (!features || features.includes(SDKFeature.PUSH)) {
         return assertPushConfigValid(config);
     }
 }
 
+export function assertKeys(platformConfigWithKeys: PlatformConfigAndKeys) {
+    if (
+        !platformConfigWithKeys.keys ||
+        !platformConfigWithKeys.keys.apiKey ||
+        !platformConfigWithKeys.keys.secretKey ||
+        !platformConfigWithKeys.publicKey
+    ) {
+        throw 'Keys are missing';
+    }
+}
+
 function assertPushConfigValid(config: any) {
-    const requiredStringProps = [
-        'region',
-        'apiKey',
-        'secretKey',
-        'vapidPublicKey'
-    ];
+    const requiredStringProps = ['region'];
     for (const prop of requiredStringProps) {
         if (typeof config[prop] !== 'string' || config[prop].length === 0) {
             throw `Required configuration key '${prop}' must be non-empty string`;
@@ -564,7 +585,7 @@ export async function trackEvent(
     const url = `${ctx.urlForService(
         Service.EVENTS
     )}/v1/app-installs/${installId}/events`;
-    return authedFetch(ctx, url, {
+    return performFetch(url, ctx.authHeader, {
         method: 'POST',
         body: JSON.stringify(events)
     });

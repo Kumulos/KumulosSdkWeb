@@ -35,7 +35,7 @@ export function persistConfig(config: Configuration): Promise<Configuration> {
         vapidPublicKey: config.vapidPublicKey,
         serviceWorkerPath: config.serviceWorkerPath,
         autoResubscribe: config.autoResubscribe,
-        pushPrompts: config.pushPrompts
+        tenantId: config.tenantId
     });
 }
 

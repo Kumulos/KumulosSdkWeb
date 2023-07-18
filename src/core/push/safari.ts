@@ -1,21 +1,20 @@
-import { Context, EventType, PlatformConfig, Service, trackEvent } from '..';
+import { Context, EventType, Service, trackEvent } from '..';
 import { PushOpsManager, TokenType } from '.';
 import { cyrb53, defer } from '../utils';
 import { get, set } from '../storage';
 
 import { PushSubscriptionState } from '../push';
-import { loadPlatformConfig } from '../config';
 
 function hashToken(ctx: Context, token: string): number {
     return cyrb53(`${ctx.apiKey}:${token}`);
 }
 
 export default class SafariPushManager implements PushOpsManager {
-    private readonly cfg: PlatformConfig;
+    private readonly safariPushId?: string;
     private pushRegisterLock: Promise<void> = Promise.resolve();
 
-    constructor(cfg: PlatformConfig) {
-        this.cfg = cfg;
+    constructor(safariPushId?: string) {
+        this.safariPushId = safariPushId;
     }
     requestNotificationPermission(
         ctx: Context
@@ -28,7 +27,7 @@ export default class SafariPushManager implements PushOpsManager {
 
         window.safari?.pushNotification.requestPermission(
             svcUrl,
-            this.cfg.safariPushId as string,
+            this.safariPushId as string,
             {},
             perm => {
                 console.log(perm);
@@ -48,9 +47,8 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
-        const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
-            cfg.safariPushId as string
+            this.safariPushId as string
         );
 
         if (!perm || !perm.deviceToken) {
@@ -67,7 +65,7 @@ export default class SafariPushManager implements PushOpsManager {
         await trackEvent(ctx, EventType.PUSH_REGISTERED, {
             type: TokenType.SAFARI,
             token: perm.deviceToken,
-            bundleId: cfg.safariPushId
+            bundleId: this.safariPushId
         });
 
         await set('pushTokenHash', tokenHash);
@@ -96,9 +94,8 @@ export default class SafariPushManager implements PushOpsManager {
     async getCurrentSubscriptionState(
         ctx: Context
     ): Promise<PushSubscriptionState> {
-        const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
-            cfg.safariPushId as string
+            this.safariPushId as string
         );
 
         if (!perm || perm?.permission === 'denied') {
@@ -116,13 +113,12 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async handleAutoResubscription(ctx: Context): Promise<void> {
-        if (!ctx.autoResubscribe || !this.cfg.safariPushId) {
+        if (!ctx.autoResubscribe || !this.safariPushId) {
             return;
         }
 
-        const cfg = await loadPlatformConfig(ctx);
         const perm = window.safari?.pushNotification.permission(
-            cfg.safariPushId as string
+            this.safariPushId as string
         );
 
         if (!perm || perm.permission !== 'granted' || !perm.deviceToken) {

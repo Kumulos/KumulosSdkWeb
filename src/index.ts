@@ -11,14 +11,16 @@ import {
     getUserId,
     setInstallId,
     trackEvent,
-    trackInstallDetails
+    trackInstallDetails,
+    PlatformConfig,
+    Keys,
+    assertKeys
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import { getBrowserName, isMobile } from './core/utils';
 import {
     getMostRecentlyOpenedPushPayload,
-    persistConfig,
-    set
+    persistConfig
 } from './core/storage';
 import getPushOpsManager, {
     KumulosPushNotification,
@@ -30,6 +32,7 @@ import getPushOpsManager, {
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
 import RootFrame from './core/root-frame';
+import { loadPlatformAndKeysConfig } from './core/config';
 
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
@@ -41,6 +44,7 @@ interface KumulosConfig extends Configuration {
 
 export default class Kumulos {
     private readonly config: KumulosConfig;
+    private readonly platformConfig: PlatformConfig;
     private readonly context: Context;
     private readonly rootFrame: RootFrame;
 
@@ -48,20 +52,43 @@ export default class Kumulos {
     private ddlManager?: DdlManager;
 
     public static async buildInstance(config: KumulosConfig) {
-        assertConfigValid(config);
+        assertConfigValid(config, true);
 
-        const context = new Context(config);
-        await Kumulos.maybePersistInstallIdAndUserId(context, config);
+        const platformConfigWithKeys = await loadPlatformAndKeysConfig(
+            `https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}`
+        );
 
-        const kumulos = new Kumulos(context, config);
+        assertKeys(platformConfigWithKeys);
+        const newManipulatedConfig = Kumulos.mapConfigAndKeysToConfig(
+            config,
+            platformConfigWithKeys.keys,
+            platformConfigWithKeys.publicKey
+        );
+
+        const context = new Context(newManipulatedConfig);
+        await Kumulos.maybePersistInstallIdAndUserId(
+            context,
+            newManipulatedConfig
+        );
+        const kumulos = new Kumulos(
+            context,
+            newManipulatedConfig,
+            platformConfigWithKeys
+        );
+
         kumulos.initialize();
 
         return kumulos;
     }
 
-    private constructor(context: Context, config: KumulosConfig) {
+    private constructor(
+        context: Context,
+        config: KumulosConfig,
+        platformConfig: PlatformConfig
+    ) {
         this.context = context;
         this.config = config;
+        this.platformConfig = platformConfig;
         this.rootFrame = new RootFrame();
     }
 
@@ -77,18 +104,18 @@ export default class Kumulos {
         }
     }
 
-    private initializePushFeature() {
+    private async initializePushFeature() {
         trackOpenFromQuery(this.context);
         registerServiceWorker(this.context.serviceWorkerPath);
-        
-        if (navigator.permissions){
+
+        if (navigator.permissions) {
             this.observePermissionStatus();
         }
 
         this.promptManager = new PromptManager(
-            this,
             this.context,
-            this.rootFrame
+            this.rootFrame,
+            this.platformConfig.prompts
         );
 
         this.maybeAddMessageEventListenerToSW();
@@ -96,9 +123,11 @@ export default class Kumulos {
     }
 
     private async observePermissionStatus() {
-        const permissionStatus = await navigator.permissions.query({name: 'notifications'});
+        const permissionStatus = await navigator.permissions.query({
+            name: 'notifications'
+        });
 
-        permissionStatus.addEventListener('change', async (event) => {
+        permissionStatus.addEventListener('change', async event => {
             const permissionStatus = event.target as PermissionStatus;
             const permissionState = permissionStatus.state;
 
@@ -110,7 +139,7 @@ export default class Kumulos {
         });
     }
 
-    private initializeDDLFeature(){
+    private initializeDDLFeature() {
         if (!isMobile()) {
             console.info(
                 'DdlManager: DDL feature support only available on mobile devices.'
@@ -120,7 +149,6 @@ export default class Kumulos {
 
         this.ddlManager = new DdlManager(this.context, this.rootFrame);
     }
-
 
     private maybeAddMessageEventListenerToSW() {
         if (!('serviceWorker' in navigator)) {
@@ -154,6 +182,30 @@ export default class Kumulos {
         });
     }
 
+    private static mapConfigAndKeysToConfig(
+        config: KumulosConfig,
+        keys: Keys,
+        vapidPublicKey: string
+    ): KumulosConfig {
+        const newConfig: KumulosConfig = {
+            region: config.region,
+            apiKey: keys.apiKey,
+            secretKey: keys.secretKey,
+            vapidPublicKey: vapidPublicKey,
+            serviceWorkerPath: config.serviceWorkerPath,
+            autoResubscribe: config.autoResubscribe,
+            features: config.features,
+            onPushReceived: config.onPushReceived,
+            onPushOpened: config.onPushOpened,
+            originalVisitorId: config.originalVisitorId,
+            customerId: config.customerId,
+            sdkVersion: config.sdkVersion,
+            tenantId: config.tenantId
+        };
+
+        return newConfig;
+    }
+
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {
         return associateUser(this.context, identifier, attributes);
     }
@@ -164,12 +216,12 @@ export default class Kumulos {
 
     async pushRegister(): Promise<void> {
         const pushManager = await getPushOpsManager(this.context);
-        const permission  = await pushManager.requestNotificationPermission(this.context);
+        const permission = await pushManager.requestNotificationPermission(
+            this.context
+        );
 
         if (permission !== 'granted') {
-            return Promise.reject(
-                'Notification permission not granted'
-            );
+            return Promise.reject('Notification permission not granted');
         }
 
         //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1

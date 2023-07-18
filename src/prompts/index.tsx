@@ -1,15 +1,11 @@
-import { Channel, ChannelSubscriptionManager } from '../core/channels';
 import {
     ChannelListItem,
-    ChannelSubAction,
     Context,
-    PlatformConfig,
     PromptAction,
     PromptConfig,
     PromptConfigs,
     PushPromptConfig,
-    SdkEvent,
-    UserChannelSelectDialogAction
+    SdkEvent
 } from '../core';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import getPushOpsManager, {
@@ -18,12 +14,10 @@ import getPushOpsManager, {
 } from '../core/push';
 import { h, render } from 'preact';
 
-import Kumulos from '..';
+import { ChannelSubscriptionManager } from '../core/channels';
 import { PromptTriggerEventFilter } from './triggers';
-import { UIContext } from './ui-context';
 import Ui from './ui';
 import { deferPromptActivation } from './utils';
-import { loadPlatformConfig } from '../core/config';
 import { maybePersistReminder } from './prompt-reminder';
 
 export type PromptManagerState =
@@ -41,34 +35,33 @@ export type PromptManagerState =
 // postaction -> ready
 
 export class PromptManager {
-    private readonly kumulosClient: Kumulos;
     private readonly context: Context;
     private readonly pushContainer: RootFrameContainer;
     private readonly triggerFilter: PromptTriggerEventFilter<PushPromptConfig>;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
-    private prompts: PromptConfigs<PushPromptConfig>;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
     private pushOpsManager?: PushOpsManager;
-    private channels: Channel[];
     private ui?: Ui;
-    private platformConfig?: PlatformConfig;
+    private prompts: PromptConfigs<PushPromptConfig>;
     private currentPostAction?: PromptAction;
     private channelSubscriptionManager?: ChannelSubscriptionManager;
 
-    constructor(client: Kumulos, ctx: Context, rootFrame: RootFrame) {
-        this.prompts = {};
+    constructor(
+        ctx: Context,
+        rootFrame: RootFrame,
+        prompts?: PromptConfigs<PushPromptConfig>
+    ) {
+        this.prompts = prompts ?? {};
         this.activePrompts = [];
-        this.channels = [];
         this.triggerFilter = new PromptTriggerEventFilter<PushPromptConfig>(
             ctx,
             this.onEventTracked
         );
 
         this.pushContainer = rootFrame.createContainer('push');
-        this.kumulosClient = client;
         this.context = ctx;
 
         this.setState('loading');
@@ -122,24 +115,6 @@ export class PromptManager {
         this.setState('ready');
     };
 
-    private onRequestPostActionPrompt = async (
-        prompt: PushPromptConfig,
-        action: PromptAction
-    ) => {
-        if ('postaction' === this.state) {
-            return;
-        }
-
-        if ('userChannelSelectDialog' !== action.type) {
-            return;
-        }
-
-        this.currentlyRequestingPrompt = prompt;
-        this.currentPostAction = action;
-
-        this.setState('postaction');
-    };
-
     private onPromptAccepted = async (
         prompt: PushPromptConfig,
         channelSelections?: ChannelListItem[]
@@ -151,7 +126,6 @@ export class PromptManager {
         this.hideAndSuppressPrompts(prompt);
 
         if (this.subscriptionState === 'subscribed') {
-            await this.handlePromptActions(prompt);
             await this.handleUserChannelSelection(channelSelections);
 
             this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
@@ -188,74 +162,6 @@ export class PromptManager {
         }
     }
 
-    private async handlePromptActions(prompt: PushPromptConfig) {
-        // Note: no prompts with such action can be created from ui for optimove apps
-        // if (!prompt.actions) {
-        //     return;
-        // }
-
-        // console.info('Will handle actions: ', prompt.actions);
-
-        // const channelSubMgr = this.getChannelSubscriptionManager();
-        // this.channels = await channelSubMgr.listChannels();
-
-        // await this.handleChannelSubActions(prompt);
-        // await this.handleChannelPostActions(prompt);
-    }
-
-    private async handleChannelSubActions(
-        prompt: PushPromptConfig
-    ): Promise<void> {
-        if (undefined === prompt.actions) {
-            return;
-        }
-
-        const actions = prompt.actions.filter<ChannelSubAction>(
-            (action: PromptAction): action is ChannelSubAction =>
-                action.type === 'subscribeToChannel'
-        );
-
-        const uuidsToSubscribe = actions
-            .filter(action => {
-                const channeltoSub = this.channels.find(
-                    c => c.uuid === action.channelUuid && c.subscribed === false
-                );
-
-                if (undefined === channeltoSub) {
-                    console.info(
-                        `Unable to subscribe to channel '${action.channelUuid}' as it does not exist`
-                    );
-                    return false;
-                }
-
-                return true;
-            })
-            .map(action => action.channelUuid);
-
-        await this.getChannelSubscriptionManager().subscribe(uuidsToSubscribe);
-    }
-
-    private async handleChannelPostActions(
-        prompt: PushPromptConfig
-    ): Promise<void> {
-        if (undefined === prompt.actions) {
-            return;
-        }
-
-        // post actions only apply to `userChannelSelectDialog` actions
-        const actions = prompt.actions.filter<UserChannelSelectDialogAction>(
-            (action: PromptAction): action is UserChannelSelectDialogAction =>
-                action.type === 'userChannelSelectDialog'
-        );
-
-        if (!actions.length) {
-            return;
-        }
-
-        // currently only expecting 1 configured `userChannelSelectDialog` action
-        this.onRequestPostActionPrompt(prompt, actions[0]);
-    }
-
     private async handleUserChannelSelection(
         channelSelections?: ChannelListItem[]
     ) {
@@ -277,30 +183,23 @@ export class PromptManager {
     }
 
     private render() {
-        if (!this.subscriptionState || !this.state || !this.platformConfig) {
+        if (!this.subscriptionState || !this.state) {
             return;
         }
 
         render(
-            <UIContext.Provider
-                value={{
-                    platformConfig: this.platformConfig,
-                    channelList: this.channels
-                }}
-            >
-                <Ui
-                    ref={r => (this.ui = r)}
-                    prompts={this.activePrompts}
-                    subscriptionState={this.subscriptionState}
-                    promptManagerState={this.state}
-                    onPromptAccepted={this.onPromptAccepted}
-                    onPromptDeclined={this.onPromptDeclined}
-                    onPostActionConfirm={this.onPostActionConfirm}
-                    onDismissOverlay={this.onDismissOverlay}
-                    currentlyRequestingPrompt={this.currentlyRequestingPrompt}
-                    currentPostAction={this.currentPostAction}
-                />
-            </UIContext.Provider>,
+            <Ui
+                ref={r => (this.ui = r)}
+                prompts={this.activePrompts}
+                subscriptionState={this.subscriptionState}
+                promptManagerState={this.state}
+                onPromptAccepted={this.onPromptAccepted}
+                onPromptDeclined={this.onPromptDeclined}
+                onPostActionConfirm={this.onPostActionConfirm}
+                onDismissOverlay={this.onDismissOverlay}
+                currentlyRequestingPrompt={this.currentlyRequestingPrompt}
+                currentPostAction={this.currentPostAction}
+            />,
             this.pushContainer.element
         );
     }
@@ -310,32 +209,16 @@ export class PromptManager {
 
         const matchedPrompts = await this.triggerFilter.filterPrompts(
             this.prompts,
-            prompt => {
-                return this.promptActionNeedsTaken(prompt);
+            _ => {
+                return this.promptActionNeedsTaken();
             }
         );
 
         this.activatePrompts(matchedPrompts);
     }
 
-    promptActionNeedsTaken(prompt: PushPromptConfig): boolean {
+    private promptActionNeedsTaken(): boolean {
         if (this.subscriptionState === 'unsubscribed') {
-            return true;
-        }
-
-        const channelsToSub =
-            prompt.actions
-                ?.filter(
-                    (action: PromptAction): action is ChannelSubAction =>
-                        action.type === 'subscribeToChannel'
-                )
-                .map(a => a.channelUuid) ?? [];
-        const needsToSub =
-            this.channels.filter(
-                c => channelsToSub.includes(c.uuid) && !c.subscribed
-            ).length > 0;
-
-        if (needsToSub) {
             return true;
         }
 
@@ -390,7 +273,6 @@ export class PromptManager {
                 this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
-                await this.loadPrompts();
                 // Note: channels irrelevant for optimove apps
                 //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
@@ -411,40 +293,5 @@ export class PromptManager {
                 this.render();
                 break;
         }
-    }
-
-    private async loadPrompts(): Promise<void> {
-        this.platformConfig = await loadPlatformConfig(this.context);
-
-        if (!this.platformConfig.publicKey) {
-            console.error('Failed to load prompts config');
-            return;
-        }
-
-        if (this.context.pushPrompts !== 'auto') {
-            this.prompts = { ...this.context.pushPrompts };
-        } else {
-            this.prompts = { ...(this.platformConfig.prompts || {}) };
-        }
-
-        //Note: no prompts with such action can be created from ui for optimove apps
-        // for (let id in this.prompts) {
-        //     const hasChannelOp = Boolean(
-        //         this.prompts[id].actions?.filter(
-        //             a => a.type === 'subscribeToChannel'
-        //         )?.length
-        //     );
-
-        //     if (hasChannelOp) {
-        //         try {
-        //             this.channels = await this.getChannelSubscriptionManager().listChannels();
-        //         } catch (e) {
-        //             // Noop
-        //         }
-        //         break;
-        //     }
-        // }
-
-        return Promise.resolve();
     }
 }

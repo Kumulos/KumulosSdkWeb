@@ -1,5 +1,5 @@
-import { PlatformConfig } from '../core';
 import { Channel } from '../core/channels';
+import { PlatformConfig } from '../core';
 export interface UIContextState {
     platformConfig: PlatformConfig;
     channelList: Channel[];
