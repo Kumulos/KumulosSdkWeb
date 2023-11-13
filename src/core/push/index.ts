@@ -1,5 +1,6 @@
 import { Context, EventType, trackEvent } from '..';
 import { getBrowserName, getFullUrl, parseQueryString } from '../utils';
+
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
 
@@ -56,11 +57,11 @@ export interface PushPayload {
     icon: string | null;
 }
 
-let manager: Promise<PushOpsManager>;
+let manager: PushOpsManager;
 
 export default function getPushOpsManager(
     ctx: Context
-): Promise<PushOpsManager> {
+): PushOpsManager {
     if (manager) {
         return manager;
     }
@@ -68,9 +69,9 @@ export default function getPushOpsManager(
     const browser = getBrowserName();
 
     if (browser === 'safari' && !('PushManager' in window)) {
-        manager = Promise.resolve(new SafariPushManager(ctx.safariPushId));
+        manager = new SafariPushManager(ctx.safariPushId)
     } else {
-        manager = Promise.resolve(new W3cPushManager());
+        manager = new W3cPushManager()
     }
 
     return manager;

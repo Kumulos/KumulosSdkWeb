@@ -143,7 +143,7 @@ self.addEventListener('pushsubscriptionchange', event => {
     }
 
     const workCompleted = withContext(ctx =>
-        getPushOpsManager(ctx).then(mgr => mgr.pushRegister(ctx))
+        getPushOpsManager(ctx).pushRegister(ctx)
     );
 
     event.waitUntil(workCompleted);

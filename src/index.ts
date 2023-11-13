@@ -2,19 +2,19 @@ import {
     Configuration,
     Context,
     InstallId,
+    Keys,
+    PlatformConfig,
     PropsObject,
     SDKFeature,
     UserId,
     assertConfigValid,
+    assertKeys,
     associateUser,
     getInstallId,
     getUserId,
     setInstallId,
     trackEvent,
-    trackInstallDetails,
-    PlatformConfig,
-    Keys,
-    assertKeys
+    trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
 import { getBrowserName, isMobile } from './core/utils';
@@ -24,6 +24,7 @@ import {
 } from './core/storage';
 import getPushOpsManager, {
     KumulosPushNotification,
+    PushOpsManager,
     notificationFromPayload,
     registerServiceWorker,
     trackOpenFromQuery
@@ -47,6 +48,7 @@ export default class Kumulos {
     private readonly platformConfig: PlatformConfig;
     private readonly context: Context;
     private readonly rootFrame: RootFrame;
+    private readonly pushManager: PushOpsManager;
 
     private promptManager?: PromptManager;
     private ddlManager?: DdlManager;
@@ -73,7 +75,8 @@ export default class Kumulos {
         const kumulos = new Kumulos(
             context,
             newManipulatedConfig,
-            platformConfigWithKeys
+            platformConfigWithKeys,
+            getPushOpsManager(context)
         );
 
         kumulos.initialize();
@@ -84,11 +87,13 @@ export default class Kumulos {
     private constructor(
         context: Context,
         config: KumulosConfig,
-        platformConfig: PlatformConfig
+        platformConfig: PlatformConfig,
+        pushManager: PushOpsManager
     ) {
         this.context = context;
         this.config = config;
         this.platformConfig = platformConfig;
+        this.pushManager = pushManager;
         this.rootFrame = new RootFrame();
     }
 
@@ -115,6 +120,7 @@ export default class Kumulos {
         this.promptManager = new PromptManager(
             this.context,
             this.rootFrame,
+            this.pushManager,
             this.platformConfig.prompts
         );
 
@@ -215,8 +221,7 @@ export default class Kumulos {
     }
 
     async pushRegister(): Promise<void> {
-        const pushManager = await getPushOpsManager(this.context);
-        const permission = await pushManager.requestNotificationPermission(
+        const permission = await this.pushManager.requestNotificationPermission(
             this.context
         );
 
@@ -229,7 +234,7 @@ export default class Kumulos {
         const browser = getBrowserName();
 
         if (browser === 'safari' || !navigator.permissions) {
-            pushManager.pushRegister(this.context);
+            this.pushManager.pushRegister(this.context);
         }
     }
 

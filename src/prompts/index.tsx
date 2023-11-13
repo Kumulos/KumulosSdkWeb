@@ -38,12 +38,13 @@ export class PromptManager {
     private readonly context: Context;
     private readonly pushContainer: RootFrameContainer;
     private readonly triggerFilter: PromptTriggerEventFilter<PushPromptConfig>;
+    private readonly pushManager: PushOpsManager;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
-    private pushOpsManager?: PushOpsManager;
+    // private pushOpsManager?: PushOpsManager;
     private ui?: Ui;
     private prompts: PromptConfigs<PushPromptConfig>;
     private currentPostAction?: PromptAction;
@@ -52,6 +53,7 @@ export class PromptManager {
     constructor(
         ctx: Context,
         rootFrame: RootFrame,
+        pushManager: PushOpsManager,
         prompts?: PromptConfigs<PushPromptConfig>
     ) {
         this.prompts = prompts ?? {};
@@ -63,6 +65,7 @@ export class PromptManager {
 
         this.pushContainer = rootFrame.createContainer('push');
         this.context = ctx;
+        this.pushManager = pushManager;
 
         this.setState('loading');
     }
@@ -100,7 +103,7 @@ export class PromptManager {
 
         this.currentlyRequestingPrompt = prompt;
 
-        this.pushOpsManager?.isNativePromptShown().then(isNativePromptShown => {
+        this.pushManager.isNativePromptShown().then(isNativePromptShown => {
             if (isNativePromptShown) {
                 this.setState('requesting');
             } else {
@@ -108,7 +111,7 @@ export class PromptManager {
             }
         });
 
-        this.subscriptionState = await this.pushOpsManager?.requestPermissionAndRegisterForPush(
+        this.subscriptionState = await this.pushManager.requestPermissionAndRegisterForPush(
             this.context
         );
 
@@ -266,21 +269,18 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                this.pushOpsManager = await getPushOpsManager(this.context);
-                await this.pushOpsManager.handleAutoResubscription(
+                await this.pushManager.handleAutoResubscription(
                     this.context
                 );
-                this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
+                this.subscriptionState = await this.pushManager.getCurrentSubscriptionState(
                     this.context
                 );
-                // Note: channels irrelevant for optimove apps
-                //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
                 this.currentPostAction = undefined;
-                this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
+                this.subscriptionState = await this.pushManager.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.evaluateTriggers();

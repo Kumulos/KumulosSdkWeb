@@ -42,7 +42,7 @@ export interface PushPayload {
     image: string | null;
     icon: string | null;
 }
-export default function getPushOpsManager(ctx: Context): Promise<PushOpsManager>;
+export default function getPushOpsManager(ctx: Context): PushOpsManager;
 export declare function trackOpenFromQuery(ctx: Context): void;
 export declare function registerServiceWorker(workerPath: string): Promise<void>;
 export declare function notificationFromPayload(payload: PushPayload): KumulosPushNotification;
