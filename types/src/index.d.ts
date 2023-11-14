@@ -1,5 +1,5 @@
 import { Configuration, InstallId, PropsObject, UserId } from './core';
-import { KumulosPushNotification } from './core/push';
+import { KumulosPushNotification, PushSubscriptionState } from './core/push';
 interface KumulosConfig extends Configuration {
     onPushReceived?: (payload: KumulosPushNotification) => void;
     onPushOpened?: (payload: KumulosPushNotification) => void;
@@ -26,6 +26,7 @@ export default class Kumulos {
     private static mapConfigAndKeysToConfig;
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void>;
     trackEvent(type: string, properties?: PropsObject): Promise<void>;
+    getPushSubscriptionStatus(subscriptionStateListener: (subscriptionState: PushSubscriptionState) => void): Promise<void>;
     pushRegister(): Promise<void>;
     private onWorkerMessage;
     private maybeFireOpenedHandler;

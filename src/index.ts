@@ -25,6 +25,7 @@ import {
 import getPushOpsManager, {
     KumulosPushNotification,
     PushOpsManager,
+    PushSubscriptionState,
     notificationFromPayload,
     registerServiceWorker,
     trackOpenFromQuery
@@ -138,9 +139,7 @@ export default class Kumulos {
             const permissionState = permissionStatus.state;
 
             if (permissionState === 'granted') {
-                const pushManager = await getPushOpsManager(this.context);
-
-                pushManager.pushRegister(this.context);
+                this.pushManager.pushRegister(this.context);
             }
         });
     }
@@ -218,6 +217,12 @@ export default class Kumulos {
 
     trackEvent(type: string, properties?: PropsObject): Promise<void> {
         return trackEvent(this.context, type, properties).then(_ => void 0);
+    }
+
+    async getPushSubscriptionStatus(subscriptionStateListener: (subscriptionState: PushSubscriptionState) => void) {
+        const subscriptionState = await this.pushManager.getCurrentSubscriptionState(this.context);
+
+        subscriptionStateListener(subscriptionState);
     }
 
     async pushRegister(): Promise<void> {
