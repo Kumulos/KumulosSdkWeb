@@ -24,6 +24,7 @@ export default class Kumulos {
     private static maybePersistInstallIdAndUserId;
     private static mapConfigAndKeysToConfig;
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void>;
+    signOutUser(): Promise<void>;
     trackEvent(type: string, properties?: PropsObject): Promise<void>;
     pushRegister(): Promise<void>;
     private onWorkerMessage;
