@@ -44,7 +44,6 @@ export class PromptManager {
     private subscriptionState?: PushSubscriptionState;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
-    // private pushOpsManager?: PushOpsManager;
     private ui?: Ui;
     private prompts: PromptConfigs<PushPromptConfig>;
     private currentPostAction?: PromptAction;
