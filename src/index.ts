@@ -10,6 +10,7 @@ import {
     assertConfigValid,
     assertKeys,
     associateUser,
+    clearUserAssociation,
     getInstallId,
     getUserId,
     setInstallId,
@@ -204,6 +205,10 @@ export default class Kumulos {
 
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {
         return associateUser(this.context, identifier, attributes);
+    }
+
+    signOutUser(): Promise<void> {
+        return clearUserAssociation(this.context);
     }
 
     trackEvent(type: string, properties?: PropsObject): Promise<void> {
