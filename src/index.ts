@@ -10,6 +10,7 @@ import {
     assertConfigValid,
     assertKeys,
     associateUser,
+    clearUserAssociation,
     getInstallId,
     getUserId,
     setInstallId,
@@ -37,8 +38,6 @@ import RootFrame from './core/root-frame';
 import { loadPlatformAndKeysConfig } from './core/config';
 
 interface KumulosConfig extends Configuration {
-    onPushReceived?: (payload: KumulosPushNotification) => void;
-    onPushOpened?: (payload: KumulosPushNotification) => void;
     originalVisitorId: InstallId;
     customerId?: UserId;
     sdkVersion?: string;
@@ -50,6 +49,9 @@ export default class Kumulos {
     private readonly context: Context;
     private readonly rootFrame: RootFrame;
     private readonly pushManager: PushOpsManager;
+
+    private onPushReceived?: (payload: KumulosPushNotification) => void;
+    private onPushOpened?: (payload: KumulosPushNotification) => void;
 
     private promptManager?: PromptManager;
     private ddlManager?: DdlManager;
@@ -124,9 +126,6 @@ export default class Kumulos {
             this.pushManager,
             this.platformConfig.prompts
         );
-
-        this.maybeAddMessageEventListenerToSW();
-        this.maybeFireOpenedHandler();
     }
 
     private async observePermissionStatus() {
@@ -200,8 +199,6 @@ export default class Kumulos {
             serviceWorkerPath: config.serviceWorkerPath,
             autoResubscribe: config.autoResubscribe,
             features: config.features,
-            onPushReceived: config.onPushReceived,
-            onPushOpened: config.onPushOpened,
             originalVisitorId: config.originalVisitorId,
             customerId: config.customerId,
             sdkVersion: config.sdkVersion,
@@ -213,6 +210,10 @@ export default class Kumulos {
 
     associateUser(identifier: UserId, attributes?: PropsObject): Promise<void> {
         return associateUser(this.context, identifier, attributes);
+    }
+
+    signOutUser(): Promise<void> {
+        return clearUserAssociation(this.context);
     }
 
     trackEvent(type: string, properties?: PropsObject): Promise<void> {
@@ -243,6 +244,16 @@ export default class Kumulos {
         }
     }
 
+    setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void) {
+        this.onPushOpened = onPushOpened;
+        this.maybeFireOpenedHandler();
+    }
+
+    setPushReceivedListener(onPushReceived: (payload: KumulosPushNotification) => void) {
+        this.onPushReceived = onPushReceived;
+        this.maybeAddMessageEventListenerToSW();
+    }
+
     private onWorkerMessage = (e: MessageEvent) => {
         if (e.origin !== location.origin) {
             return;
@@ -255,7 +266,7 @@ export default class Kumulos {
         switch (e.data.type) {
             case WorkerMessageType.KPushReceived: {
                 const push = notificationFromPayload(e.data.data);
-                this.config.onPushReceived?.(push);
+                this.onPushReceived?.(push);
 
                 break;
             }
@@ -270,6 +281,6 @@ export default class Kumulos {
 
         const push = notificationFromPayload(payload);
 
-        this.config.onPushOpened?.(push);
+        this.onPushOpened?.(push);
     }
 }
