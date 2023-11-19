@@ -10,6 +10,7 @@ export declare enum MessageType {
 export interface PushOpsManager {
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    pushUnregister(ctx: Context): Promise<void>;
     requestPermissionAndRegisterForPush(ctx: Context): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
     handleAutoResubscription(ctx: Context): Promise<void>;

@@ -46,6 +46,27 @@ export default class SafariPushManager implements PushOpsManager {
         return result;
     }
 
+    async pushUnregister(ctx: Context): Promise<void> {
+        const perm = window.safari?.pushNotification.permission(
+            this.safariPushId as string
+        );
+
+        if (!perm || !perm.deviceToken) {
+            return;
+        }
+
+        const existingTokenHash = await get<number>('pushTokenHash');
+        const tokenHash = hashToken(ctx, perm.deviceToken);
+
+        if (existingTokenHash === tokenHash) {
+            return;
+        }
+
+        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
+
+        await set('pushTokenHash', tokenHash);
+    }
+
     private async pushRegisterSync(ctx: Context): Promise<void> {
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string

@@ -29,6 +29,7 @@ export default class Kumulos {
     trackEvent(type: string, properties?: PropsObject): Promise<void>;
     getPushSubscriptionStatus(subscriptionStateListener: (subscriptionState: PushSubscriptionState) => void): Promise<void>;
     pushRegister(): Promise<void>;
+    pushUnregister(): Promise<void>;
     setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void): void;
     setPushReceivedListener(onPushReceived: (payload: KumulosPushNotification) => void): void;
     private onWorkerMessage;

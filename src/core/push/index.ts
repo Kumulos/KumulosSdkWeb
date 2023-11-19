@@ -20,6 +20,7 @@ export interface PushOpsManager {
         ctx: Context
     ): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    pushUnregister(ctx: Context): Promise<void>;
     requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<PushSubscriptionState>;

@@ -1,7 +1,7 @@
 import { Context, EventType, trackEvent } from '..';
 import { PushOpsManager, PushSubscriptionState, TokenType } from '.';
 import { base64UrlEncode, cyrb53, getBrowserName, getFullUrl } from '../utils';
-import { get, set } from '../storage';
+import { del, get, set } from '../storage';
 
 const BLUR_EVENT_TIMEOUT_MILLIS = 1000;
 
@@ -78,12 +78,20 @@ export default class W3cPushManager implements PushOpsManager {
             ctx.serviceWorkerPath
         );
 
+        await this.unsubscribeIfDifferentVapid(workerReg, ctx.vapidPublicKey);
+
+        await this.subscribeAndMaybeTrackRegisteredEvent(workerReg, ctx);
+    }
+
+    private async unsubscribeIfDifferentVapid(workerReg: ServiceWorkerRegistration, vapidPublicKey: string): Promise<void> {
         const existingSub = await workerReg.pushManager.getSubscription();
 
-        if (existingSub && !hasSameKey(ctx.vapidPublicKey, existingSub)) {
-            await existingSub?.unsubscribe();
+        if (existingSub && !hasSameKey(vapidPublicKey, existingSub)) {
+            await existingSub.unsubscribe();
         }
+    }
 
+    private async subscribeAndMaybeTrackRegisteredEvent(workerReg: ServiceWorkerRegistration, ctx: Context): Promise<void> {
         const sub = await workerReg.pushManager.subscribe({
             applicationServerKey: ctx.vapidPublicKey,
             userVisibleOnly: true
@@ -103,10 +111,36 @@ export default class W3cPushManager implements PushOpsManager {
             return;
         }
 
-        await this.trackEventAndCache(ctx, sub, endpointHash);
+        await this.trackAndCachePushRegisteredEvent(ctx, sub, endpointHash);
     }
 
-    private async trackEventAndCache(
+    async pushUnregister(ctx: Context): Promise<void> {
+        if (!('PushManager' in window)) {
+            return Promise.reject(
+                'Push notifications are not supported in this browser'
+            );
+        }
+
+        const workerReg = await getActiveServiceWorkerReg(
+            ctx.serviceWorkerPath
+        );
+
+        const existingSub = await workerReg.pushManager.getSubscription();
+
+        if (!existingSub) {
+            return;
+        }
+
+        await existingSub.unsubscribe();
+
+        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
+
+        await del('pushEndpointHash');
+        await del('pushExpiresAt');
+
+    }
+
+    private async trackAndCachePushRegisteredEvent(
         ctx: Context,
         pushSubscription: PushSubscription,
         endpointHash: number

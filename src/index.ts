@@ -244,6 +244,10 @@ export default class Kumulos {
         }
     }
 
+    async pushUnregister(): Promise<void> {
+        this.pushManager.pushUnregister(this.context);
+    }
+
     setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void) {
         this.onPushOpened = onPushOpened;
         this.maybeFireOpenedHandler();
