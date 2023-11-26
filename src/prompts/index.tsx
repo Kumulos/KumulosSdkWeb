@@ -7,11 +7,11 @@ import {
     PushPromptConfig,
     SdkEvent
 } from '../core';
-import RootFrame, { RootFrameContainer } from '../core/root-frame';
-import getPushOpsManager, {
+import {
     PushOpsManager,
     PushSubscriptionState
 } from '../core/push';
+import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import { h, render } from 'preact';
 
 import { ChannelSubscriptionManager } from '../core/channels';

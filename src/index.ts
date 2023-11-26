@@ -138,7 +138,7 @@ export default class Kumulos {
             const permissionState = permissionStatus.state;
 
             if (permissionState === 'granted') {
-                this.pushManager.pushRegister(this.context);
+                this.pushManager.attemptPushRegister(this.context);
             }
         });
     }

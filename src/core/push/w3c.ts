@@ -66,8 +66,15 @@ export default class W3cPushManager implements PushOpsManager {
         this.pushRegisterLock = result.catch(() => {});
         return result;
     }
+    
+    async attemptPushRegister(ctx: Context): Promise<void> {
+        // check if unregister was called explicitly before
+        this.pushRegister(ctx);
+    }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
+        await del('wasUnregistered');
+
         if (!('PushManager' in window)) {
             return Promise.reject(
                 'Push notifications are not supported in this browser'
@@ -157,6 +164,12 @@ export default class W3cPushManager implements PushOpsManager {
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<import('.').PushSubscriptionState> {
+        const wasUnregistered = await get<boolean>('wasUnregistered');
+
+        if (wasUnregistered) {
+            return 'unregistered';
+        }
+        
         const perm = await this.requestNotificationPermission(ctx);
 
         switch (perm) {
@@ -241,7 +254,7 @@ export default class W3cPushManager implements PushOpsManager {
         console.info('Auto-resubscribe: attempting resubscription');
 
         try {
-            return this.pushRegister(ctx);
+            return this.attemptPushRegister(ctx);
         } catch (e) {
             console.error(e);
         }

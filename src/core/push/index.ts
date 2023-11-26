@@ -4,7 +4,7 @@ import { getBrowserName, getFullUrl, parseQueryString } from '../utils';
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
 
-export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked' | 'unregistered';
 
 export enum TokenType {
     W3C = 3,
@@ -20,6 +20,7 @@ export interface PushOpsManager {
         ctx: Context
     ): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    attemptPushRegister(ctx: Context): Promise<void>;
     pushUnregister(ctx: Context): Promise<void>;
     requestPermissionAndRegisterForPush(
         ctx: Context

@@ -1,7 +1,7 @@
 import { Context, EventType, Service, trackEvent } from '..';
 import { PushOpsManager, TokenType } from '.';
 import { cyrb53, defer } from '../utils';
-import { get, set } from '../storage';
+import { del, get, set } from '../storage';
 
 import { PushSubscriptionState } from '../push';
 
@@ -46,7 +46,20 @@ export default class SafariPushManager implements PushOpsManager {
         return result;
     }
 
+    async attemptPushRegister(ctx: Context): Promise<void> {
+        const wasUnregistered = await get<boolean>('wasUnregistered');
+
+        if (wasUnregistered) {
+            return;
+        }
+
+        this.pushRegister(ctx);
+    }
+
     async pushUnregister(ctx: Context): Promise<void> {
+        //todo - should broadcast the event that would hide the soft prompt in case shown
+        await set<boolean>('wasUnregistered', true);
+
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );
@@ -68,6 +81,8 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
+        await del('wasUnregistered');
+        
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );
@@ -95,6 +110,12 @@ export default class SafariPushManager implements PushOpsManager {
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<PushSubscriptionState> {
+        const wasUnregistered = await get<boolean>('wasUnregistered');
+
+        if (wasUnregistered) {
+            return 'unregistered';
+        }
+
         const perm = await this.requestNotificationPermission(ctx);
 
         switch (perm) {
@@ -159,7 +180,7 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        return this.pushRegister(ctx);
+        return this.attemptPushRegister(ctx);
     }
 
     async isNativePromptShown(): Promise<boolean> {
