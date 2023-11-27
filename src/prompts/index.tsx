@@ -64,6 +64,10 @@ export class PromptManager {
         this.setState('loading');
     }
 
+    public refresh(){
+        this.setState('ready');
+    }
+
     private onEventTracked = (e: SdkEvent) => {
         console.info('Prompt trigger saw event', e);
 

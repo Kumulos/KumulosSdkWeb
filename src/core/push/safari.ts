@@ -58,7 +58,6 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
-        //todo - should broadcast the event that would hide the soft prompt in case shown
         await set<boolean>('wasUnregistered', true);
 
         const perm = window.safari?.pushNotification.permission(

@@ -245,7 +245,8 @@ export default class Kumulos {
     }
 
     async pushUnregister(): Promise<void> {
-        this.pushManager.pushUnregister(this.context);
+        await this.pushManager.pushUnregister(this.context);
+        this.promptManager?.refresh();
     }
 
     setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void) {

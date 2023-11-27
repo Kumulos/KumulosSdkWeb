@@ -132,7 +132,6 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
-        //todo - should broadcast the event that would hide the soft prompt in case shown
         await set<boolean>('wasUnregistered', true);
 
         const workerReg = await getActiveServiceWorkerReg(
