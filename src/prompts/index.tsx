@@ -221,9 +221,6 @@ export class PromptManager {
                 await this.pushManager.handleAutoResubscription(
                     this.context
                 );
-                this.subscriptionState = await this.pushManager.getCurrentSubscriptionState(
-                    this.context
-                );
                 this.setState('ready');
                 break;
             case 'ready':

@@ -40,9 +40,7 @@ function hashSubscription(ctx: Context, sub: PushSubscription): number {
 export default class W3cPushManager implements PushOpsManager {
     private pushRegisterLock: Promise<void> = Promise.resolve();
 
-    async requestNotificationPermission(
-        ctx: Context
-    ): Promise<NotificationPermission> {
+    async requestNotificationPermission(): Promise<NotificationPermission> {
         if (typeof Notification === 'undefined') {
             return Promise.reject(
                 'Notifications are not supported in this browser, aborting...'
@@ -68,8 +66,14 @@ export default class W3cPushManager implements PushOpsManager {
     }
     
     async attemptPushRegister(ctx: Context): Promise<void> {
-        // check if unregister was called explicitly before
-        this.pushRegister(ctx);
+        const wasUnregistered = await get<boolean>('wasUnregistered');
+
+        if (wasUnregistered) {
+            console.info('Was unregistered before, not calling push register');
+            return;
+        }
+
+        return this.pushRegister(ctx);
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
@@ -128,6 +132,9 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
+        //todo - should broadcast the event that would hide the soft prompt in case shown
+        await set<boolean>('wasUnregistered', true);
+
         const workerReg = await getActiveServiceWorkerReg(
             ctx.serviceWorkerPath
         );
@@ -170,7 +177,7 @@ export default class W3cPushManager implements PushOpsManager {
             return 'unregistered';
         }
         
-        const perm = await this.requestNotificationPermission(ctx);
+        const perm = await this.requestNotificationPermission();
 
         switch (perm) {
             case 'default':
@@ -194,6 +201,12 @@ export default class W3cPushManager implements PushOpsManager {
 
         if (perm === 'denied') {
             return 'blocked';
+        }
+
+        const wasUnregistered = await get<boolean>('wasUnregistered');
+
+        if (wasUnregistered) {
+            return 'unregistered';
         }
 
         const reg = await getActiveServiceWorkerReg(ctx.serviceWorkerPath);

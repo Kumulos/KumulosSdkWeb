@@ -50,10 +50,11 @@ export default class SafariPushManager implements PushOpsManager {
         const wasUnregistered = await get<boolean>('wasUnregistered');
 
         if (wasUnregistered) {
+            console.info('Was unregistered before, not calling push register');
             return;
         }
 
-        this.pushRegister(ctx);
+        return this.pushRegister(ctx);
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
@@ -142,6 +143,12 @@ export default class SafariPushManager implements PushOpsManager {
 
         if (!perm || perm?.permission === 'denied') {
             return 'blocked';
+        }
+
+        const wasUnregistered = await get<boolean>('wasUnregistered');
+
+        if (wasUnregistered) {
+            return 'unregistered';
         }
 
         const existingTokenHash = await get<number>('pushTokenHash');
