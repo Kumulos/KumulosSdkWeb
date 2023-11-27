@@ -1,7 +1,6 @@
 import {
     AlertPromptConfig,
     BannerPromptConfig,
-    ChannelListItem,
     PromptTypeName
 } from '../../core';
 import { Component, h } from 'preact';
@@ -16,37 +15,21 @@ const styles = {
     }
 };
 
-export interface DialogState {
-    channelSelections: ChannelListItem[];
-}
-
 export class Dialog extends Component<
-    PromptUiProps<AlertPromptConfig | BannerPromptConfig>,
-    DialogState
+    PromptUiProps<AlertPromptConfig | BannerPromptConfig>
 > {
     constructor(props: PromptUiProps<AlertPromptConfig | BannerPromptConfig>) {
         super(props);
-
-        this.state = {
-            channelSelections: []
-        };
     }
 
     onRequestNativePrompt = () => {
         this.props.onPromptAccepted(
             this.props.config,
-            this.state.channelSelections
         );
     };
 
     onRequestCancel = () => {
         this.props.onPromptDeclined(this.props.config);
-    };
-
-    onSelectedChannelChanged = (channelList: ChannelListItem[]) => {
-        this.setState({
-            channelSelections: [...channelList]
-        });
     };
 
     render() {
