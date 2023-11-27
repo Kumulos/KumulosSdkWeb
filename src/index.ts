@@ -235,18 +235,12 @@ export default class Kumulos {
             return Promise.reject('Notification permission not granted');
         }
 
-        //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1
-        // it also supports the legacy safari push notification implementation, which can not rely on the permission change event handler
-        const browser = getBrowserName();
-
-        if (browser === 'safari' || !navigator.permissions) {
-            this.pushManager.pushRegister(this.context);
-        }
+        this.pushManager.pushRegister(this.context);
     }
 
     async pushUnregister(): Promise<void> {
         await this.pushManager.pushUnregister(this.context);
-        this.promptManager?.refresh();
+        this.promptManager?.hideShownPrompts();
     }
 
     setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void) {

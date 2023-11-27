@@ -64,7 +64,8 @@ export class PromptManager {
         this.setState('loading');
     }
 
-    public refresh(){
+    public async hideShownPrompts(){
+        this.activePrompts = [];
         this.setState('ready');
     }
 
