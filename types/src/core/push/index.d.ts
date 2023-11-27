@@ -1,5 +1,5 @@
 import { Context } from '..';
-export declare type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+export declare type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked' | 'unregistered';
 export declare enum TokenType {
     W3C = 3,
     SAFARI = 4
@@ -10,6 +10,7 @@ export declare enum MessageType {
 export interface PushOpsManager {
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    attemptPushRegister(ctx: Context): Promise<void>;
     pushUnregister(ctx: Context): Promise<void>;
     requestPermissionAndRegisterForPush(ctx: Context): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;

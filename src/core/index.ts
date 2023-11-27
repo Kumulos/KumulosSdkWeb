@@ -1,8 +1,6 @@
 import { performFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 
-import { Channel } from './channels';
-
 const SDK_TYPE = 104;
 // Backwards compatibility with optimove SDK not including version in Optimobile config
 const DEFAULT_SDK_VERSION = '2.0.17';
@@ -667,30 +665,6 @@ export async function trackInstallDetails(
     return trackEvent(ctx, EventType.INSTALL_TRACKED, payload)
         .then(() => set('detailsHash', hash))
         .then(() => void 0);
-}
-
-export interface ChannelListItem {
-    channel: Channel;
-    checked: boolean;
-}
-
-export function getChannelDialogChannels(
-    allChannels: Channel[],
-    selectionConfig: MultiChannelSelectionConfig
-) {
-    return allChannels
-        .filter(
-            c =>
-                selectionConfig.presentedUuids === 'all' ||
-                selectionConfig.presentedUuids.includes(c.uuid)
-        )
-        .map<ChannelListItem>(c => ({
-            channel: { ...c },
-            checked:
-                c.subscribed.valueOf() ||
-                selectionConfig.checkedUuids === 'all' ||
-                selectionConfig.checkedUuids.includes(c.uuid)
-        }));
 }
 
 export interface Dimensions {

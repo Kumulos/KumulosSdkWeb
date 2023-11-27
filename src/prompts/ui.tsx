@@ -1,24 +1,22 @@
-import { Component, Fragment, h, JSX } from 'preact';
-
 import {
-    PushPromptConfig,
-    PromptTypeName,
     AlertPromptConfig,
     BannerPromptConfig,
     PromptAction,
-    UserChannelSelectInlineAction,
-    ChannelListItem
+    PromptTypeName,
+    PushPromptConfig,
+    UserChannelSelectInlineAction
 } from '../core';
+import { Component, Fragment, h } from 'preact';
+
+import { BackgroundMask } from './overlay/background-mask';
+import { Bell } from './bell';
+import { Dialog } from './dialog';
+import { Overlay } from './overlay/push-perms';
+import { OverlaySilent } from './overlay/push-perms-silent';
 import { PromptManagerState } from '.';
 import { PushSubscriptionState } from '../core/push';
 import { createPortal } from 'preact/compat';
 import { isMobile } from '../core/utils';
-import { Bell } from './bell';
-import { Dialog } from './dialog';
-import { ChannelsDialog } from './dialog/channels-dialog';
-import { BackgroundMask } from './overlay/background-mask';
-import { Overlay } from './overlay/push-perms';
-import { OverlaySilent } from './overlay/push-perms-silent';
 
 export const DEFAULT_SUBSCRIBE_LABEL = 'Subscribe for notifications';
 
@@ -31,8 +29,7 @@ export interface PromptUiProps<T extends PushPromptConfig> {
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
-        prompt: PushPromptConfig,
-        channelSelections?: ChannelListItem[]
+        prompt: PushPromptConfig
     ) => void;
     onPromptDeclined: (prompt: PushPromptConfig) => void;
     action?: UserChannelSelectInlineAction;
@@ -65,17 +62,11 @@ interface UiProps {
     subscriptionState: PushSubscriptionState;
     promptManagerState: PromptManagerState;
     onPromptAccepted: (
-        prompt: PushPromptConfig,
-        channelSelections?: ChannelListItem[]
+        prompt: PushPromptConfig
     ) => void;
     onPromptDeclined: (prompt: PushPromptConfig) => void;
-    onPostActionConfirm: (
-        prompt: PushPromptConfig,
-        channelSelections?: ChannelListItem[]
-    ) => void;
     onDismissOverlay: (prompt: PushPromptConfig) => void;
     currentlyRequestingPrompt?: PushPromptConfig;
-    currentPostAction?: PromptAction;
 }
 
 interface UiState {
@@ -115,8 +106,6 @@ export default class Ui extends Component<UiProps, UiState> {
                 {this.maybeRenderPromptBackgroundMask()}
 
                 {this.props.prompts.map(this.renderPrompt, this)}
-
-                {this.renderPostAction()}
 
                 {!isMobile() && (
                     <Overlay
@@ -222,55 +211,5 @@ export default class Ui extends Component<UiProps, UiState> {
             default:
                 return null;
         }
-    }
-
-    renderPostAction() {
-        const {
-            promptManagerState,
-            currentPostAction,
-            currentlyRequestingPrompt
-        } = this.props;
-
-        if ('postaction' !== promptManagerState) {
-            return null;
-        }
-
-        if (!currentlyRequestingPrompt) {
-            return null;
-        }
-
-        if ('userChannelSelectDialog' !== currentPostAction?.type) {
-            return null;
-        }
-
-        let backgroundMask = null;
-
-        if (
-            (currentlyRequestingPrompt.type === PromptTypeName.ALERT ||
-                currentlyRequestingPrompt.type === PromptTypeName.BANNER) &&
-            undefined !== currentlyRequestingPrompt.backgroundMask
-        ) {
-            const maskConfig = currentlyRequestingPrompt.backgroundMask;
-            backgroundMask = (
-                <BackgroundMask
-                    style={{ backgroundColor: maskConfig.colors.bg }}
-                />
-            );
-        }
-
-        return (
-            <Fragment>
-                {backgroundMask}
-                <ChannelsDialog
-                    action={currentPostAction}
-                    onConfirm={channelSelections => {
-                        this.props.onPostActionConfirm(
-                            currentlyRequestingPrompt,
-                            channelSelections
-                        );
-                    }}
-                />
-            </Fragment>
-        );
     }
 }

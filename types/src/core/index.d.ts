@@ -1,4 +1,3 @@
-import { Channel } from './channels';
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -304,11 +303,6 @@ export declare type KumulosEvent = {
 export declare type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
 export declare function trackInstallDetails(ctx: Context, optionalSdkVersion?: string): Promise<void>;
-export interface ChannelListItem {
-    channel: Channel;
-    checked: boolean;
-}
-export declare function getChannelDialogChannels(allChannels: Channel[], selectionConfig: MultiChannelSelectionConfig): ChannelListItem[];
 export interface Dimensions {
     width: number;
     height: number;

@@ -4,6 +4,7 @@ export default class W3cPushManager implements PushOpsManager {
     private pushRegisterLock;
     requestNotificationPermission(ctx: Context): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    attemptPushRegister(ctx: Context): Promise<void>;
     private pushRegisterSync;
     private unsubscribeIfDifferentVapid;
     private subscribeAndMaybeTrackRegisteredEvent;
