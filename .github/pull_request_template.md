@@ -12,7 +12,7 @@ Prepare:
 
 -   [ ] Detail any breaking changes. Breaking changes require a new major version number
 
-Bump versions in:
+Bump versions in (Kumulos Web SDK only):
 
 -   [ ] package.json
 -   [ ] package-lock.json (run `npm install` after editing package.json)
@@ -23,7 +23,13 @@ Build:
 -   [ ] `npm run dist`
 -   [ ] Commit resulting `dist/` changes
 
-Release:
+Release (Optimove Web SDK):
+
+-   [ ] Squash and merge to optimobile-web
+-   [ ] Delete branch once merged
+-   [ ] Publish `dist/optimove-worker.js` and `dist/optimove-web-bundle.js` to CDN (re-run `npm run dist` locally to update `optimove-web-bundle.js`)
+
+Release (Kumulos Web SDK):
 
 -   [ ] Squash and merge to master
 -   [ ] Delete branch once merged
