@@ -1,3 +1,4 @@
+import { PushSubscriptionState } from './push';
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -263,12 +264,8 @@ export interface Configuration {
 export declare type PromptReminder = {
     declinedOn: number;
 } | 'suppressed';
-declare type SdkEventType = 'eventTracked';
-export declare type SdkEvent = {
-    type: SdkEventType;
-    event: KumulosEvent;
-};
-declare type SdkEventHandler = (event: SdkEvent) => void;
+declare type SdkEventHandler = (event: KumulosEvent) => void;
+declare type PushSubscriptionStateHandler = (pushSubscriptionState: PushSubscriptionState) => void;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;
@@ -278,11 +275,14 @@ export declare class Context {
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
     readonly safariPushId?: string;
-    private readonly subscribers;
+    private readonly eventSubscribers;
+    private readonly pushStateSubscribers;
     private readonly urlMap;
     constructor(config: Configuration);
-    subscribe(event: SdkEventType, handler: SdkEventHandler): void;
-    broadcast(type: SdkEventType, event: KumulosEvent): void;
+    subscribeToEvents(handler: SdkEventHandler): void;
+    subscribeToSubscriptionStatus(handler: PushSubscriptionStateHandler): void;
+    broadcastEvent(event: KumulosEvent): void;
+    broadcastSubscriptionState(pushSubscriptionState: PushSubscriptionState): void;
     hasFeature(feature: SDKFeature): boolean;
     urlForService(service: Service): string;
 }

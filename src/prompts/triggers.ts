@@ -4,8 +4,7 @@ import {
     KumulosEvent,
     PromptConfig,
     PromptConfigs,
-    PropFilter,
-    SdkEvent
+    PropFilter
 } from '../core';
 
 import { escapeRegExp } from '../core/utils';
@@ -112,11 +111,11 @@ export function triggerMatched(
 
 export class PromptTriggerEventFilter<T extends PromptConfig> {
     private eventQueue: KumulosEvent[] = [];
-    private eventReceivedCallback?: (e: SdkEvent) => void;
+    private eventReceivedCallback?: (event: KumulosEvent) => void;
 
-    constructor(ctx: Context, eventReceivedCallback?: (e: SdkEvent) => void) {
+    constructor(ctx: Context, eventReceivedCallback?: (event: KumulosEvent) => void) {
         this.eventReceivedCallback = eventReceivedCallback;
-        ctx.subscribe('eventTracked', this.handleSdkEvent);
+        ctx.subscribeToEvents(this.handleSdkEvent);
     }
 
     async filterPrompts(
@@ -150,9 +149,9 @@ export class PromptTriggerEventFilter<T extends PromptConfig> {
         return matchedPrompts as T[];
     }
 
-    private handleSdkEvent = (e: SdkEvent) => {
-        this.eventQueue.push(e.event);
+    private handleSdkEvent = (event: KumulosEvent) => {
+        this.eventQueue.push(event);
 
-        this.eventReceivedCallback?.(e);
+        this.eventReceivedCallback?.(event);
     };
 }

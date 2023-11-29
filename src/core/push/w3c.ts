@@ -36,6 +36,7 @@ async function getActiveServiceWorkerReg(
 function hashSubscription(ctx: Context, sub: PushSubscription): number {
     return cyrb53(`${ctx.apiKey}:${sub.endpoint}`);
 }
+type PushStateHandler = (pushSubscriptionState: PushSubscriptionState) => void;
 
 export default class W3cPushManager implements PushOpsManager {
     private pushRegisterLock: Promise<void> = Promise.resolve();
@@ -92,6 +93,8 @@ export default class W3cPushManager implements PushOpsManager {
         await this.unsubscribeIfDifferentVapid(workerReg, ctx.vapidPublicKey);
 
         await this.subscribeAndMaybeTrackRegisteredEvent(workerReg, ctx);
+
+        ctx.broadcastSubscriptionState('subscribed');
     }
 
     private async unsubscribeIfDifferentVapid(
@@ -153,6 +156,8 @@ export default class W3cPushManager implements PushOpsManager {
         if (existingSub) {
             await existingSub.unsubscribe();
         }
+
+        ctx.broadcastSubscriptionState('unregistered');
     }
 
     private async trackAndCachePushRegisteredEvent(

@@ -1,10 +1,10 @@
 import {
     Context,
     EventType,
+    KumulosEvent,
     PromptConfig,
     PromptConfigs,
-    PushPromptConfig,
-    SdkEvent
+    PushPromptConfig
 } from '../core';
 import { PushOpsManager, PushSubscriptionState } from '../core/push';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
@@ -62,10 +62,10 @@ export class PromptManager {
         this.setState('loading');
     }
 
-    private onEventTracked = (e: SdkEvent) => {
-        console.info('Prompt trigger saw event', e);
+    private onEventTracked = (event: KumulosEvent) => {
+        console.info('Prompt trigger saw event', event);
 
-        if (e.event.type === EventType.PUSH_UNREGISTERED) {
+        if (event.type === EventType.PUSH_UNREGISTERED) {
             console.info('Prompt identified an unregistered event');
             this.activePrompts = [];
         }

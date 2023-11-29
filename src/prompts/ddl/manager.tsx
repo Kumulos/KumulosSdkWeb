@@ -1,22 +1,23 @@
-import { h, render } from 'preact';
 import {
     Context,
     DdlPromptConfig,
+    KumulosEvent,
     PromptConfig,
-    UiActionType,
-    SdkEvent
+    UiActionType
 } from '../../core/index';
 import RootFrame, { RootFrameContainer } from '../../core/root-frame';
-import Ui from './ui';
 import {
-    loadDdlConfig,
-    deleteDdlBannerConfigFromCache
+    deleteDdlBannerConfigFromCache,
+    loadDdlConfig
 } from '../../core/config';
-import { maybePersistReminder } from '../prompt-reminder';
-import { deferPromptActivation } from '../utils';
-import { sendClickRequest } from '../../fp';
+import { h, render } from 'preact';
+
 import { FingerprintComponents } from '../../fp/types';
 import { PromptTriggerEventFilter } from '../triggers';
+import Ui from './ui';
+import { deferPromptActivation } from '../utils';
+import { maybePersistReminder } from '../prompt-reminder';
+import { sendClickRequest } from '../../fp';
 
 export enum DdlManagerState {
     LOADING = 'loading',
@@ -38,7 +39,7 @@ export default class DdlManager {
 
         this.triggerFilter = new PromptTriggerEventFilter<DdlPromptConfig>(
             ctx,
-            (_: SdkEvent) => {
+            (_: KumulosEvent) => {
                 this.updateActiveConfigs();
                 this.setState(DdlManagerState.READY);
             }

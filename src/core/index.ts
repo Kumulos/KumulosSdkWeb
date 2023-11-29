@@ -1,5 +1,6 @@
 import { performFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
+import { PushSubscriptionState } from './push';
 
 const SDK_TYPE = 104;
 // Backwards compatibility with optimove SDK not including version in Optimobile config
@@ -363,9 +364,8 @@ export type PromptReminder =
       }
     | 'suppressed';
 
-type SdkEventType = 'eventTracked';
-export type SdkEvent = { type: SdkEventType; event: KumulosEvent };
-type SdkEventHandler = (event: SdkEvent) => void;
+type SdkEventHandler = (event: KumulosEvent) => void;
+type PushSubscriptionStateHandler = (pushSubscriptionState: PushSubscriptionState) => void;
 
 export class Context {
     readonly apiKey: string;
@@ -377,7 +377,8 @@ export class Context {
     readonly features: SDKFeature[];
     readonly safariPushId?: string;
 
-    private readonly subscribers: { [key: string]: SdkEventHandler[] };
+    private readonly eventSubscribers: SdkEventHandler[];
+    private readonly pushStateSubscribers: PushSubscriptionStateHandler[];
     private readonly urlMap: { [key in Service]: string };
 
     constructor(config: Configuration) {
@@ -389,7 +390,8 @@ export class Context {
         this.autoResubscribe = config.autoResubscribe ?? true;
         this.features = config.features ?? [SDKFeature.PUSH];
 
-        this.subscribers = {};
+        this.eventSubscribers = [];
+        this.pushStateSubscribers = [];
 
         this.urlMap = {
             [Service.PUSH]: `https://push-${config.region}.kumulos.com`,
@@ -398,29 +400,20 @@ export class Context {
         };
     }
 
-    subscribe(event: SdkEventType, handler: SdkEventHandler) {
-        if (!this.subscribers[event]) {
-            this.subscribers[event] = [];
-        }
-
-        if (this.subscribers[event].indexOf(handler) > -1) {
-            return;
-        }
-
-        this.subscribers[event].push(handler);
+    subscribeToEvents(handler: SdkEventHandler) {
+        this.eventSubscribers.push(handler);
     }
 
-    broadcast(type: SdkEventType, event: KumulosEvent) {
-        if (!this.subscribers[type]) {
-            return;
-        }
+    subscribeToSubscriptionStatus(handler: PushSubscriptionStateHandler){
+        this.pushStateSubscribers.push(handler);
+    }
 
-        for (let i = 0; i < this.subscribers[type].length; ++i) {
-            this.subscribers[type][i]({
-                type: type,
-                event
-            });
-        }
+    broadcastEvent(event: KumulosEvent) {
+        this.eventSubscribers.forEach(subscriber => subscriber(event));
+    }
+
+    broadcastSubscriptionState(pushSubscriptionState: PushSubscriptionState) {
+        this.pushStateSubscribers.forEach(subscriber => subscriber(pushSubscriptionState));
     }
 
     hasFeature(feature: SDKFeature) {
@@ -573,7 +566,7 @@ export async function trackEvent(
         userId
     };
 
-    ctx.broadcast('eventTracked', event);
+    ctx.broadcastEvent(event);
 
     if (!isSystemEvent(type)) {
         return Promise.resolve();
