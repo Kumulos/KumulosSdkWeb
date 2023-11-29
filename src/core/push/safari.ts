@@ -75,7 +75,7 @@ export default class SafariPushManager implements PushOpsManager {
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
         await del('unregisteredAt');
-        
+
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );

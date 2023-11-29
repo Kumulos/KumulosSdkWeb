@@ -4,7 +4,11 @@ import { getBrowserName, getFullUrl, parseQueryString } from '../utils';
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
 
-export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked' | 'unregistered';
+export type PushSubscriptionState =
+    | 'subscribed'
+    | 'unsubscribed'
+    | 'blocked'
+    | 'unregistered';
 
 export enum TokenType {
     W3C = 3,
@@ -61,9 +65,7 @@ export interface PushPayload {
 
 let manager: PushOpsManager;
 
-export default function getPushOpsManager(
-    ctx: Context
-): PushOpsManager {
+export default function getPushOpsManager(ctx: Context): PushOpsManager {
     if (manager) {
         return manager;
     }
@@ -71,9 +73,9 @@ export default function getPushOpsManager(
     const browser = getBrowserName();
 
     if (browser === 'safari' && !('PushManager' in window)) {
-        manager = new SafariPushManager(ctx.safariPushId)
+        manager = new SafariPushManager(ctx.safariPushId);
     } else {
-        manager = new W3cPushManager()
+        manager = new W3cPushManager();
     }
 
     return manager;

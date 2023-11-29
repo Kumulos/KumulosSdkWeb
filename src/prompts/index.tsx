@@ -5,10 +5,7 @@ import {
     PushPromptConfig,
     SdkEvent
 } from '../core';
-import {
-    PushOpsManager,
-    PushSubscriptionState
-} from '../core/push';
+import { PushOpsManager, PushSubscriptionState } from '../core/push';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
 import { h, render } from 'preact';
 
@@ -64,7 +61,7 @@ export class PromptManager {
         this.setState('loading');
     }
 
-    public async hideShownPrompts(){
+    public async hideShownPrompts() {
         this.activePrompts = [];
         this.setState('ready');
     }
@@ -107,9 +104,7 @@ export class PromptManager {
         this.setState('ready');
     };
 
-    private onPromptAccepted = async (
-        prompt: PushPromptConfig
-    ) => {
+    private onPromptAccepted = async (prompt: PushPromptConfig) => {
         if (this.subscriptionState === 'unsubscribed') {
             await this.onRequestNativePrompt(prompt);
         }
@@ -223,9 +218,7 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                await this.pushManager.handleAutoResubscription(
-                    this.context
-                );
+                await this.pushManager.handleAutoResubscription(this.context);
                 this.setState('ready');
                 break;
             case 'ready':

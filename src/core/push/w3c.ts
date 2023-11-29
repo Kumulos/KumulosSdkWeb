@@ -64,7 +64,7 @@ export default class W3cPushManager implements PushOpsManager {
         this.pushRegisterLock = result.catch(() => {});
         return result;
     }
-    
+
     async attemptPushRegister(ctx: Context): Promise<void> {
         const unregisteredAt = await get<number>('unregisteredAt');
 
@@ -94,7 +94,10 @@ export default class W3cPushManager implements PushOpsManager {
         await this.subscribeAndMaybeTrackRegisteredEvent(workerReg, ctx);
     }
 
-    private async unsubscribeIfDifferentVapid(workerReg: ServiceWorkerRegistration, vapidPublicKey: string): Promise<void> {
+    private async unsubscribeIfDifferentVapid(
+        workerReg: ServiceWorkerRegistration,
+        vapidPublicKey: string
+    ): Promise<void> {
         const existingSub = await workerReg.pushManager.getSubscription();
 
         if (existingSub && !hasSameKey(vapidPublicKey, existingSub)) {
@@ -102,7 +105,10 @@ export default class W3cPushManager implements PushOpsManager {
         }
     }
 
-    private async subscribeAndMaybeTrackRegisteredEvent(workerReg: ServiceWorkerRegistration, ctx: Context): Promise<void> {
+    private async subscribeAndMaybeTrackRegisteredEvent(
+        workerReg: ServiceWorkerRegistration,
+        ctx: Context
+    ): Promise<void> {
         const sub = await workerReg.pushManager.subscribe({
             applicationServerKey: ctx.vapidPublicKey,
             userVisibleOnly: true
@@ -149,7 +155,6 @@ export default class W3cPushManager implements PushOpsManager {
         await set<number>('unregisteredAt', Date.now());
         await del('pushEndpointHash');
         await del('pushExpiresAt');
-
     }
 
     private async trackAndCachePushRegisteredEvent(
@@ -174,7 +179,7 @@ export default class W3cPushManager implements PushOpsManager {
         if (unregisteredAt) {
             return 'unregistered';
         }
-        
+
         const perm = await this.requestNotificationPermission();
 
         switch (perm) {

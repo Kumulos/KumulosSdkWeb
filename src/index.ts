@@ -220,8 +220,14 @@ export default class Kumulos {
         return trackEvent(this.context, type, properties).then(_ => void 0);
     }
 
-    async getPushSubscriptionStatus(subscriptionStateListener: (subscriptionState: PushSubscriptionState) => void) {
-        const subscriptionState = await this.pushManager.getCurrentSubscriptionState(this.context);
+    async getPushSubscriptionStatus(
+        subscriptionStateListener: (
+            subscriptionState: PushSubscriptionState
+        ) => void
+    ) {
+        const subscriptionState = await this.pushManager.getCurrentSubscriptionState(
+            this.context
+        );
 
         subscriptionStateListener(subscriptionState);
     }
@@ -243,12 +249,16 @@ export default class Kumulos {
         this.promptManager?.hideShownPrompts();
     }
 
-    setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void) {
+    setPushOpenedListener(
+        onPushOpened: (payload: KumulosPushNotification) => void
+    ) {
         this.onPushOpened = onPushOpened;
         this.maybeFireOpenedHandler();
     }
 
-    setPushReceivedListener(onPushReceived: (payload: KumulosPushNotification) => void) {
+    setPushReceivedListener(
+        onPushReceived: (payload: KumulosPushNotification) => void
+    ) {
         this.onPushReceived = onPushReceived;
         this.maybeAddMessageEventListenerToSW();
     }
