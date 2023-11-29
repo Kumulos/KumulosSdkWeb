@@ -14,7 +14,6 @@ export declare class PromptManager {
     private ui?;
     private prompts;
     constructor(ctx: Context, rootFrame: RootFrame, pushManager: PushOpsManager, prompts?: PromptConfigs<PushPromptConfig>);
-    hideShownPrompts(): Promise<void>;
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;

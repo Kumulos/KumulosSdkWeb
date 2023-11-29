@@ -58,14 +58,6 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
-        const perm = window.safari?.pushNotification.permission(
-            this.safariPushId as string
-        );
-
-        if (!perm || !perm.deviceToken) {
-            return;
-        }
-
         await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
 
         await set<number>('unregisteredAt', Date.now());

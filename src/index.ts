@@ -246,7 +246,6 @@ export default class Kumulos {
 
     async pushUnregister(): Promise<void> {
         await this.pushManager.pushUnregister(this.context);
-        this.promptManager?.hideShownPrompts();
     }
 
     setPushOpenedListener(

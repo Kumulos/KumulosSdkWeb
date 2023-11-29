@@ -1,12 +1,11 @@
 import {
+    Context,
     FilterValue,
     KumulosEvent,
-    PropFilter,
     PromptConfig,
     PromptConfigs,
-    Context,
-    SdkEvent,
-    EventPayload
+    PropFilter,
+    SdkEvent
 } from '../core';
 
 import { escapeRegExp } from '../core/utils';
@@ -112,7 +111,7 @@ export function triggerMatched(
 }
 
 export class PromptTriggerEventFilter<T extends PromptConfig> {
-    private eventQueue: EventPayload = [];
+    private eventQueue: KumulosEvent[] = [];
     private eventReceivedCallback?: (e: SdkEvent) => void;
 
     constructor(ctx: Context, eventReceivedCallback?: (e: SdkEvent) => void) {
@@ -152,9 +151,7 @@ export class PromptTriggerEventFilter<T extends PromptConfig> {
     }
 
     private handleSdkEvent = (e: SdkEvent) => {
-        const events = e.data as EventPayload;
-
-        this.eventQueue.push(...events);
+        this.eventQueue.push(e.event);
 
         this.eventReceivedCallback?.(e);
     };

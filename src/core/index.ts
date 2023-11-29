@@ -364,7 +364,7 @@ export type PromptReminder =
     | 'suppressed';
 
 type SdkEventType = 'eventTracked';
-export type SdkEvent<T = any> = { type: SdkEventType; data: T };
+export type SdkEvent = { type: SdkEventType; event: KumulosEvent };
 type SdkEventHandler = (event: SdkEvent) => void;
 
 export class Context {
@@ -410,15 +410,15 @@ export class Context {
         this.subscribers[event].push(handler);
     }
 
-    broadcast(event: SdkEventType, data: any) {
-        if (!this.subscribers[event]) {
+    broadcast(type: SdkEventType, event: KumulosEvent) {
+        if (!this.subscribers[type]) {
             return;
         }
 
-        for (let i = 0; i < this.subscribers[event].length; ++i) {
-            this.subscribers[event][i]({
-                type: event,
-                data
+        for (let i = 0; i < this.subscribers[type].length; ++i) {
+            this.subscribers[type][i]({
+                type: type,
+                event
             });
         }
     }
@@ -555,7 +555,7 @@ export type KumulosEvent = {
     data?: PropsObject;
 };
 
-export type EventPayload = KumulosEvent[];
+// export type EventPayload = KumulosEvent[];
 
 export async function trackEvent(
     ctx: Context,
@@ -565,17 +565,15 @@ export async function trackEvent(
     const installId = await getInstallId();
     const userId = await getUserId();
 
-    const events: EventPayload = [
-        {
-            type,
-            uuid: uuidv4(),
-            timestamp: Date.now(),
-            data: properties,
-            userId
-        }
-    ];
+    const event: KumulosEvent = {
+        type,
+        uuid: uuidv4(),
+        timestamp: Date.now(),
+        data: properties,
+        userId
+    };
 
-    ctx.broadcast('eventTracked', events);
+    ctx.broadcast('eventTracked', event);
 
     if (!isSystemEvent(type)) {
         return Promise.resolve();
@@ -586,7 +584,7 @@ export async function trackEvent(
     )}/v1/app-installs/${installId}/events`;
     return performFetch(url, ctx.authHeader, {
         method: 'POST',
-        body: JSON.stringify(events)
+        body: JSON.stringify([event])
     });
 }
 

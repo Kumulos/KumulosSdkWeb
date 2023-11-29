@@ -1,5 +1,6 @@
 import {
     Context,
+    EventType,
     PromptConfig,
     PromptConfigs,
     PushPromptConfig,
@@ -61,17 +62,12 @@ export class PromptManager {
         this.setState('loading');
     }
 
-    public async hideShownPrompts() {
-        this.activePrompts = [];
-        this.setState('ready');
-    }
-
     private onEventTracked = (e: SdkEvent) => {
         console.info('Prompt trigger saw event', e);
 
-        if (this.state !== 'ready') {
-            console.info('Not ready, waiting on queue');
-            return;
+        if (e.event.type === EventType.PUSH_UNREGISTERED) {
+            console.info('Prompt identified an unregistered event');
+            this.activePrompts = [];
         }
 
         this.evaluateTriggers();

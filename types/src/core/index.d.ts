@@ -264,9 +264,9 @@ export declare type PromptReminder = {
     declinedOn: number;
 } | 'suppressed';
 declare type SdkEventType = 'eventTracked';
-export declare type SdkEvent<T = any> = {
+export declare type SdkEvent = {
     type: SdkEventType;
-    data: T;
+    event: KumulosEvent;
 };
 declare type SdkEventHandler = (event: SdkEvent) => void;
 export declare class Context {
@@ -282,7 +282,7 @@ export declare class Context {
     private readonly urlMap;
     constructor(config: Configuration);
     subscribe(event: SdkEventType, handler: SdkEventHandler): void;
-    broadcast(event: SdkEventType, data: any): void;
+    broadcast(type: SdkEventType, event: KumulosEvent): void;
     hasFeature(feature: SDKFeature): boolean;
     urlForService(service: Service): string;
 }
@@ -300,7 +300,6 @@ export declare type KumulosEvent = {
     userId: string;
     data?: PropsObject;
 };
-export declare type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
 export declare function trackInstallDetails(ctx: Context, optionalSdkVersion?: string): Promise<void>;
 export interface Dimensions {
