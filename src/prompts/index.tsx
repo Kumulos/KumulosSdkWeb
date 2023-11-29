@@ -23,13 +23,10 @@ export type PromptManagerState =
     | 'requesting'
     | 'requesting-silent'
     | 'requesting-silent-dismissed'
-    | 'postaction';
 
 // loading -> ready
 // ready -> requesting
 // requesting -> ready
-// ready -> postaction
-// postaction -> ready
 
 export class PromptManager {
     private readonly context: Context;
@@ -236,7 +233,6 @@ export class PromptManager {
                 await this.evaluateTriggers();
                 this.render();
                 break;
-            case 'postaction':
             case 'requesting':
             case 'requesting-silent':
             case 'requesting-silent-dismissed':
