@@ -1,7 +1,5 @@
 import {
-    ChannelListItem,
     Context,
-    PromptAction,
     PromptConfig,
     PromptConfigs,
     PushPromptConfig,
@@ -14,7 +12,6 @@ import getPushOpsManager, {
 } from '../core/push';
 import { h, render } from 'preact';
 
-import { ChannelSubscriptionManager } from '../core/channels';
 import { PromptTriggerEventFilter } from './triggers';
 import Ui from './ui';
 import { deferPromptActivation } from './utils';
@@ -26,13 +23,10 @@ export type PromptManagerState =
     | 'requesting'
     | 'requesting-silent'
     | 'requesting-silent-dismissed'
-    | 'postaction';
 
 // loading -> ready
 // ready -> requesting
 // requesting -> ready
-// ready -> postaction
-// postaction -> ready
 
 export class PromptManager {
     private readonly context: Context;
@@ -46,8 +40,6 @@ export class PromptManager {
     private pushOpsManager?: PushOpsManager;
     private ui?: Ui;
     private prompts: PromptConfigs<PushPromptConfig>;
-    private currentPostAction?: PromptAction;
-    private channelSubscriptionManager?: ChannelSubscriptionManager;
 
     constructor(
         ctx: Context,
@@ -65,16 +57,6 @@ export class PromptManager {
         this.context = ctx;
 
         this.setState('loading');
-    }
-
-    private getChannelSubscriptionManager(): ChannelSubscriptionManager {
-        if (!this.channelSubscriptionManager) {
-            this.channelSubscriptionManager = new ChannelSubscriptionManager(
-                this.context
-            );
-        }
-
-        return this.channelSubscriptionManager;
     }
 
     private onEventTracked = (e: SdkEvent) => {
@@ -116,8 +98,7 @@ export class PromptManager {
     };
 
     private onPromptAccepted = async (
-        prompt: PushPromptConfig,
-        channelSelections?: ChannelListItem[]
+        prompt: PushPromptConfig
     ) => {
         if (this.subscriptionState === 'unsubscribed') {
             await this.onRequestNativePrompt(prompt);
@@ -126,20 +107,8 @@ export class PromptManager {
         this.hideAndSuppressPrompts(prompt);
 
         if (this.subscriptionState === 'subscribed') {
-            await this.handleUserChannelSelection(channelSelections);
-
             this.ui?.showToast(prompt.labels?.thanksForSubscribing!);
         }
-    };
-
-    private onPostActionConfirm = async (
-        prompt: PushPromptConfig,
-        channelSelections?: ChannelListItem[]
-    ) => {
-        await this.handleUserChannelSelection(channelSelections);
-
-        this.setState('ready');
-        this.hideAndSuppressPrompts(prompt);
     };
 
     private onPromptDeclined = (prompt: PushPromptConfig) => {
@@ -162,26 +131,6 @@ export class PromptManager {
         }
     }
 
-    private async handleUserChannelSelection(
-        channelSelections?: ChannelListItem[]
-    ) {
-        if (undefined === channelSelections) {
-            return;
-        }
-
-        const channelSubMgr = this.getChannelSubscriptionManager();
-
-        const unsubscribes = channelSelections
-            .filter(cs => !cs.checked)
-            .map(cs => cs.channel.uuid);
-        await channelSubMgr.unsubscribe(unsubscribes);
-
-        const subscribes = channelSelections
-            .filter(cs => cs.checked)
-            .map(cs => cs.channel.uuid);
-        await channelSubMgr.subscribe(subscribes);
-    }
-
     private render() {
         if (!this.subscriptionState || !this.state) {
             return;
@@ -195,10 +144,8 @@ export class PromptManager {
                 promptManagerState={this.state}
                 onPromptAccepted={this.onPromptAccepted}
                 onPromptDeclined={this.onPromptDeclined}
-                onPostActionConfirm={this.onPostActionConfirm}
                 onDismissOverlay={this.onDismissOverlay}
                 currentlyRequestingPrompt={this.currentlyRequestingPrompt}
-                currentPostAction={this.currentPostAction}
             />,
             this.pushContainer.element
         );
@@ -273,20 +220,16 @@ export class PromptManager {
                 this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
                     this.context
                 );
-                // Note: channels irrelevant for optimove apps
-                //this.channels = await this.getChannelSubscriptionManager().listChannels();
                 this.setState('ready');
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
-                this.currentPostAction = undefined;
                 this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.evaluateTriggers();
                 this.render();
                 break;
-            case 'postaction':
             case 'requesting':
             case 'requesting-silent':
             case 'requesting-silent-dismissed':

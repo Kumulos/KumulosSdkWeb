@@ -1,6 +1,6 @@
 import { Context, PromptConfigs, PushPromptConfig } from '../core';
 import RootFrame from '../core/root-frame';
-export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'requesting-silent-dismissed' | 'postaction';
+export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'requesting-silent-dismissed';
 export declare class PromptManager {
     private readonly context;
     private readonly pushContainer;
@@ -12,19 +12,14 @@ export declare class PromptManager {
     private pushOpsManager?;
     private ui?;
     private prompts;
-    private currentPostAction?;
-    private channelSubscriptionManager?;
     constructor(ctx: Context, rootFrame: RootFrame, prompts?: PromptConfigs<PushPromptConfig>);
-    private getChannelSubscriptionManager;
     private onEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;
     private onPromptAccepted;
-    private onPostActionConfirm;
     private onPromptDeclined;
     private onDismissOverlay;
     private hideAndSuppressPrompts;
-    private handleUserChannelSelection;
     private render;
     private evaluateTriggers;
     private promptActionNeedsTaken;
