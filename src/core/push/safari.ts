@@ -63,6 +63,8 @@ export default class SafariPushManager implements PushOpsManager {
         await set<number>('unregisteredAt', Date.now());
 
         await del('pushTokenHash');
+
+        ctx.broadcastSubscriptionState('unregistered');
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
@@ -90,6 +92,8 @@ export default class SafariPushManager implements PushOpsManager {
         });
 
         await set('pushTokenHash', tokenHash);
+
+        ctx.broadcastSubscriptionState('subscribed');
     }
 
     async requestPermissionAndRegisterForPush(
