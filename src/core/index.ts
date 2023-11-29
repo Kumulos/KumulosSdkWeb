@@ -2,6 +2,7 @@ import { performFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
 import { PushSubscriptionState } from './push';
 
+
 const SDK_TYPE = 104;
 // Backwards compatibility with optimove SDK not including version in Optimobile config
 const DEFAULT_SDK_VERSION = '2.0.17';

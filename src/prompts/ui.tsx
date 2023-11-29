@@ -168,10 +168,6 @@ export default class Ui extends Component<UiProps, UiState> {
             return null;
         }
 
-        if ('postaction' === this.props.promptManagerState) {
-            return null;
-        }
-
         switch (prompt.type) {
             case 'bell':
                 return (

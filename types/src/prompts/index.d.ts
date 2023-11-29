@@ -1,7 +1,7 @@
 import { Context, PromptConfigs, PushPromptConfig } from '../core';
 import { PushOpsManager } from '../core/push';
 import RootFrame from '../core/root-frame';
-export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'requesting-silent-dismissed' | 'postaction';
+export declare type PromptManagerState = 'loading' | 'ready' | 'requesting' | 'requesting-silent' | 'requesting-silent-dismissed';
 export declare class PromptManager {
     private readonly context;
     private readonly pushContainer;
