@@ -18,7 +18,6 @@ import {
     trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
-import { getBrowserName, isMobile } from './core/utils';
 import {
     getMostRecentlyOpenedPushPayload,
     persistConfig
@@ -35,6 +34,7 @@ import getPushOpsManager, {
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
 import RootFrame from './core/root-frame';
+import { isMobile } from './core/utils';
 import { loadPlatformAndKeysConfig } from './core/config';
 
 interface KumulosConfig extends Configuration {
@@ -142,6 +142,8 @@ export default class Kumulos {
 
             if (permissionState === 'granted') {
                 this.pushManager.attemptPushRegister(this.context);
+            } else if (permissionState === 'denied') {
+                this.context.broadcastSubscriptionState(await this.pushManager.getCurrentSubscriptionState(this.context));
             }
         });
     }
