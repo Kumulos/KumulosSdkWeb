@@ -65,6 +65,13 @@ export class PromptManager {
         if (event.type === EventType.PUSH_UNREGISTERED) {
             console.info('Prompt identified an unregistered event');
             this.activePrompts = [];
+            this.evaluateTriggers();
+            return;
+        }
+
+        if (this.state !== 'ready') {
+            console.info('Not ready, waiting on queue');
+            return;
         }
 
         this.evaluateTriggers();
