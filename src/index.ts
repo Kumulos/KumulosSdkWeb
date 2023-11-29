@@ -52,6 +52,9 @@ export default class Kumulos {
 
     private onPushReceived?: (payload: KumulosPushNotification) => void;
     private onPushOpened?: (payload: KumulosPushNotification) => void;
+    private onPushStateChanged?: (
+        pushSubscriptionState: PushSubscriptionState
+    ) => void;
 
     private promptManager?: PromptManager;
     private ddlManager?: DdlManager;
@@ -260,6 +263,15 @@ export default class Kumulos {
     ) {
         this.onPushReceived = onPushReceived;
         this.maybeAddMessageEventListenerToSW();
+    }
+
+    async setPushSubscriptionStateListener(
+        onPushStateChanged: (
+            pushSubscriptionState: PushSubscriptionState
+        ) => void
+    ) {
+        onPushStateChanged(await this.pushManager.getCurrentSubscriptionState(this.context));
+        this.context.subscribeToSubscriptionStatus(onPushStateChanged);
     }
 
     private onWorkerMessage = (e: MessageEvent) => {

@@ -13,6 +13,7 @@ export default class Kumulos {
     private readonly pushManager;
     private onPushReceived?;
     private onPushOpened?;
+    private onPushStateChanged?;
     private promptManager?;
     private ddlManager?;
     static buildInstance(config: KumulosConfig): Promise<Kumulos>;
@@ -32,6 +33,7 @@ export default class Kumulos {
     pushUnregister(): Promise<void>;
     setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void): void;
     setPushReceivedListener(onPushReceived: (payload: KumulosPushNotification) => void): void;
+    setPushSubscriptionStateListener(onPushStateChanged: (pushSubscriptionState: PushSubscriptionState) => void): Promise<void>;
     private onWorkerMessage;
     private maybeFireOpenedHandler;
 }
