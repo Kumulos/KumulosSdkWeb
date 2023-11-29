@@ -66,9 +66,9 @@ export default class W3cPushManager implements PushOpsManager {
     }
     
     async attemptPushRegister(ctx: Context): Promise<void> {
-        const wasUnregistered = await get<boolean>('wasUnregistered');
+        const unregisteredAt = await get<number>('unregisteredAt');
 
-        if (wasUnregistered) {
+        if (unregisteredAt) {
             console.info('Was unregistered before, not calling push register');
             return;
         }
@@ -77,7 +77,7 @@ export default class W3cPushManager implements PushOpsManager {
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
-        await del('wasUnregistered');
+        await del('unregisteredAt');
 
         if (!('PushManager' in window)) {
             return Promise.reject(
@@ -132,8 +132,6 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
-        await set<boolean>('wasUnregistered', true);
-
         const workerReg = await getActiveServiceWorkerReg(
             ctx.serviceWorkerPath
         );
@@ -148,6 +146,7 @@ export default class W3cPushManager implements PushOpsManager {
 
         await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
 
+        await set<number>('unregisteredAt', Date.now());
         await del('pushEndpointHash');
         await del('pushExpiresAt');
 
@@ -170,9 +169,9 @@ export default class W3cPushManager implements PushOpsManager {
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<import('.').PushSubscriptionState> {
-        const wasUnregistered = await get<boolean>('wasUnregistered');
+        const unregisteredAt = await get<number>('unregisteredAt');
 
-        if (wasUnregistered) {
+        if (unregisteredAt) {
             return 'unregistered';
         }
         
@@ -202,9 +201,9 @@ export default class W3cPushManager implements PushOpsManager {
             return 'blocked';
         }
 
-        const wasUnregistered = await get<boolean>('wasUnregistered');
+        const unregisteredAt = await get<number>('unregisteredAt');
 
-        if (wasUnregistered) {
+        if (unregisteredAt) {
             return 'unregistered';
         }
 

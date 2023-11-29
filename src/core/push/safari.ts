@@ -47,9 +47,9 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async attemptPushRegister(ctx: Context): Promise<void> {
-        const wasUnregistered = await get<boolean>('wasUnregistered');
+        const unregisteredAt = await get<number>('unregisteredAt');
 
-        if (wasUnregistered) {
+        if (unregisteredAt) {
             console.info('Was unregistered before, not calling push register');
             return;
         }
@@ -58,8 +58,6 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
-        await set<boolean>('wasUnregistered', true);
-
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );
@@ -68,20 +66,15 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        const existingTokenHash = await get<number>('pushTokenHash');
-        const tokenHash = hashToken(ctx, perm.deviceToken);
-
-        if (existingTokenHash === tokenHash) {
-            return;
-        }
-
         await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
 
-        await set('pushTokenHash', tokenHash);
+        await set<number>('unregisteredAt', Date.now());
+
+        await del('pushTokenHash');
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {
-        await del('wasUnregistered');
+        await del('unregisteredAt');
         
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
@@ -110,9 +103,9 @@ export default class SafariPushManager implements PushOpsManager {
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<PushSubscriptionState> {
-        const wasUnregistered = await get<boolean>('wasUnregistered');
+        const unregisteredAt = await get<number>('unregisteredAt');
 
-        if (wasUnregistered) {
+        if (unregisteredAt) {
             return 'unregistered';
         }
 
@@ -144,9 +137,9 @@ export default class SafariPushManager implements PushOpsManager {
             return 'blocked';
         }
 
-        const wasUnregistered = await get<boolean>('wasUnregistered');
+        const unregisteredAt = await get<number>('unregisteredAt');
 
-        if (wasUnregistered) {
+        if (unregisteredAt) {
             return 'unregistered';
         }
 
