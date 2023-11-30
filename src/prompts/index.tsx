@@ -63,9 +63,7 @@ export class PromptManager {
         console.info('Prompt trigger saw event', event);
 
         if (event.type === EventType.PUSH_UNREGISTERED) {
-            console.info('Prompt identified an unregistered event');
-            this.activePrompts = [];
-            this.evaluateTriggers();
+            this.unregisteredEventTracked();
             return;
         }
 
@@ -76,6 +74,15 @@ export class PromptManager {
 
         this.evaluateTriggers();
     };
+
+    private async unregisteredEventTracked(){
+        console.info('Prompt identified an unregistered event');
+        this.activePrompts = [];
+        this.subscriptionState = await this.pushManager.getCurrentSubscriptionState(
+            this.context
+        );
+        this.render();
+    }
 
     private activateDeferredPrompt = (prompt: PromptConfig) => {
         this.activatePrompt(prompt as PushPromptConfig);

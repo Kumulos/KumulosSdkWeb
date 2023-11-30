@@ -15,6 +15,7 @@ export declare class PromptManager {
     private prompts;
     constructor(ctx: Context, rootFrame: RootFrame, pushManager: PushOpsManager, prompts?: PromptConfigs<PushPromptConfig>);
     private onEventTracked;
+    private unregisteredEventTracked;
     private activateDeferredPrompt;
     private onRequestNativePrompt;
     private onPromptAccepted;
