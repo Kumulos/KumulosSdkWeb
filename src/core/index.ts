@@ -1,5 +1,7 @@
 import { performFetch, cyrb53, uuidv4 } from './utils';
 import { del, get, set } from './storage';
+import { PushSubscriptionState } from './push';
+
 
 const SDK_TYPE = 104;
 // Backwards compatibility with optimove SDK not including version in Optimobile config
@@ -31,6 +33,7 @@ export enum EventType {
     MESSAGE_DELIVERED = 'k.message.delivered',
     MESSAGE_OPENED = 'k.message.opened',
     PUSH_REGISTERED = 'k.push.deviceRegistered',
+    PUSH_UNREGISTERED = 'k.push.deviceUnsubscribed',
     INSTALL_TRACKED = 'k.stats.installTracked',
     USER_ASSOCIATED = 'k.stats.userAssociated',
     USER_ASSOCIATION_CLEARED = 'k.stats.userAssociationCleared'
@@ -362,9 +365,8 @@ export type PromptReminder =
       }
     | 'suppressed';
 
-type SdkEventType = 'eventTracked';
-export type SdkEvent<T = any> = { type: SdkEventType; data: T };
-type SdkEventHandler = (event: SdkEvent) => void;
+type SdkEventHandler = (event: KumulosEvent) => void;
+type PushSubscriptionStateHandler = (pushSubscriptionState: PushSubscriptionState) => void;
 
 export class Context {
     readonly apiKey: string;
@@ -376,7 +378,8 @@ export class Context {
     readonly features: SDKFeature[];
     readonly safariPushId?: string;
 
-    private readonly subscribers: { [key: string]: SdkEventHandler[] };
+    private readonly eventSubscribers: SdkEventHandler[];
+    private readonly pushStateSubscribers: PushSubscriptionStateHandler[];
     private readonly urlMap: { [key in Service]: string };
 
     constructor(config: Configuration) {
@@ -388,7 +391,8 @@ export class Context {
         this.autoResubscribe = config.autoResubscribe ?? true;
         this.features = config.features ?? [SDKFeature.PUSH];
 
-        this.subscribers = {};
+        this.eventSubscribers = [];
+        this.pushStateSubscribers = [];
 
         this.urlMap = {
             [Service.PUSH]: `https://push-${config.region}.kumulos.com`,
@@ -397,29 +401,20 @@ export class Context {
         };
     }
 
-    subscribe(event: SdkEventType, handler: SdkEventHandler) {
-        if (!this.subscribers[event]) {
-            this.subscribers[event] = [];
-        }
-
-        if (this.subscribers[event].indexOf(handler) > -1) {
-            return;
-        }
-
-        this.subscribers[event].push(handler);
+    subscribeToEvents(handler: SdkEventHandler) {
+        this.eventSubscribers.push(handler);
     }
 
-    broadcast(event: SdkEventType, data: any) {
-        if (!this.subscribers[event]) {
-            return;
-        }
+    subscribeToSubscriptionStatus(handler: PushSubscriptionStateHandler){
+        this.pushStateSubscribers.push(handler);
+    }
 
-        for (let i = 0; i < this.subscribers[event].length; ++i) {
-            this.subscribers[event][i]({
-                type: event,
-                data
-            });
-        }
+    broadcastEvent(event: KumulosEvent) {
+        this.eventSubscribers.forEach(subscriber => subscriber(event));
+    }
+
+    broadcastSubscriptionState(pushSubscriptionState: PushSubscriptionState) {
+        this.pushStateSubscribers.forEach(subscriber => subscriber(pushSubscriptionState));
     }
 
     hasFeature(feature: SDKFeature) {
@@ -554,7 +549,7 @@ export type KumulosEvent = {
     data?: PropsObject;
 };
 
-export type EventPayload = KumulosEvent[];
+// export type EventPayload = KumulosEvent[];
 
 export async function trackEvent(
     ctx: Context,
@@ -564,17 +559,15 @@ export async function trackEvent(
     const installId = await getInstallId();
     const userId = await getUserId();
 
-    const events: EventPayload = [
-        {
-            type,
-            uuid: uuidv4(),
-            timestamp: Date.now(),
-            data: properties,
-            userId
-        }
-    ];
+    const event: KumulosEvent = {
+        type,
+        uuid: uuidv4(),
+        timestamp: Date.now(),
+        data: properties,
+        userId
+    };
 
-    ctx.broadcast('eventTracked', events);
+    ctx.broadcastEvent(event);
 
     if (!isSystemEvent(type)) {
         return Promise.resolve();
@@ -585,7 +578,7 @@ export async function trackEvent(
     )}/v1/app-installs/${installId}/events`;
     return performFetch(url, ctx.authHeader, {
         method: 'POST',
-        body: JSON.stringify(events)
+        body: JSON.stringify([event])
     });
 }
 

@@ -1,3 +1,4 @@
+import { PushSubscriptionState } from './push';
 export declare type InstallId = string;
 export declare type UserId = string;
 declare type Jsonish = string | number | boolean | null | {
@@ -17,6 +18,7 @@ export declare enum EventType {
     MESSAGE_DELIVERED = "k.message.delivered",
     MESSAGE_OPENED = "k.message.opened",
     PUSH_REGISTERED = "k.push.deviceRegistered",
+    PUSH_UNREGISTERED = "k.push.deviceUnsubscribed",
     INSTALL_TRACKED = "k.stats.installTracked",
     USER_ASSOCIATED = "k.stats.userAssociated",
     USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared"
@@ -262,12 +264,8 @@ export interface Configuration {
 export declare type PromptReminder = {
     declinedOn: number;
 } | 'suppressed';
-declare type SdkEventType = 'eventTracked';
-export declare type SdkEvent<T = any> = {
-    type: SdkEventType;
-    data: T;
-};
-declare type SdkEventHandler = (event: SdkEvent) => void;
+declare type SdkEventHandler = (event: KumulosEvent) => void;
+declare type PushSubscriptionStateHandler = (pushSubscriptionState: PushSubscriptionState) => void;
 export declare class Context {
     readonly apiKey: string;
     readonly secretKey: string;
@@ -277,11 +275,14 @@ export declare class Context {
     readonly autoResubscribe: boolean;
     readonly features: SDKFeature[];
     readonly safariPushId?: string;
-    private readonly subscribers;
+    private readonly eventSubscribers;
+    private readonly pushStateSubscribers;
     private readonly urlMap;
     constructor(config: Configuration);
-    subscribe(event: SdkEventType, handler: SdkEventHandler): void;
-    broadcast(event: SdkEventType, data: any): void;
+    subscribeToEvents(handler: SdkEventHandler): void;
+    subscribeToSubscriptionStatus(handler: PushSubscriptionStateHandler): void;
+    broadcastEvent(event: KumulosEvent): void;
+    broadcastSubscriptionState(pushSubscriptionState: PushSubscriptionState): void;
     hasFeature(feature: SDKFeature): boolean;
     urlForService(service: Service): string;
 }
@@ -299,7 +300,6 @@ export declare type KumulosEvent = {
     userId: string;
     data?: PropsObject;
 };
-export declare type EventPayload = KumulosEvent[];
 export declare function trackEvent(ctx: Context, type: string, properties?: PropsObject): Promise<Response | void>;
 export declare function trackInstallDetails(ctx: Context, optionalSdkVersion?: string): Promise<void>;
 export interface Dimensions {

@@ -18,13 +18,14 @@ import {
     trackInstallDetails
 } from './core';
 import { WorkerMessageType, isKumulosWorkerMessage } from './worker/messaging';
-import { getBrowserName, isMobile } from './core/utils';
 import {
     getMostRecentlyOpenedPushPayload,
     persistConfig
 } from './core/storage';
 import getPushOpsManager, {
     KumulosPushNotification,
+    PushOpsManager,
+    PushSubscriptionState,
     notificationFromPayload,
     registerServiceWorker,
     trackOpenFromQuery
@@ -33,6 +34,7 @@ import getPushOpsManager, {
 import DdlManager from './prompts/ddl/manager';
 import { PromptManager } from './prompts';
 import RootFrame from './core/root-frame';
+import { isMobile } from './core/utils';
 import { loadPlatformAndKeysConfig } from './core/config';
 
 interface KumulosConfig extends Configuration {
@@ -46,9 +48,13 @@ export default class Kumulos {
     private readonly platformConfig: PlatformConfig;
     private readonly context: Context;
     private readonly rootFrame: RootFrame;
+    private readonly pushManager: PushOpsManager;
 
     private onPushReceived?: (payload: KumulosPushNotification) => void;
     private onPushOpened?: (payload: KumulosPushNotification) => void;
+    private onPushStateChanged?: (
+        pushSubscriptionState: PushSubscriptionState
+    ) => void;
 
     private promptManager?: PromptManager;
     private ddlManager?: DdlManager;
@@ -75,7 +81,8 @@ export default class Kumulos {
         const kumulos = new Kumulos(
             context,
             newManipulatedConfig,
-            platformConfigWithKeys
+            platformConfigWithKeys,
+            getPushOpsManager(context)
         );
 
         kumulos.initialize();
@@ -86,11 +93,13 @@ export default class Kumulos {
     private constructor(
         context: Context,
         config: KumulosConfig,
-        platformConfig: PlatformConfig
+        platformConfig: PlatformConfig,
+        pushManager: PushOpsManager
     ) {
         this.context = context;
         this.config = config;
         this.platformConfig = platformConfig;
+        this.pushManager = pushManager;
         this.rootFrame = new RootFrame();
     }
 
@@ -117,6 +126,7 @@ export default class Kumulos {
         this.promptManager = new PromptManager(
             this.context,
             this.rootFrame,
+            this.pushManager,
             this.platformConfig.prompts
         );
     }
@@ -131,9 +141,9 @@ export default class Kumulos {
             const permissionState = permissionStatus.state;
 
             if (permissionState === 'granted') {
-                const pushManager = await getPushOpsManager(this.context);
-
-                pushManager.pushRegister(this.context);
+                this.pushManager.attemptPushRegister(this.context);
+            } else if (permissionState === 'denied') {
+                this.context.broadcastSubscriptionState(await this.pushManager.getCurrentSubscriptionState(this.context));
             }
         });
     }
@@ -215,9 +225,20 @@ export default class Kumulos {
         return trackEvent(this.context, type, properties).then(_ => void 0);
     }
 
+    async getPushSubscriptionStatus(
+        subscriptionStateListener: (
+            subscriptionState: PushSubscriptionState
+        ) => void
+    ) {
+        const subscriptionState = await this.pushManager.getCurrentSubscriptionState(
+            this.context
+        );
+
+        subscriptionStateListener(subscriptionState);
+    }
+
     async pushRegister(): Promise<void> {
-        const pushManager = await getPushOpsManager(this.context);
-        const permission = await pushManager.requestNotificationPermission(
+        const permission = await this.pushManager.requestNotificationPermission(
             this.context
         );
 
@@ -225,23 +246,34 @@ export default class Kumulos {
             return Promise.reject('Notification permission not granted');
         }
 
-        //TODO: The below code is a hack in place to avoid an issue with the onPermissionChange event not firing from Safari: https://bugs.webkit.org/show_bug.cgi?id=256201#c1
-        // it also supports the legacy safari push notification implementation, which can not rely on the permission change event handler
-        const browser = getBrowserName();
-
-        if (browser === 'safari' || !navigator.permissions) {
-            pushManager.pushRegister(this.context);
-        }
+        this.pushManager.pushRegister(this.context);
     }
 
-    setPushOpenedListener(onPushOpened: (payload: KumulosPushNotification) => void) {
+    async pushUnregister(): Promise<void> {
+        await this.pushManager.pushUnregister(this.context);
+    }
+
+    setPushOpenedListener(
+        onPushOpened: (payload: KumulosPushNotification) => void
+    ) {
         this.onPushOpened = onPushOpened;
         this.maybeFireOpenedHandler();
     }
 
-    setPushReceivedListener(onPushReceived: (payload: KumulosPushNotification) => void) {
+    setPushReceivedListener(
+        onPushReceived: (payload: KumulosPushNotification) => void
+    ) {
         this.onPushReceived = onPushReceived;
         this.maybeAddMessageEventListenerToSW();
+    }
+
+    async setPushSubscriptionStateListener(
+        onPushStateChanged: (
+            pushSubscriptionState: PushSubscriptionState
+        ) => void
+    ) {
+        onPushStateChanged(await this.pushManager.getCurrentSubscriptionState(this.context));
+        this.context.subscribeToSubscriptionStatus(onPushStateChanged);
     }
 
     private onWorkerMessage = (e: MessageEvent) => {

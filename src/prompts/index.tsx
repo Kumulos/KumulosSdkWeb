@@ -1,15 +1,13 @@
 import {
     Context,
+    EventType,
+    KumulosEvent,
     PromptConfig,
     PromptConfigs,
-    PushPromptConfig,
-    SdkEvent
+    PushPromptConfig
 } from '../core';
+import { PushOpsManager, PushSubscriptionState } from '../core/push';
 import RootFrame, { RootFrameContainer } from '../core/root-frame';
-import getPushOpsManager, {
-    PushOpsManager,
-    PushSubscriptionState
-} from '../core/push';
 import { h, render } from 'preact';
 
 import { PromptTriggerEventFilter } from './triggers';
@@ -32,18 +30,19 @@ export class PromptManager {
     private readonly context: Context;
     private readonly pushContainer: RootFrameContainer;
     private readonly triggerFilter: PromptTriggerEventFilter<PushPromptConfig>;
+    private readonly pushManager: PushOpsManager;
 
     private state?: PromptManagerState;
     private subscriptionState?: PushSubscriptionState;
     private activePrompts: PushPromptConfig[];
     private currentlyRequestingPrompt?: PushPromptConfig;
-    private pushOpsManager?: PushOpsManager;
     private ui?: Ui;
     private prompts: PromptConfigs<PushPromptConfig>;
 
     constructor(
         ctx: Context,
         rootFrame: RootFrame,
+        pushManager: PushOpsManager,
         prompts?: PromptConfigs<PushPromptConfig>
     ) {
         this.prompts = prompts ?? {};
@@ -55,12 +54,18 @@ export class PromptManager {
 
         this.pushContainer = rootFrame.createContainer('push');
         this.context = ctx;
+        this.pushManager = pushManager;
 
         this.setState('loading');
     }
 
-    private onEventTracked = (e: SdkEvent) => {
-        console.info('Prompt trigger saw event', e);
+    private onEventTracked = (event: KumulosEvent) => {
+        console.info('Prompt trigger saw event', event);
+
+        if (event.type === EventType.PUSH_UNREGISTERED) {
+            this.unregisteredEventTracked();
+            return;
+        }
 
         if (this.state !== 'ready') {
             console.info('Not ready, waiting on queue');
@@ -69,6 +74,15 @@ export class PromptManager {
 
         this.evaluateTriggers();
     };
+
+    private async unregisteredEventTracked(){
+        console.info('Prompt identified an unregistered event');
+        this.activePrompts = [];
+        this.subscriptionState = await this.pushManager.getCurrentSubscriptionState(
+            this.context
+        );
+        this.render();
+    }
 
     private activateDeferredPrompt = (prompt: PromptConfig) => {
         this.activatePrompt(prompt as PushPromptConfig);
@@ -82,7 +96,7 @@ export class PromptManager {
 
         this.currentlyRequestingPrompt = prompt;
 
-        this.pushOpsManager?.isNativePromptShown().then(isNativePromptShown => {
+        this.pushManager.isNativePromptShown().then(isNativePromptShown => {
             if (isNativePromptShown) {
                 this.setState('requesting');
             } else {
@@ -90,16 +104,14 @@ export class PromptManager {
             }
         });
 
-        this.subscriptionState = await this.pushOpsManager?.requestPermissionAndRegisterForPush(
+        this.subscriptionState = await this.pushManager.requestPermissionAndRegisterForPush(
             this.context
         );
 
         this.setState('ready');
     };
 
-    private onPromptAccepted = async (
-        prompt: PushPromptConfig
-    ) => {
+    private onPromptAccepted = async (prompt: PushPromptConfig) => {
         if (this.subscriptionState === 'unsubscribed') {
             await this.onRequestNativePrompt(prompt);
         }
@@ -213,18 +225,12 @@ export class PromptManager {
     private async onEnter(state: PromptManagerState) {
         switch (state) {
             case 'loading':
-                this.pushOpsManager = await getPushOpsManager(this.context);
-                await this.pushOpsManager.handleAutoResubscription(
-                    this.context
-                );
-                this.subscriptionState = await this.pushOpsManager.getCurrentSubscriptionState(
-                    this.context
-                );
+                await this.pushManager.handleAutoResubscription(this.context);
                 this.setState('ready');
                 break;
             case 'ready':
                 this.currentlyRequestingPrompt = undefined;
-                this.subscriptionState = await this.pushOpsManager?.getCurrentSubscriptionState(
+                this.subscriptionState = await this.pushManager.getCurrentSubscriptionState(
                     this.context
                 );
                 await this.evaluateTriggers();

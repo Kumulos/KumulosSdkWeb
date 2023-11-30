@@ -1,7 +1,7 @@
 import { Context, EventType, Service, trackEvent } from '..';
 import { PushOpsManager, TokenType } from '.';
 import { cyrb53, defer } from '../utils';
-import { get, set } from '../storage';
+import { del, get, set } from '../storage';
 
 import { PushSubscriptionState } from '../push';
 
@@ -46,7 +46,30 @@ export default class SafariPushManager implements PushOpsManager {
         return result;
     }
 
+    async attemptPushRegister(ctx: Context): Promise<void> {
+        const unregisteredAt = await get<number>('unregisteredAt');
+
+        if (unregisteredAt) {
+            console.info('Was unregistered before, not calling push register');
+            return;
+        }
+
+        return this.pushRegister(ctx);
+    }
+
+    async pushUnregister(ctx: Context): Promise<void> {
+        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
+
+        await set<number>('unregisteredAt', Date.now());
+
+        await del('pushTokenHash');
+
+        ctx.broadcastSubscriptionState('unregistered');
+    }
+
     private async pushRegisterSync(ctx: Context): Promise<void> {
+        await del('unregisteredAt');
+
         const perm = window.safari?.pushNotification.permission(
             this.safariPushId as string
         );
@@ -69,11 +92,19 @@ export default class SafariPushManager implements PushOpsManager {
         });
 
         await set('pushTokenHash', tokenHash);
+
+        ctx.broadcastSubscriptionState('subscribed');
     }
 
     async requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<PushSubscriptionState> {
+        const unregisteredAt = await get<number>('unregisteredAt');
+
+        if (unregisteredAt) {
+            return 'unregistered';
+        }
+
         const perm = await this.requestNotificationPermission(ctx);
 
         switch (perm) {
@@ -100,6 +131,12 @@ export default class SafariPushManager implements PushOpsManager {
 
         if (!perm || perm?.permission === 'denied') {
             return 'blocked';
+        }
+
+        const unregisteredAt = await get<number>('unregisteredAt');
+
+        if (unregisteredAt) {
+            return 'unregistered';
         }
 
         const existingTokenHash = await get<number>('pushTokenHash');
@@ -138,7 +175,7 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        return this.pushRegister(ctx);
+        return this.attemptPushRegister(ctx);
     }
 
     async isNativePromptShown(): Promise<boolean> {

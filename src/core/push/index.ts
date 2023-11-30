@@ -1,9 +1,14 @@
 import { Context, EventType, trackEvent } from '..';
 import { getBrowserName, getFullUrl, parseQueryString } from '../utils';
+
 import SafariPushManager from './safari';
 import W3cPushManager from './w3c';
 
-export type PushSubscriptionState = 'subscribed' | 'unsubscribed' | 'blocked';
+export type PushSubscriptionState =
+    | 'subscribed'
+    | 'unsubscribed'
+    | 'blocked'
+    | 'unregistered';
 
 export enum TokenType {
     W3C = 3,
@@ -19,6 +24,8 @@ export interface PushOpsManager {
         ctx: Context
     ): Promise<NotificationPermission>;
     pushRegister(ctx: Context): Promise<void>;
+    attemptPushRegister(ctx: Context): Promise<void>;
+    pushUnregister(ctx: Context): Promise<void>;
     requestPermissionAndRegisterForPush(
         ctx: Context
     ): Promise<PushSubscriptionState>;
@@ -56,11 +63,9 @@ export interface PushPayload {
     icon: string | null;
 }
 
-let manager: Promise<PushOpsManager>;
+let manager: PushOpsManager;
 
-export default function getPushOpsManager(
-    ctx: Context
-): Promise<PushOpsManager> {
+export default function getPushOpsManager(ctx: Context): PushOpsManager {
     if (manager) {
         return manager;
     }
@@ -68,9 +73,9 @@ export default function getPushOpsManager(
     const browser = getBrowserName();
 
     if (browser === 'safari' && !('PushManager' in window)) {
-        manager = Promise.resolve(new SafariPushManager(ctx.safariPushId));
+        manager = new SafariPushManager(ctx.safariPushId);
     } else {
-        manager = Promise.resolve(new W3cPushManager());
+        manager = new W3cPushManager();
     }
 
     return manager;
