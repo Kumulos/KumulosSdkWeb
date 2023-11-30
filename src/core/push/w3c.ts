@@ -93,8 +93,6 @@ export default class W3cPushManager implements PushOpsManager {
         await this.unsubscribeIfDifferentVapid(workerReg, ctx.vapidPublicKey);
 
         await this.subscribeAndMaybeTrackRegisteredEvent(workerReg, ctx);
-
-        ctx.broadcastSubscriptionState('subscribed');
     }
 
     private async unsubscribeIfDifferentVapid(
@@ -132,6 +130,7 @@ export default class W3cPushManager implements PushOpsManager {
         }
 
         await this.trackAndCachePushRegisteredEvent(ctx, sub, endpointHash);
+        ctx.broadcastSubscriptionState('subscribed');
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
