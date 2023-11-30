@@ -141,12 +141,6 @@ export default class W3cPushManager implements PushOpsManager {
             );
         }
 
-        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
-
-        await set<number>('unregisteredAt', Date.now());
-        await del('pushEndpointHash');
-        await del('pushExpiresAt');
-
         const workerReg = await getActiveServiceWorkerReg(
             ctx.serviceWorkerPath
         );
@@ -156,6 +150,12 @@ export default class W3cPushManager implements PushOpsManager {
         if (existingSub) {
             await existingSub.unsubscribe();
         }
+
+        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
+
+        await set<number>('unregisteredAt', Date.now());
+        await del('pushEndpointHash');
+        await del('pushExpiresAt');
 
         ctx.broadcastSubscriptionState('unregistered');
     }
