@@ -58,15 +58,22 @@ export default class SafariPushManager implements PushOpsManager {
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
-        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
-
+        await this.pushUnsubscribe(ctx, false);
         await set<number>('unregisteredAt', Date.now());
-
-        await del('pushTokenHash');
 
         ctx.broadcastSubscriptionState('unregistered');
     }
 
+    async pushUnsubscribe(ctx: Context, shouldBroadcastUnsubscribe = true) {
+        await trackEvent(ctx, EventType.PUSH_UNSUBSCRIBED);
+
+        await del('pushTokenHash');
+
+        if (shouldBroadcastUnsubscribe) {
+            ctx.broadcastSubscriptionState('unsubscribed');
+        }
+    }
+    
     private async pushRegisterSync(ctx: Context): Promise<void> {
         await del('unregisteredAt');
 

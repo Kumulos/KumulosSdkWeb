@@ -134,6 +134,13 @@ export default class W3cPushManager implements PushOpsManager {
     }
 
     async pushUnregister(ctx: Context): Promise<void> {
+        await this.pushUnsubscribe(ctx, false);
+
+        await set<number>('unregisteredAt', Date.now());
+        ctx.broadcastSubscriptionState('unregistered');
+    }
+
+    async pushUnsubscribe(ctx: Context, shouldBroadcastUnsubscribe = true) {
         if (!('PushManager' in window)) {
             return Promise.reject(
                 'Push notifications are not supported in this browser'
@@ -150,13 +157,14 @@ export default class W3cPushManager implements PushOpsManager {
             await existingSub.unsubscribe();
         }
 
-        await trackEvent(ctx, EventType.PUSH_UNREGISTERED);
+        await trackEvent(ctx, EventType.PUSH_UNSUBSCRIBED);
 
-        await set<number>('unregisteredAt', Date.now());
         await del('pushEndpointHash');
         await del('pushExpiresAt');
 
-        ctx.broadcastSubscriptionState('unregistered');
+        if (shouldBroadcastUnsubscribe) {
+            ctx.broadcastSubscriptionState('unsubscribed');
+        }
     }
 
     private async trackAndCachePushRegisteredEvent(

@@ -18,7 +18,7 @@ export declare enum EventType {
     MESSAGE_DELIVERED = "k.message.delivered",
     MESSAGE_OPENED = "k.message.opened",
     PUSH_REGISTERED = "k.push.deviceRegistered",
-    PUSH_UNREGISTERED = "k.push.deviceUnsubscribed",
+    PUSH_UNSUBSCRIBED = "k.push.deviceUnsubscribed",
     INSTALL_TRACKED = "k.stats.installTracked",
     USER_ASSOCIATED = "k.stats.userAssociated",
     USER_ASSOCIATION_CLEARED = "k.stats.userAssociationCleared"
