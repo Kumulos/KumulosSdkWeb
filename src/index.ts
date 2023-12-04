@@ -144,7 +144,7 @@ export default class Kumulos {
                 this.pushManager.attemptPushRegister(this.context);
             } else {
                 this.pushManager.pushUnsubscribe(this.context);
-            } 
+            }
         });
     }
 
@@ -272,7 +272,9 @@ export default class Kumulos {
             pushSubscriptionState: PushSubscriptionState
         ) => void
     ) {
-        onPushStateChanged(await this.pushManager.getCurrentSubscriptionState(this.context));
+        onPushStateChanged(
+            await this.pushManager.getCurrentSubscriptionState(this.context)
+        );
         this.context.subscribeToSubscriptionStatus(onPushStateChanged);
     }
 
