@@ -76,15 +76,7 @@ export default class SafariPushManager implements PushOpsManager {
             return;
         }
 
-        if (
-            (window.safari?.pushNotification.permission(
-                this.safariPushId as string
-            ) ?? 'denied') === 'denied'
-        ) {
-            ctx.broadcastSubscriptionState('blocked');
-        } else {
-            ctx.broadcastSubscriptionState('unsubscribed');
-        }
+        ctx.broadcastSubscriptionState(await this.getCurrentSubscriptionState(ctx));
     }
 
     private async pushRegisterSync(ctx: Context): Promise<void> {

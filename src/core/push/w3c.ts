@@ -169,11 +169,7 @@ export default class W3cPushManager implements PushOpsManager {
             return;
         }
 
-        if (Notification.permission === 'denied') {
-            ctx.broadcastSubscriptionState('blocked');
-        } else {
-            ctx.broadcastSubscriptionState('unsubscribed');
-        }
+        ctx.broadcastSubscriptionState(await this.getCurrentSubscriptionState(ctx));
     }
 
     private async trackAndCachePushRegisteredEvent(
