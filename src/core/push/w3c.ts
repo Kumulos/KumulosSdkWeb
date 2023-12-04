@@ -140,7 +140,10 @@ export default class W3cPushManager implements PushOpsManager {
         ctx.broadcastSubscriptionState('unregistered');
     }
 
-    async pushUnsubscribe(ctx: Context, shouldBroadcastUnsubscribe = true) {
+    async pushUnsubscribe(
+        ctx: Context,
+        shouldBroadcastSubscriptionState = true
+    ) {
         if (!('PushManager' in window)) {
             return Promise.reject(
                 'Push notifications are not supported in this browser'
@@ -162,7 +165,13 @@ export default class W3cPushManager implements PushOpsManager {
         await del('pushEndpointHash');
         await del('pushExpiresAt');
 
-        if (shouldBroadcastUnsubscribe) {
+        if (!shouldBroadcastSubscriptionState) {
+            return;
+        }
+
+        if (Notification.permission === 'denied') {
+            ctx.broadcastSubscriptionState('blocked');
+        } else {
             ctx.broadcastSubscriptionState('unsubscribed');
         }
     }

@@ -64,16 +64,29 @@ export default class SafariPushManager implements PushOpsManager {
         ctx.broadcastSubscriptionState('unregistered');
     }
 
-    async pushUnsubscribe(ctx: Context, shouldBroadcastUnsubscribe = true) {
+    async pushUnsubscribe(
+        ctx: Context,
+        shouldBroadcastSubscriptionState = true
+    ) {
         await trackEvent(ctx, EventType.PUSH_UNSUBSCRIBED);
 
         await del('pushTokenHash');
 
-        if (shouldBroadcastUnsubscribe) {
+        if (!shouldBroadcastSubscriptionState) {
+            return;
+        }
+
+        if (
+            (window.safari?.pushNotification.permission(
+                this.safariPushId as string
+            ) ?? 'denied') === 'denied'
+        ) {
+            ctx.broadcastSubscriptionState('blocked');
+        } else {
             ctx.broadcastSubscriptionState('unsubscribed');
         }
     }
-    
+
     private async pushRegisterSync(ctx: Context): Promise<void> {
         await del('unregisteredAt');
 
