@@ -9,6 +9,7 @@ export default class SafariPushManager implements PushOpsManager {
     pushRegister(ctx: Context): Promise<void>;
     attemptPushRegister(ctx: Context): Promise<void>;
     pushUnregister(ctx: Context): Promise<void>;
+    pushUnsubscribe(ctx: Context, shouldBroadcastUnsubscribe?: boolean): Promise<void>;
     private pushRegisterSync;
     requestPermissionAndRegisterForPush(ctx: Context): Promise<PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;

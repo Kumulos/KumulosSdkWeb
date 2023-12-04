@@ -142,8 +142,8 @@ export default class Kumulos {
 
             if (permissionState === 'granted') {
                 this.pushManager.attemptPushRegister(this.context);
-            } else if (permissionState === 'denied') {
-                this.context.broadcastSubscriptionState(await this.pushManager.getCurrentSubscriptionState(this.context));
+            } else {
+                this.pushManager.pushUnsubscribe(this.context);
             }
         });
     }
@@ -272,7 +272,9 @@ export default class Kumulos {
             pushSubscriptionState: PushSubscriptionState
         ) => void
     ) {
-        onPushStateChanged(await this.pushManager.getCurrentSubscriptionState(this.context));
+        onPushStateChanged(
+            await this.pushManager.getCurrentSubscriptionState(this.context)
+        );
         this.context.subscribeToSubscriptionStatus(onPushStateChanged);
     }
 

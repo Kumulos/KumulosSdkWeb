@@ -62,7 +62,7 @@ export class PromptManager {
     private onEventTracked = (event: KumulosEvent) => {
         console.info('Prompt trigger saw event', event);
 
-        if (event.type === EventType.PUSH_UNREGISTERED) {
+        if (event.type === EventType.PUSH_UNSUBSCRIBED) {
             this.unregisteredEventTracked();
             return;
         }

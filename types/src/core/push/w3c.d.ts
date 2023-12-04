@@ -9,6 +9,7 @@ export default class W3cPushManager implements PushOpsManager {
     private unsubscribeIfDifferentVapid;
     private subscribeAndMaybeTrackRegisteredEvent;
     pushUnregister(ctx: Context): Promise<void>;
+    pushUnsubscribe(ctx: Context, shouldBroadcastUnsubscribe?: boolean): Promise<undefined>;
     private trackAndCachePushRegisteredEvent;
     requestPermissionAndRegisterForPush(ctx: Context): Promise<import('.').PushSubscriptionState>;
     getCurrentSubscriptionState(ctx: Context): Promise<PushSubscriptionState>;
