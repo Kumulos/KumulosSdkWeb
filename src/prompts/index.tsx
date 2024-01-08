@@ -85,6 +85,9 @@ export class PromptManager {
     }
 
     private activateDeferredPrompt = (prompt: PromptConfig) => {
+        if (!this.promptActionNeedsTaken()) {
+            return;
+        }
         this.activatePrompt(prompt as PushPromptConfig);
         this.render();
     };
@@ -177,7 +180,7 @@ export class PromptManager {
     }
 
     private promptActionNeedsTaken(): boolean {
-        if (this.subscriptionState === 'unsubscribed') {
+        if (this.subscriptionState === 'unsubscribed' && Notification.permission !== 'granted') {
             return true;
         }
 
