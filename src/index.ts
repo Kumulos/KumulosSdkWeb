@@ -63,7 +63,7 @@ export default class Kumulos {
         assertConfigValid(config, true);
 
         const platformConfigWithKeys = await loadPlatformAndKeysConfig(
-            `https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}`
+            `https://push-${config.region}.kumulos.com/v2/web/config?tenantId=${config.tenantId}&installId=${config.originalVisitorId}`
         );
 
         assertKeys(platformConfigWithKeys);
