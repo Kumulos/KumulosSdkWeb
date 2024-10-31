@@ -82,6 +82,7 @@ self.addEventListener('push', event => {
             {
                 body: payload.msg,
                 data: payload,
+                badge: payload.image ?? undefined,
                 icon: payload.icon ?? undefined,
                 image: payload.image ?? undefined,
                 requireInteraction: true
